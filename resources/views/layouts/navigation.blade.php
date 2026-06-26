@@ -13,7 +13,10 @@
                 <!-- Navigation Links -->
                 <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
                     <x-nav-link :href="route('feed.index')" :active="request()->routeIs('feed')">
-                        {{ __('feed') }}
+                        {{ __('Home') }}
+                    </x-nav-link>
+                       <x-nav-link :href="route('profile.edit')" :active="request()->routeIs('profile')">
+                        {{ __('Profil') }}
                     </x-nav-link>
                 </div>
             </div>
