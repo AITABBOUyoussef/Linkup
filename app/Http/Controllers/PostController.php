@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Models\Post;
+use App\Models\User;
 use Illuminate\Http\Request;
 
 class PostController extends Controller
@@ -27,7 +28,7 @@ $request->validate([
 ]);
 $post = new Post();
 $post->content = $request->content;
-$post->user_id = 1;
+$post->user_id =  $request->user()->id;
 $post->save();
 return redirect()->route('feed.index')->with('success', 'Post ajouté avec succès');
 }

@@ -29,6 +29,8 @@
 
             <!-- Page Content -->
             <main>
+                {{-- {{ $header }} --}}
+
                 {{ $slot }}
             </main>
         </div>

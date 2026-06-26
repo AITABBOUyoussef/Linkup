@@ -1,6 +1,7 @@
-@extends('layouts.app')
 
-@section('content')
+<x-app-layout>
+
+
 
     <div class="mb-6">
         <h2 class="text-xl font-bold text-gray-700">Fil d'actualité</h2>
@@ -43,8 +44,10 @@
                             @method('DELETE')
                             <button type="submit" class="btn btn-danger bg-red-300 rounded-3xl p-1 m-1"  onclick="return confirm('Êtes-vous sûr de vouloir supprimer ce Post ?')">Supprimer</button>
                         </form>
-                    
+
 </div>
     @endforeach
 
-@endsection
+
+
+</x-app-layout>
