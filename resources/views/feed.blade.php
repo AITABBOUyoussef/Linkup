@@ -38,12 +38,22 @@
             <div class="text-gray-800 leading-relaxed">
                 {{ $post->content }}
             </div>
-  <a href="{{ route('feed.edit', $post->id) }}" class="btn btn-warning bg-green-200 rounded-3xl p-1 m-1">Modifier</a>
+            <tr>
+                 <td>
+                    @if ($post->user_id==auth()->id())
+
+
+                        <a href="{{ route('feed.edit', $post->id) }}" class="btn btn-warning bg-green-200 rounded-3xl p-1 m-1">Modifier</a>
  <form action="{{ route('feed.destroy', $post->id) }}" method="POST" style="display:inline;">
                             @csrf
                             @method('DELETE')
                             <button type="submit" class="btn btn-danger bg-red-300 rounded-3xl p-1 m-1"  onclick="return confirm('Êtes-vous sûr de vouloir supprimer ce Post ?')">Supprimer</button>
                         </form>
+                    </td>
+                     @endif
+                     <div></div>
+            </tr>
+
 
 </div>
     @endforeach

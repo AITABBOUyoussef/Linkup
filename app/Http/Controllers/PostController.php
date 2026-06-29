@@ -28,10 +28,10 @@ $request->validate([
 ]);
 $post = new Post();
 $post->content = $request->content;
-$post->user_id =  $request->user()->id;
+$post->user_id = $request->user()->id;
 $post->save();
 return redirect()->route('feed.index')->with('success', 'Post ajouté avec succès');
-}
+} 
 public  function edit(string $id){
     $post = Post::findOrFail($id);
     return view('edit',compact('post'));
