@@ -63,6 +63,8 @@ app/Http/Controllers/PostController.php
 app/Http/Controllers/ProfileController.php
 app/Http/Requests/Auth/LoginRequest.php
 app/Http/Requests/ProfileUpdateRequest.php
+app/Models/comment.php
+app/Models/like.php
 app/Models/Post.php
 app/Models/User.php
 app/Providers/AppServiceProvider.php
@@ -91,6 +93,8 @@ database/migrations/0001_01_01_000000_create_users_table.php
 database/migrations/0001_01_01_000001_create_cache_table.php
 database/migrations/0001_01_01_000002_create_jobs_table.php
 database/migrations/2026_06_22_150443_create_posts_table.php
+database/migrations/2026_06_30_142352_create_likes_table.php
+database/migrations/2026_06_30_142410_create_comments_table.php
 database/seeders/DatabaseSeeder.php
 package.json
 phpunit.xml
@@ -163,6 +167,107 @@ vite.config.js
 
 <files>
 This section contains the contents of the repository's files.
+
+<file path="app/Models/comment.php">
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Model;
+
+class comment extends Model
+{
+    public function poste(){
+        return $this->belongsTo(Post::class);
+    }
+    public  function user(){
+        return $this->belongsTo(user::class);
+    }
+}
+</file>
+
+<file path="app/Models/like.php">
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Model;
+
+class like extends Model
+{
+ public function post(){
+    return $this->belongsTo(post::class);
+}
+public function user(){
+        return $this->belongsTo(User::class);
+    }
+}
+</file>
+
+<file path="database/migrations/2026_06_30_142352_create_likes_table.php">
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    /**
+     * Run the migrations.
+     */
+    public function up(): void
+    {
+        Schema::create('likes', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('user_id')->constrained()->onDelete('cascade');
+            $table->foreignId('post-id')->constrained()->onDelete('cascade');
+            $table->timestamps();
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        Schema::dropIfExists('likes');
+    }
+};
+</file>
+
+<file path="database/migrations/2026_06_30_142410_create_comments_table.php">
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    /**
+     * Run the migrations.
+     */
+    public function up(): void
+    {
+        Schema::create('comments', function (Blueprint $table) {
+            $table->id();
+             $table->foreignId('user_id')->constrained()->onDelete('cascade');
+            $table->foreignId('post-id')->constrained()->onDelete('cascade');
+            $table->text('content');
+            $table->timestamps();
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        Schema::dropIfExists('comments');
+    }
+};
+</file>
 
 <file path=".editorconfig">
 root = true
@@ -556,71 +661,6 @@ namespace App\Http\Controllers;
 abstract class Controller
 {
     //
-}
-</file>
-
-<file path="app/Http/Controllers/ProfileController.php">
-<?php
-
-namespace App\Http\Controllers;
-
-use App\Http\Requests\ProfileUpdateRequest;
-use Illuminate\Http\RedirectResponse;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Redirect;
-use Illuminate\View\View;
-
-class ProfileController extends Controller
-{
-    /**
-     * Display the user's profile form.
-     */
-
-    public function edit(Request $request): View
-    {
-        return view('profile.edit', [
-            'user' => $request->user(),
-        ]);
-    }
-
-    /**
-     * Update the user's profile information.
-     */
-    public function update(ProfileUpdateRequest $request): RedirectResponse
-    {
-        $request->user()->fill($request->validated());
-
-        if ($request->user()->isDirty('email')) {
-            $request->user()->email_verified_at = null;
-        }
-        $request->user()->company = $request->company;
-        $request->user()->image_url = $request->image_url;
-        $request->user()->save();
-
-        return Redirect::route('profile.edit')->with('status', 'profile-updated');
-    }
-
-    /**
-     * Delete the user's account.
-     */
-    public function destroy(Request $request): RedirectResponse
-    {
-        $request->validateWithBag('userDeletion', [
-            'password' => ['required', 'current_password'],
-        ]);
-
-        $user = $request->user();
-
-        Auth::logout();
-
-        $user->delete();
-
-        $request->session()->invalidate();
-        $request->session()->regenerateToken();
-
-        return Redirect::to('/');
-    }
 }
 </file>
 
@@ -2494,127 +2534,6 @@ window.axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
 </x-guest-layout>
 </file>
 
-<file path="resources/views/auth/login.blade.php">
-<x-guest-layout>
-    <!-- Session Status -->
-    <x-auth-session-status class="mb-4" :status="session('status')" />
-
-
-  <form method="POST" action="{{ route('login') }}">
-        @csrf
-
-        <!-- Email Address -->
-        <div>
-            <x-input-label for="email" :value="__('Email')" />
-            <x-text-input id="email" class="block mt-1 w-full" type="email" name="email" :value="old('email')" required autofocus autocomplete="username" />
-            <x-input-error :messages="$errors->get('email')" class="mt-2" />
-        </div>
-
-        <!-- Password -->
-        <div class="mt-4">
-            <x-input-label for="password" :value="__('Password')" />
-
-            <x-text-input id="password" class="block mt-1 w-full"
-                            type="password"
-                            name="password"
-                            required autocomplete="current-password" />
-
-            <x-input-error :messages="$errors->get('password')" class="mt-2" />
-        </div>
-
-        <!-- Remember Me -->
-        <div class="block mt-4">
-            <label for="remember_me" class="inline-flex items-center">
-                <input id="remember_me" type="checkbox" class="rounded dark:bg-gray-900 border-gray-300 dark:border-gray-700 text-indigo-600 shadow-sm focus:ring-indigo-500 dark:focus:ring-indigo-600 dark:focus:ring-offset-gray-800" name="remember">
-                <span class="ms-2 text-sm text-gray-600 dark:text-gray-400">{{ __('Remember me') }}</span>
-            </label>
-        </div>
-
-        <div class="flex items-center justify-end mt-4">
-            @if (Route::has('password.request'))
-                <a class="underline text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:focus:ring-offset-gray-800" href="{{ route('password.request') }}">
-                    {{ __('Forgot your password?') }}
-                </a>
-            @endif
-
-            <x-primary-button class="ms-3">
-                {{ __('Log in') }}
-            </x-primary-button>
-
-        </div>
-    </form>
-
-
-                           <a
-                                href="{{ route('register') }}"
-                                class="inline-block px-5 py-1.5 dark:text-[#EDEDEC] border-[#19140035] hover:border-[#1915014a] border text-[#1b1b18] dark:border-[#3E3E3A] dark:hover:border-[#62605b] rounded-sm text-sm leading-normal">
-                                Register
-                            </a>
-                   
-
-
-</x-guest-layout>
-</file>
-
-<file path="resources/views/auth/register.blade.php">
-<x-guest-layout>
-    <form method="POST" action="{{ route('register') }}">
-        @csrf
-
-        <!-- Name -->
-        <div>
-            <x-input-label for="name" :value="__('Name')" />
-            <x-text-input id="name" class="block mt-1 w-full" type="text" name="name" :value="old('name')" required autofocus autocomplete="name" />
-            <x-input-error :messages="$errors->get('name')" class="mt-2" />
-        </div>
-
-        <!-- Email Address -->
-        <div class="mt-4">
-            <x-input-label for="email" :value="__('Email')" />
-            <x-text-input id="email" class="block mt-1 w-full" type="email" name="email" :value="old('email')" required autocomplete="username" />
-            <x-input-error :messages="$errors->get('email')" class="mt-2" />
-        </div>
-   <div>
-            <x-input-label for="headline" :value="__('headline')" />
-            <x-text-input id="headline" class="block mt-1 w-full" type="text" name="headline" :value="old('headline')" required autofocus autocomplete="headline" />
-            <x-input-error :messages="$errors->get('headline')" class="mt-2" />
-        </div>
-        <!-- Password -->
-        <div class="mt-4">
-            <x-input-label for="password" :value="__('Password')" />
-
-            <x-text-input id="password" class="block mt-1 w-full"
-                            type="password"
-                            name="password"
-                            required autocomplete="new-password" />
-
-            <x-input-error :messages="$errors->get('password')" class="mt-2" />
-        </div>
-
-        <!-- Confirm Password -->
-        <div class="mt-4">
-            <x-input-label for="password_confirmation" :value="__('Confirm Password')" />
-
-            <x-text-input id="password_confirmation" class="block mt-1 w-full"
-                            type="password"
-                            name="password_confirmation" required autocomplete="new-password" />
-
-            <x-input-error :messages="$errors->get('password_confirmation')" class="mt-2" />
-        </div>
-
-        <div class="flex items-center justify-end mt-4">
-            <a class="underline text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:focus:ring-offset-gray-800" href="{{ route('login') }}">
-                {{ __('Already registered?') }}
-            </a>
-
-            <x-primary-button class="ms-4">
-                {{ __('Register') }}
-            </x-primary-button>
-        </div>
-    </form>
-</x-guest-layout>
-</file>
-
 <file path="resources/views/auth/reset-password.blade.php">
 <x-guest-layout>
     <form method="POST" action="{{ route('password.store') }}">
@@ -3063,90 +2982,6 @@ $classes = ($active ?? false)
             <x-primary-button>{{ __('Save') }}</x-primary-button>
 
             @if (session('status') === 'password-updated')
-                <p
-                    x-data="{ show: true }"
-                    x-show="show"
-                    x-transition
-                    x-init="setTimeout(() => show = false, 2000)"
-                    class="text-sm text-gray-600 dark:text-gray-400"
-                >{{ __('Saved.') }}</p>
-            @endif
-        </div>
-    </form>
-</section>
-</file>
-
-<file path="resources/views/profile/partials/update-profile-information-form.blade.php">
-<section>
-    <header>
-        <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100">
-            {{ __('Profile Information') }}
-        </h2>
-
-        <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">
-            {{ __("Update your account's profile information and email address.") }}
-        </p>
-    </header>
-
-    <form id="send-verification" method="post" action="{{ route('verification.send') }}">
-        @csrf
-    </form>
-
-    <form method="post" action="{{ route('profile.update') }}" class="mt-6 space-y-6">
-        @csrf
-        @method('patch')
-
-        <div>
-            <x-input-label for="name" :value="__('Name')" />
-            <x-text-input id="name" name="name" type="text" class="mt-1 block w-full" :value="old('name', $user->name)" required autofocus autocomplete="name" />
-            <x-input-error class="mt-2" :messages="$errors->get('name')" />
-        </div>
-
-
-
-        <div>
-            <x-input-label for="email" :value="__('Email')" />
-            <x-text-input id="email" name="email" type="email" class="mt-1 block w-full" :value="old('email', $user->email)" required autocomplete="username" />
-            <x-input-error class="mt-2" :messages="$errors->get('email')" />
-
-            @if ($user instanceof \Illuminate\Contracts\Auth\MustVerifyEmail && ! $user->hasVerifiedEmail())
-                <div>
-                    <p class="text-sm mt-2 text-gray-800 dark:text-gray-200">
-                        {{ __('Your email address is unverified.') }}
-
-                        <button form="send-verification" class="underline text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:focus:ring-offset-gray-800">
-                            {{ __('Click here to re-send the verification email.') }}
-                        </button>
-                    </p>
-
-                    @if (session('status') === 'verification-link-sent')
-                        <p class="mt-2 font-medium text-sm text-green-600 dark:text-green-400">
-                            {{ __('A new verification link has been sent to your email address.') }}
-                        </p>
-                    @endif
-                </div>
-            @endif
-        </div>
-     <div>
-            <x-input-label for="headline" :value="__('headline')" />
-            <x-text-input id="headline" name="nheadlineame" type="text" class="mt-1 block w-full" :value="old('headline', $user->headline)" required autofocus autocomplete="headline" />
-            <x-input-error class="mt-2" :messages="$errors->get('headline')" />
-        </div>
-          <div>
-            <x-input-label for="image_url" :value="__('image_url')" />
-            <x-text-input id="image_url" name="image_url" type="text" class="mt-1 block w-full" :value="old('image_url', $user->image_url)" required autofocus autocomplete="image_url" />
-            <x-input-error class="mt-2" :messages="$errors->get('image_url')" />
-        </div>
-          <div>
-            <x-input-label for="company" :value="__('company')" />
-            <x-text-input id="company" name="company" type="text" class="mt-1 block w-full" :value="old('company', $user->company)"  autofocus autocomplete="company" />
-            <x-input-error class="mt-2" :messages="$errors->get('company')" />
-        </div>
-
-        <div class="flex items-center gap-4">
-            <x-primary-button>{{ __('Save') }}</x-primary-button>
-
-            @if (session('status') === 'profile-updated')
                 <p
                     x-data="{ show: true }"
                     x-show="show"
@@ -4226,64 +4061,6 @@ class EmailVerificationPromptController extends Controller
 }
 </file>
 
-<file path="app/Http/Controllers/Auth/RegisteredUserController.php">
-<?php
-
-namespace App\Http\Controllers\Auth;
-
-use App\Http\Controllers\Controller;
-use App\Models\User;
-use Illuminate\Auth\Events\Registered;
-use Illuminate\Http\RedirectResponse;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Validation\Rules;
-use Illuminate\Validation\ValidationException;
-use Illuminate\View\View;
-
-class RegisteredUserController extends Controller
-{
-    /**
-     * Display the registration view.
-     */
-    public function create(): View
-    {
-        return view('auth.register');
-    }
-
-    /**
-     * Handle an incoming registration request.
-     *
-     * @throws ValidationException
-     */
-    public function store(Request $request): RedirectResponse
-    {
-        $request->validate([
-            'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class],
-            'password' => ['required', 'confirmed', Rules\Password::defaults()],
-            'headline'=>'required',
-        ]);
-
-        $user = User::create([
-            'name' => $request->name,
-            'email' => $request->email,
-            'password' => Hash::make($request->password),
-            'headline' => $request->headline,
-    'company' => 'À la recherche d\'opportunités',
-    'image_url' => 'https://ui-avatars.com/api/?name=' . urlencode($request->name) . '&background=random',
-        ]);
-
-        event(new Registered($user));
-
-        Auth::login($user);
-
-        return redirect(route('feed.index', absolute: false));
-    }
-}
-</file>
-
 <file path="app/Http/Controllers/Auth/VerifyEmailController.php">
 <?php
 
@@ -4314,73 +4091,68 @@ class VerifyEmailController extends Controller
 }
 </file>
 
-<file path="app/Models/User.php">
+<file path="app/Http/Controllers/ProfileController.php">
 <?php
 
-namespace App\Models;
+namespace App\Http\Controllers;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
-use Illuminate\Database\Eloquent\Casts\Attribute;
-use Database\Factories\UserFactory;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Foundation\Auth\User as Authenticatable;
-use Illuminate\Notifications\Notifiable;
+use App\Http\Requests\ProfileUpdateRequest;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Redirect;
+use Illuminate\View\View;
 
-class User extends Authenticatable
+class ProfileController extends Controller
 {
-    /** @use HasFactory<UserFactory> */
-    use HasFactory, Notifiable;
-
     /**
-     * The attributes that are mass assignable.
-     *
-     * @var list<string>
+     * Display the user's profile form.
      */
-    protected $fillable = [
-        'name',
-        'email',
-        'password',
-        'image_url',
-        'company',
-        'headline',
-    ];
 
-    /**
-     * The attributes that should be hidden for serialization.
-     *
-     * @var list<string>
-     */
-    protected $hidden = [
-        'password',
-        'remember_token',
-    ];
-
-    /**
-     * Get the attributes that should be cast.
-     *
-     * @return array<string, string>
-     */
-    protected function casts(): array
+    public function edit(Request $request): View
     {
-        return [
-            'email_verified_at' => 'datetime',
-            'password' => 'hashed',
-        ];
+        return view('profile.edit', [
+            'user' => $request->user(),
+        ]);
     }
-public function posts(){
-    return $this->hasMany(post::class);
-}
 
-protected function avatarUrl(): Attribute{
-    return Attribute::make(
-        get: function(){
-            if($this->image_url){
-                return $this->image_url;
-            }
-            return 'https://ui-avatars.com/api/?name=' . urlencode($this->name) . '&background=random&color=fff';
+    /**
+     * Update the user's profile information.
+     */
+    public function update(ProfileUpdateRequest $request): RedirectResponse
+    {
+        $request->user()->fill($request->validated());
+
+        if ($request->user()->isDirty('email')) {
+            $request->user()->email_verified_at = null;
         }
-    );
-}
+        $request->user()->company = $request->company;
+        $request->user()->image_url = $request->image_url;
+        $request->user()->save();
+
+        return Redirect::route('profile.edit')->with('status', 'profile-updated');
+    }
+
+    /**
+     * Delete the user's account.
+     */
+    public function destroy(Request $request): RedirectResponse
+    {
+        $request->validateWithBag('userDeletion', [
+            'password' => ['required', 'current_password'],
+        ]);
+
+        $user = $request->user();
+
+        Auth::logout();
+
+        $user->delete();
+
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+
+        return Redirect::to('/');
+    }
 }
 </file>
 
@@ -4839,6 +4611,127 @@ window.Alpine = Alpine;
 Alpine.start();
 </file>
 
+<file path="resources/views/auth/login.blade.php">
+<x-guest-layout>
+    <!-- Session Status -->
+    <x-auth-session-status class="mb-4" :status="session('status')" />
+
+
+  <form method="POST" action="{{ route('login') }}">
+        @csrf
+
+        <!-- Email Address -->
+        <div>
+            <x-input-label for="email" :value="__('Email')" />
+            <x-text-input id="email" class="block mt-1 w-full" type="email" name="email" :value="old('email')" required autofocus autocomplete="username" />
+            <x-input-error :messages="$errors->get('email')" class="mt-2" />
+        </div>
+
+        <!-- Password -->
+        <div class="mt-4">
+            <x-input-label for="password" :value="__('Password')" />
+
+            <x-text-input id="password" class="block mt-1 w-full"
+                            type="password"
+                            name="password"
+                            required autocomplete="current-password" />
+
+            <x-input-error :messages="$errors->get('password')" class="mt-2" />
+        </div>
+
+        <!-- Remember Me -->
+        <div class="block mt-4">
+            <label for="remember_me" class="inline-flex items-center">
+                <input id="remember_me" type="checkbox" class="rounded dark:bg-gray-900 border-gray-300 dark:border-gray-700 text-indigo-600 shadow-sm focus:ring-indigo-500 dark:focus:ring-indigo-600 dark:focus:ring-offset-gray-800" name="remember">
+                <span class="ms-2 text-sm text-gray-600 dark:text-gray-400">{{ __('Remember me') }}</span>
+            </label>
+        </div>
+
+        <div class="flex items-center justify-end mt-4">
+            @if (Route::has('password.request'))
+                <a class="underline text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:focus:ring-offset-gray-800" href="{{ route('password.request') }}">
+                    {{ __('Forgot your password?') }}
+                </a>
+            @endif
+
+            <x-primary-button class="ms-3">
+                {{ __('Log in') }}
+            </x-primary-button>
+
+        </div>
+    </form>
+
+
+                           <a
+                                href="{{ route('register') }}"
+                                class="inline-block px-5 py-1.5 dark:text-[#EDEDEC] border-[#19140035] hover:border-[#1915014a] border text-[#1b1b18] dark:border-[#3E3E3A] dark:hover:border-[#62605b] rounded-sm text-sm leading-normal">
+                                Register
+                            </a>
+                   
+
+
+</x-guest-layout>
+</file>
+
+<file path="resources/views/auth/register.blade.php">
+<x-guest-layout>
+    <form method="POST" action="{{ route('register') }}">
+        @csrf
+
+        <!-- Name -->
+        <div>
+            <x-input-label for="name" :value="__('Name')" />
+            <x-text-input id="name" class="block mt-1 w-full" type="text" name="name" :value="old('name')" required autofocus autocomplete="name" />
+            <x-input-error :messages="$errors->get('name')" class="mt-2" />
+        </div>
+
+        <!-- Email Address -->
+        <div class="mt-4">
+            <x-input-label for="email" :value="__('Email')" />
+            <x-text-input id="email" class="block mt-1 w-full" type="email" name="email" :value="old('email')" required autocomplete="username" />
+            <x-input-error :messages="$errors->get('email')" class="mt-2" />
+        </div>
+   <div>
+            <x-input-label for="headline" :value="__('headline')" />
+            <x-text-input id="headline" class="block mt-1 w-full" type="text" name="headline" :value="old('headline')" required autofocus autocomplete="headline" />
+            <x-input-error :messages="$errors->get('headline')" class="mt-2" />
+        </div>
+        <!-- Password -->
+        <div class="mt-4">
+            <x-input-label for="password" :value="__('Password')" />
+
+            <x-text-input id="password" class="block mt-1 w-full"
+                            type="password"
+                            name="password"
+                            required autocomplete="new-password" />
+
+            <x-input-error :messages="$errors->get('password')" class="mt-2" />
+        </div>
+
+        <!-- Confirm Password -->
+        <div class="mt-4">
+            <x-input-label for="password_confirmation" :value="__('Confirm Password')" />
+
+            <x-text-input id="password_confirmation" class="block mt-1 w-full"
+                            type="password"
+                            name="password_confirmation" required autocomplete="new-password" />
+
+            <x-input-error :messages="$errors->get('password_confirmation')" class="mt-2" />
+        </div>
+
+        <div class="flex items-center justify-end mt-4">
+            <a class="underline text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:focus:ring-offset-gray-800" href="{{ route('login') }}">
+                {{ __('Already registered?') }}
+            </a>
+
+            <x-primary-button class="ms-4">
+                {{ __('Register') }}
+            </x-primary-button>
+        </div>
+    </form>
+</x-guest-layout>
+</file>
+
 <file path="resources/views/create.blade.php">
 <x-app-layout>
 <div class="max-w-2xl mx-auto">
@@ -4941,6 +4834,90 @@ Alpine.start();
 </x-app-layout>
 </file>
 
+<file path="resources/views/profile/partials/update-profile-information-form.blade.php">
+<section>
+    <header>
+        <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100">
+            {{ __('Profile Information') }}
+        </h2>
+
+        <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">
+            {{ __("Update your account's profile information and email address.") }}
+        </p>
+    </header>
+
+    <form id="send-verification" method="post" action="{{ route('verification.send') }}">
+        @csrf
+    </form>
+
+    <form method="post" action="{{ route('profile.update') }}" class="mt-6 space-y-6">
+        @csrf
+        @method('patch')
+
+        <div>
+            <x-input-label for="name" :value="__('Name')" />
+            <x-text-input id="name" name="name" type="text" class="mt-1 block w-full" :value="old('name', $user->name)" required autofocus autocomplete="name" />
+            <x-input-error class="mt-2" :messages="$errors->get('name')" />
+        </div>
+
+
+
+        <div>
+            <x-input-label for="email" :value="__('Email')" />
+            <x-text-input id="email" name="email" type="email" class="mt-1 block w-full" :value="old('email', $user->email)" required autocomplete="username" />
+            <x-input-error class="mt-2" :messages="$errors->get('email')" />
+
+            @if ($user instanceof \Illuminate\Contracts\Auth\MustVerifyEmail && ! $user->hasVerifiedEmail())
+                <div>
+                    <p class="text-sm mt-2 text-gray-800 dark:text-gray-200">
+                        {{ __('Your email address is unverified.') }}
+
+                        <button form="send-verification" class="underline text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:focus:ring-offset-gray-800">
+                            {{ __('Click here to re-send the verification email.') }}
+                        </button>
+                    </p>
+
+                    @if (session('status') === 'verification-link-sent')
+                        <p class="mt-2 font-medium text-sm text-green-600 dark:text-green-400">
+                            {{ __('A new verification link has been sent to your email address.') }}
+                        </p>
+                    @endif
+                </div>
+            @endif
+        </div>
+     <div>
+            <x-input-label for="headline" :value="__('headline')" />
+            <x-text-input id="headline" name="nheadlineame" type="text" class="mt-1 block w-full" :value="old('headline', $user->headline)" required autofocus autocomplete="headline" />
+            <x-input-error class="mt-2" :messages="$errors->get('headline')" />
+        </div>
+          <div>
+            <x-input-label for="image_url" :value="__('image_url')" />
+            <x-text-input id="image_url" name="image_url" type="text" class="mt-1 block w-full" :value="old('image_url', $user->image_url)" required autofocus autocomplete="image_url" />
+            <x-input-error class="mt-2" :messages="$errors->get('image_url')" />
+        </div>
+          <div>
+            <x-input-label for="company" :value="__('company')" />
+            <x-text-input id="company" name="company" type="text" class="mt-1 block w-full" :value="old('company', $user->company)"  autofocus autocomplete="company" />
+            <x-input-error class="mt-2" :messages="$errors->get('company')" />
+        </div>
+
+        <div class="flex items-center gap-4">
+            <x-primary-button>{{ __('Save') }}</x-primary-button>
+
+            @if (session('status') === 'profile-updated')
+                <p
+                    x-data="{ show: true }"
+                    x-show="show"
+                    x-transition
+                    x-init="setTimeout(() => show = false, 2000)"
+                    class="text-sm text-gray-600 dark:text-gray-400"
+                >{{ __('Saved.') }}</p>
+            @endif
+        </div>
+    </form>
+</section>
+</file>
+
 <file path="vite.config.js">
 import { defineConfig } from 'vite';
 import laravel from 'laravel-vite-plugin';
@@ -4953,6 +4930,140 @@ export default defineConfig({
         }),
     ],
 });
+</file>
+
+<file path="app/Http/Controllers/Auth/RegisteredUserController.php">
+<?php
+
+namespace App\Http\Controllers\Auth;
+
+use App\Http\Controllers\Controller;
+use App\Models\User;
+use Illuminate\Auth\Events\Registered;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\Rules;
+use Illuminate\Validation\ValidationException;
+use Illuminate\View\View;
+
+class RegisteredUserController extends Controller
+{
+    /**
+     * Display the registration view.
+     */
+    public function create(): View
+    {
+        return view('auth.register');
+    }
+
+    /**
+     * Handle an incoming registration request.
+     *
+     * @throws ValidationException
+     */
+    public function store(Request $request): RedirectResponse
+    {
+        $request->validate([
+            'name' => ['required', 'string', 'max:255'],
+            'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class],
+            'password' => ['required', 'confirmed', Rules\Password::defaults()],
+            'headline'=>'required',
+        ]);
+
+        $user = User::create([
+            'name' => $request->name,
+            'email' => $request->email,
+            'password' => Hash::make($request->password),
+            'headline' => $request->headline,
+    'company' => 'À la recherche d\'opportunités',
+    'image_url' => 'https://ui-avatars.com/api/?name=' . urlencode($request->name) . '&background=random',
+        ]);
+
+        event(new Registered($user));
+
+        Auth::login($user);
+
+        return redirect(route('feed.index', absolute: false));
+    }
+}
+</file>
+
+<file path="app/Models/User.php">
+<?php
+
+namespace App\Models;
+
+// use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Illuminate\Database\Eloquent\Casts\Attribute;
+use Database\Factories\UserFactory;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Notifications\Notifiable;
+
+class User extends Authenticatable
+{
+    /** @use HasFactory<UserFactory> */
+    use HasFactory, Notifiable;
+
+    /**
+     * The attributes that are mass assignable.
+     *
+     * @var list<string>
+     */
+    protected $fillable = [
+        'name',
+        'email',
+        'password',
+        'image_url',
+        'company',
+        'headline',
+    ];
+
+    /**
+     * The attributes that should be hidden for serialization.
+     *
+     * @var list<string>
+     */
+    protected $hidden = [
+        'password',
+        'remember_token',
+    ];
+
+    /**
+     * Get the attributes that should be cast.
+     *
+     * @return array<string, string>
+     */
+    protected function casts(): array
+    {
+        return [
+            'email_verified_at' => 'datetime',
+            'password' => 'hashed',
+        ];
+    }
+public function posts(){
+    return $this->hasMany(post::class);
+}
+public function likes(){
+    return $this->hasMany(like::class);
+}
+
+ public function comments(){
+        return $this->hasMany(comment::class);
+    }
+protected function avatarUrl(): Attribute{
+    return Attribute::make(
+        get: function(){
+            if($this->image_url){
+                return $this->image_url;
+            }
+            return 'https://ui-avatars.com/api/?name=' . urlencode($this->name) . '&background=random&color=fff';
+        }
+    );
+}
+}
 </file>
 
 <file path="resources/views/layouts/app.blade.php">
@@ -4994,112 +5105,6 @@ export default defineConfig({
         </div>
     </body>
 </html>
-</file>
-
-<file path="resources/views/layouts/navigation.blade.php">
-<nav x-data="{ open: false }" class="bg-white dark:bg-gray-800 border-b border-gray-100 dark:border-gray-700">
-    <!-- Primary Navigation Menu -->
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex justify-between h-16">
-            <div class="flex">
-                <!-- Logo -->
-                <div class="shrink-0 flex items-center">
-                    <a href="{{ route('feed.index') }}">
-                        <x-application-logo class="block h-9 w-auto fill-current text-gray-800 dark:text-gray-200" />
-                    </a>
-                </div>
-
-                <!-- Navigation Links -->
-                <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
-                    <x-nav-link :href="route('feed.index')" :active="request()->routeIs('feed')">
-                        {{ __('Home') }}
-                    </x-nav-link>
-                       <x-nav-link :href="route('profile.edit')" :active="request()->routeIs('profile')">
-                        {{ __('Profil') }}
-                    </x-nav-link>
-                </div>
-            </div>
-
-            <!-- Settings Dropdown -->
-            <div class="hidden sm:flex sm:items-center sm:ms-6">
-                <x-dropdown align="right" width="48">
-                    <x-slot name="trigger">
-                        <button class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-gray-500 dark:text-gray-400 bg-white dark:bg-gray-800 hover:text-gray-700 dark:hover:text-gray-300 focus:outline-none transition ease-in-out duration-150">
-                            <div>{{ Auth::user()->name }}</div>
-
-                            <div class="ms-1">
-                                <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
-                                </svg>
-                            </div>
-                        </button>
-                    </x-slot>
-
-                    <x-slot name="content">
-                        <x-dropdown-link :href="route('profile.edit')">
-                            {{ __('Profile') }}
-                        </x-dropdown-link>
-
-                        <!-- Authentication -->
-                        <form method="POST" action="{{ route('logout') }}">
-                            @csrf
-
-                            <x-dropdown-link :href="route('logout')"
-                                    onclick="event.preventDefault();
-                                                this.closest('form').submit();">
-                                {{ __('Log Out') }}
-                            </x-dropdown-link>
-                        </form>
-                    </x-slot>
-                </x-dropdown>
-            </div>
-
-            <!-- Hamburger -->
-            <div class="-me-2 flex items-center sm:hidden">
-                <button @click="open = ! open" class="inline-flex items-center justify-center p-2 rounded-md text-gray-400 dark:text-gray-500 hover:text-gray-500 dark:hover:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-900 focus:outline-none focus:bg-gray-100 dark:focus:bg-gray-900 focus:text-gray-500 dark:focus:text-gray-400 transition duration-150 ease-in-out">
-                    <svg class="h-6 w-6" stroke="currentColor" fill="none" viewBox="0 0 24 24">
-                        <path :class="{'hidden': open, 'inline-flex': ! open }" class="inline-flex" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
-                        <path :class="{'hidden': ! open, 'inline-flex': open }" class="hidden" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Responsive Navigation Menu -->
-    <div :class="{'block': open, 'hidden': ! open}" class="hidden sm:hidden">
-        <div class="pt-2 pb-3 space-y-1">
-            <x-responsive-nav-link :href="route('feed.index')" :active="request()->routeIs('feed.index')">
-                {{ __('feed.index') }}
-            </x-responsive-nav-link>
-        </div>
-
-        <!-- Responsive Settings Options -->
-        <div class="pt-4 pb-1 border-t border-gray-200 dark:border-gray-600">
-            <div class="px-4">
-                <div class="font-medium text-base text-gray-800 dark:text-gray-200">{{ Auth::user()->name }}</div>
-                <div class="font-medium text-sm text-gray-500">{{ Auth::user()->email }}</div>
-            </div>
-
-            <div class="mt-3 space-y-1">
-                <x-responsive-nav-link :href="route('profile.edit')">
-                    {{ __('Profile') }}
-                </x-responsive-nav-link>
-
-                <!-- Authentication -->
-                <form method="POST" action="{{ route('logout') }}">
-                    @csrf
-
-                    <x-responsive-nav-link :href="route('logout')"
-                            onclick="event.preventDefault();
-                                        this.closest('form').submit();">
-                        {{ __('Log Out') }}
-                    </x-responsive-nav-link>
-                </form>
-            </div>
-        </div>
-    </div>
-</nav>
 </file>
 
 <file path="app/Http/Controllers/PostController.php">
@@ -5179,7 +5184,190 @@ class Post extends Model
     public function user(){
         return $this->belongsTo(User::class);
     }
+     public function likes(){
+        return $this->hasMany(like::class);
+    }
+     public function comments(){
+        return $this->hasMany(comment::class);
+    }
 }
+</file>
+
+<file path="resources/views/layouts/navigation.blade.php">
+<nav x-data="{ open: false }" class="bg-white border-b border-gray-200 sticky top-0 z-50 shadow-sm">
+    <!-- Primary Navigation Menu -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex justify-between h-14">
+            <!-- Left Side: Logo & Search -->
+            <div class="flex items-center">
+                <!-- Logo -->
+                <div class="shrink-0 flex items-center">
+                    <a href="{{ route('feed.index') }}" class="flex items-center gap-1 transition transform hover:scale-105">
+                        <div class="bg-blue-600 text-white p-1 rounded font-bold text-xl leading-none flex items-center justify-center w-8 h-8">
+                            in
+                        </div>
+                    </a>
+                </div>
+
+                <!-- Search Bar (Hidden on very small screens) -->
+                <div class="hidden sm:flex items-center ml-4">
+                    <div class="relative group">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <svg class="h-4 w-4 text-gray-500 group-focus-within:text-blue-500 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                            </svg>
+                        </div>
+                        <input type="text"
+                               class="block w-64 pl-10 pr-3 py-1.5 border border-transparent rounded-md leading-5 bg-[#EEF3F8] text-gray-900 placeholder-gray-500 focus:outline-none focus:bg-white focus:border-gray-300 focus:ring-0 sm:text-sm transition-all duration-300 ease-in-out focus:w-80"
+                               placeholder="Recherche...">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Side: Navigation Icons & Profile Dropdown -->
+            <div class="hidden sm:flex sm:items-center sm:ms-6 h-full space-x-1 md:space-x-4">
+
+                <!-- Icon: Accueil -->
+                <a href="{{ route('feed.index') }}"
+                   class="flex flex-col items-center justify-center w-16 h-full border-b-2 transition duration-150 ease-in-out {{ request()->routeIs('feed.index') ? 'border-black text-black' : 'border-transparent text-gray-500 hover:text-black' }}">
+                    <svg class="w-6 h-6" fill="{{ request()->routeIs('feed.index') ? 'currentColor' : 'none' }}" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
+                    </svg>
+                    <span class="text-[10px] hidden md:block mt-0.5 font-medium">Accueil</span>
+                </a>
+
+                <!-- Icon: Réseau (Placeholder) -->
+                <a href="#" class="flex flex-col items-center justify-center w-16 h-full border-b-2 border-transparent text-gray-500 hover:text-black transition duration-150 ease-in-out">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path>
+                    </svg>
+                    <span class="text-[10px] hidden md:block mt-0.5 font-medium">Réseau</span>
+                </a>
+
+                <!-- Icon: Emplois (Placeholder) -->
+                <a href="#" class="flex flex-col items-center justify-center w-16 h-full border-b-2 border-transparent text-gray-500 hover:text-black transition duration-150 ease-in-out">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+                    </svg>
+                    <span class="text-[10px] hidden md:block mt-0.5 font-medium">Emplois</span>
+                </a>
+
+                <!-- Diviseur vertical -->
+                <div class="h-8 w-px bg-gray-200 mx-2 hidden md:block"></div>
+
+                <!-- Settings Dropdown -->
+                <div class="flex items-center h-full">
+                    <x-dropdown align="right" width="48">
+                        <x-slot name="trigger">
+                            <button class="flex flex-col items-center justify-center w-12 h-full text-gray-500 hover:text-black focus:outline-none transition duration-150 ease-in-out">
+                                <img class="h-6 w-6 rounded-full object-cover border border-gray-200"
+                                     src="{{ auth()->user()->avatar_url ?? 'https://ui-avatars.com/api/?name='.urlencode(auth()->user()->name).'&background=random' }}"
+                                     alt="Profile">
+                                <div class="hidden md:flex items-center mt-0.5">
+                                    <span class="text-[10px] font-medium">Vous</span>
+                                    <svg class="fill-current h-3 w-3 ml-0.5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+                                    </svg>
+                                </div>
+                            </button>
+                        </x-slot>
+
+                        <x-slot name="content">
+                            <!-- User Info Header -->
+                            <div class="px-4 py-3 border-b border-gray-100">
+                                <p class="text-sm font-semibold text-gray-900 truncate">{{ Auth::user()->name }}</p>
+                                <p class="text-xs text-gray-500 truncate">{{ Auth::user()->headline ?? 'Membre' }}</p>
+                            </div>
+
+                            <x-dropdown-link :href="route('profile.edit')" class="font-medium mt-1">
+                                {{ __('Voir le profil') }}
+                            </x-dropdown-link>
+
+                            <div class="border-t border-gray-100 mt-1"></div>
+
+                            <!-- Authentication -->
+                            <form method="POST" action="{{ route('logout') }}">
+                                @csrf
+                                <x-dropdown-link :href="route('logout')"
+                                        onclick="event.preventDefault();
+                                                    this.closest('form').submit();" class="text-red-600 hover:text-red-700">
+                                    {{ __('Déconnexion') }}
+                                </x-dropdown-link>
+                            </form>
+                        </x-slot>
+                    </x-dropdown>
+                </div>
+            </div>
+
+            <!-- Hamburger (Mobile) -->
+            <div class="-me-2 flex items-center sm:hidden">
+                <button @click="open = ! open" class="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:bg-gray-100 focus:text-gray-500 transition duration-150 ease-in-out">
+                    <svg class="h-6 w-6" stroke="currentColor" fill="none" viewBox="0 0 24 24">
+                        <path :class="{'hidden': open, 'inline-flex': ! open }" class="inline-flex" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                        <path :class="{'hidden': ! open, 'inline-flex': open }" class="hidden" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Responsive Navigation Menu (Mobile) -->
+    <div :class="{'block': open, 'hidden': ! open}" class="hidden sm:hidden border-t border-gray-200">
+
+        <!-- Mobile Search (Visible only on mobile when menu opens) -->
+        <div class="p-4 border-b border-gray-200">
+            <div class="relative">
+                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <svg class="h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                    </svg>
+                </div>
+                <input type="text" class="block w-full pl-10 pr-3 py-2 border border-transparent rounded-md leading-5 bg-[#EEF3F8] text-gray-900 placeholder-gray-500 focus:outline-none focus:bg-white focus:border-blue-500 sm:text-sm" placeholder="Recherche...">
+            </div>
+        </div>
+
+        <div class="pt-2 pb-3 space-y-1">
+            <x-responsive-nav-link :href="route('feed.index')" :active="request()->routeIs('feed.index')">
+                {{ __('Accueil') }}
+            </x-responsive-nav-link>
+            <x-responsive-nav-link href="#">
+                {{ __('Réseau') }}
+            </x-responsive-nav-link>
+            <x-responsive-nav-link href="#">
+                {{ __('Emplois') }}
+            </x-responsive-nav-link>
+        </div>
+
+        <!-- Responsive Settings Options -->
+        <div class="pt-4 pb-1 border-t border-gray-200">
+            <div class="px-4 flex items-center gap-3 mb-3">
+                <img class="h-10 w-10 rounded-full object-cover border border-gray-200"
+                     src="{{ auth()->user()->avatar_url ?? 'https://ui-avatars.com/api/?name='.urlencode(auth()->user()->name).'&background=random' }}"
+                     alt="Profile">
+                <div>
+                    <div class="font-medium text-base text-gray-800">{{ Auth::user()->name }}</div>
+                    <div class="font-medium text-sm text-gray-500">{{ Auth::user()->headline ?? Auth::user()->email }}</div>
+                </div>
+            </div>
+
+            <div class="mt-3 space-y-1">
+                <x-responsive-nav-link :href="route('profile.edit')">
+                    {{ __('Voir le profil') }}
+                </x-responsive-nav-link>
+
+                <!-- Authentication -->
+                <form method="POST" action="{{ route('logout') }}">
+                    @csrf
+                    <x-responsive-nav-link :href="route('logout')"
+                            onclick="event.preventDefault();
+                                        this.closest('form').submit();" class="text-red-600">
+                        {{ __('Déconnexion') }}
+                    </x-responsive-nav-link>
+                </form>
+            </div>
+        </div>
+    </div>
+</nav>
 </file>
 
 <file path="database/seeders/DatabaseSeeder.php">
@@ -5206,130 +5394,66 @@ class DatabaseSeeder extends Seeder
 
 <file path="resources/views/feed.blade.php">
 <x-app-layout>
-    <div class="py-10 bg-[#F3F2EF] min-h-screen"> <!-- Loun dyal background bhal LinkedIn -->
+    <div class="py-10 bg-[#F3F2EF] min-h-screen">
         <div class="max-w-2xl mx-auto sm:px-6 lg:px-8 space-y-6">
 
-            <!-- 1. L'Boite dyal Création d'un Post (Premium UI) -->
+            <!-- Create Post Area -->
             <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
                 <div class="flex items-center gap-3">
-                    <!-- Tswira dyal l'user li connecté -->
                     <img src="{{ auth()->user()->avatar_url ?? 'https://ui-avatars.com/api/?name='.urlencode(auth()->user()->name).'&background=random' }}"
-                         alt="Mon Avatar"
-                         class="w-12 h-12 rounded-full object-cover border border-gray-100">
-
-                    <!-- L'Bouton li kayddi l'page dyal Création -->
+                         alt="Avatar" class="w-12 h-12 rounded-full object-cover">
                     <a href="{{ route('feed.create') }}"
-                       class="flex-1 bg-white hover:bg-gray-100 text-gray-500 text-sm font-medium text-left rounded-full py-3.5 px-5 border border-gray-400 transition-colors duration-200 cursor-text">
+                       class="flex-1 bg-white border border-gray-300 hover:bg-gray-50 text-gray-500 text-sm font-medium rounded-full py-3.5 px-5 transition cursor-pointer">
                         Commencer un post...
                     </a>
                 </div>
-
-                <!-- Les actions sghar ta7t (Zwaq bach yban Pro) -->
-                <div class="flex items-center justify-around mt-3 pt-2">
-                    <button class="flex items-center gap-2 text-gray-500 hover:bg-gray-100 px-4 py-2 rounded-md transition font-medium text-sm">
-                        <svg class="w-5 h-5 text-blue-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clip-rule="evenodd"></path></svg>
-                        Média
-                    </button>
-                    <button class="flex items-center gap-2 text-gray-500 hover:bg-gray-100 px-4 py-2 rounded-md transition font-medium text-sm">
-                        <svg class="w-5 h-5 text-amber-600" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd"></path></svg>
-                        Événement
-                    </button>
-                    <button class="flex items-center gap-2 text-gray-500 hover:bg-gray-100 px-4 py-2 rounded-md transition font-medium text-sm">
-                        <svg class="w-5 h-5 text-orange-400" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 2a4 4 0 00-4 4v1H5a1 1 0 00-.994.89l-1 9A1 1 0 004 18h12a1 1 0 00.994-1.11l-1-9A1 1 0 0015 7h-1V6a4 4 0 00-4-4zm2 5V6a2 2 0 10-4 0v1h4zm-6 3a1 1 0 112 0 1 1 0 01-2 0zm7-1a1 1 0 100 2 1 1 0 000-2z" clip-rule="evenodd"></path></svg>
-                        Article
-                    </button>
-                </div>
             </div>
 
-            <!-- 2. Divider mkhbi (Khitt r9iq d'lfassel) -->
-            <div class="flex items-center mb-4">
-                <hr class="flex-grow border-gray-300">
-                <span class="px-3 text-xs text-gray-500 font-medium">Classer par : <span class="text-black font-semibold cursor-pointer">Pertinence</span></span>
-            </div>
-
-            <!-- 3. La Boucle dyal les Posts (Forelse 7ssen mn Foreach bach ndiro Empty State) -->
-            @forelse ($posts as $post)
-                <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-
-                    <!-- L'En-tête dyal L'Post -->
-                    <div class="p-4 flex items-start justify-between">
-                        <div class="flex items-center gap-3">
-                            <a href="#" class="flex-shrink-0">
+            <!-- Feed -->
+            <div class="space-y-4">
+                @forelse ($posts as $post)
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                        <!-- Post Header -->
+                        <div class="p-4 flex items-center justify-between">
+                            <div class="flex items-center gap-3">
                                 <img src="{{ $post->user->avatar_url ?? 'https://ui-avatars.com/api/?name='.urlencode($post->user->name).'&background=random' }}"
-                                     alt="Avatar"
-                                     class="w-12 h-12 rounded-full object-cover">
-                            </a>
-                            <div class="flex flex-col">
-                                <a href="#" class="font-semibold text-gray-900 hover:text-blue-600 hover:underline text-sm">{{ $post->user->name }}</a>
-                                <span class="text-xs text-gray-500 truncate w-48 sm:w-80">
-                                    {{ $post->user->headline ?? 'Membre' }}
-                                    @if($post->user->company) chez {{ $post->user->company }} @endif
-                                </span>
-                                <div class="flex items-center text-xs text-gray-400 mt-0.5">
-                                    <span>{{ $post->created_at->diffForHumans() }}</span>
-                                    <span class="mx-1">•</span>
-                                    <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM4.332 8.027a6.012 6.012 0 011.912-2.706C6.512 5.73 6.974 6 7.5 6A1.5 1.5 0 019 7.5V8a2 2 0 004 0 2 2 0 011.523-1.943A5.977 5.977 0 0116 10c0 .34-.028.675-.083 1H15a2 2 0 00-2 2v2.197A5.973 5.973 0 0110 16v-2a2 2 0 00-2-2 2 2 0 01-2-2 2 2 0 00-1.668-1.973z" clip-rule="evenodd"></path></svg>
+                                     alt="Avatar" class="w-12 h-12 rounded-full object-cover">
+                                <div>
+                                    <h4 class="font-bold text-gray-900 text-sm">{{ $post->user->name }}</h4>
+                                    <p class="text-xs text-gray-500">{{ $post->created_at->diffForHumans() }}</p>
                                 </div>
                             </div>
+
+                            @if ($post->user_id == auth()->id())
+                                <div class="flex gap-2">
+                                    <a href="{{ route('feed.edit', $post->id) }}" class="text-gray-400 hover:text-blue-600 text-sm">Edit</a>
+                                    <form action="{{ route('feed.destroy', $post->id) }}" method="POST">
+                                        @csrf @method('DELETE')
+                                        <button type="submit" onclick="return confirm('Supprimer ce post ?')" class="text-gray-400 hover:text-red-600 text-sm">Delete</button>
+                                    </form>
+                                </div>
+                            @endif
                         </div>
 
-                        <!-- Menu (...) dyal l'Edition (Kayban ghir l'moul l'post) -->
-                        @if ($post->user_id == auth()->id())
-                            <div class="flex items-center gap-2">
-                                <!-- Bouton Edit -->
-                                <a href="{{ route('feed.edit', $post->id) }}" class="text-gray-400 hover:text-blue-600 hover:bg-blue-50 p-2 rounded-full transition">
-                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
-                                </a>
-                                <!-- Formulaire Delete -->
-                                <form action="{{ route('feed.destroy', $post->id) }}" method="POST" class="inline">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" onclick="return confirm('Supprimer ce post ?')" class="text-gray-400 hover:text-red-600 hover:bg-red-50 p-2 rounded-full transition">
-                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-                                    </button>
-                                </form>
-                            </div>
-                        @endif
+                        <!-- Content -->
+                        <div class="px-4 pb-4">
+                            <p class="text-gray-800 text-sm leading-relaxed whitespace-pre-wrap">{{ $post->content }}</p>
+                        </div>
+
+                        <!-- Actions -->
+                        <div class="px-4 py-3 border-t border-gray-100 flex gap-6">
+                            <button class="text-sm text-gray-600 font-medium hover:text-blue-600 transition">J'aime</button>
+                            <button class="text-sm text-gray-600 font-medium hover:text-blue-600 transition">Commenter</button>
+                            <button class="text-sm text-gray-600 font-medium hover:text-blue-600 transition">Partager</button>
+                        </div>
                     </div>
-
-                    <!-- L'Contenu dyal L'Post -->
-                    <div class="px-4 pb-3">
-                        <p class="text-gray-800 text-sm leading-relaxed whitespace-pre-wrap">{{ $post->content }}</p>
+                @empty
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-8 text-center">
+                        <p class="text-gray-500">Aucun post pour le moment.</p>
+                        <a href="{{ route('feed.create') }}" class="text-blue-600 font-bold hover:underline">Soyez le premier à publier !</a>
                     </div>
-
-                    <!-- L'Khtotat w Zwa9 dyal Ta7t (Likes & Comments placeholders) -->
-                    <div class="px-4 py-2 border-t border-gray-100 flex items-center justify-between mt-2">
-                        <!-- Likes button (Mzl makhdamch walakin zwin f design) -->
-                        <button class="flex items-center gap-2 text-gray-500 hover:bg-gray-100 px-3 py-2 rounded-md transition font-medium text-sm flex-1 justify-center">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 10h4.764a2 2 0 011.789 2.894l-3.5 7A2 2 0 0115.263 21h-4.017c-.163 0-.326-.02-.485-.06L7 20m7-10V5a2 2 0 00-2-2h-.095c-.5 0-.905.405-.905.905 0 .714-.211 1.412-.608 2.006L7 11v9m7-10h-2M7 20H5a2 2 0 01-2-2v-6a2 2 0 012-2h2.5"></path></svg>
-                            J'aime
-                        </button>
-
-                        <button class="flex items-center gap-2 text-gray-500 hover:bg-gray-100 px-3 py-2 rounded-md transition font-medium text-sm flex-1 justify-center">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path></svg>
-                            Commenter
-                        </button>
-
-                        <button class="flex items-center gap-2 text-gray-500 hover:bg-gray-100 px-3 py-2 rounded-md transition font-medium text-sm flex-1 justify-center">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"></path></svg>
-                            Partager
-                        </button>
-                    </div>
-                </div>
-            @empty
-                <!-- 4. L'Empty State (Ila kan l'Feed khawi) -->
-                <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-12 text-center flex flex-col items-center">
-                    <div class="w-24 h-24 bg-blue-50 rounded-full flex items-center justify-center mb-4">
-                        <svg class="w-12 h-12 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9.5a2.5 2.5 0 00-2.5-2.5H15M9 11l3 3L22 4"></path></svg>
-                    </div>
-                    <h3 class="text-lg font-bold text-gray-900 mb-2">Aucun post pour le moment</h3>
-                    <p class="text-gray-500 text-sm max-w-sm mx-auto mb-6">Soyez le premier à partager vos pensées, idées ou opportunités avec votre réseau.</p>
-                    <a href="{{ route('feed.create') }}" class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2.5 px-6 rounded-full transition duration-150">
-                        Créer mon premier post
-                    </a>
-                </div>
-            @endforelse
-
+                @endforelse
+            </div>
         </div>
     </div>
 </x-app-layout>

@@ -53,7 +53,13 @@ class User extends Authenticatable
 public function posts(){
     return $this->hasMany(post::class);
 }
+public function likes(){
+    return $this->hasMany(like::class);
+}
 
+ public function comments(){
+        return $this->hasMany(comment::class);
+    }
 protected function avatarUrl(): Attribute{
     return Attribute::make(
         get: function(){

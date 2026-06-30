@@ -8,9 +8,9 @@ use Illuminate\Support\Facades\Route;
 //     return view('welcome');
 // });
 
-Route::get('/feed', function () {
-    return view('feed');
-})->middleware(['auth', 'verified']);
+// Route::get('/feed', function () {
+//     return view('feed');
+// })->middleware(['auth', 'verified']);
 
 Route::resource('/feed', PostController::class)->middleware(['auth', 'verified']);
 
