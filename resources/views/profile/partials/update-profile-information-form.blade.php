@@ -23,6 +23,8 @@
             <x-input-error class="mt-2" :messages="$errors->get('name')" />
         </div>
 
+
+
         <div>
             <x-input-label for="email" :value="__('Email')" />
             <x-text-input id="email" name="email" type="email" class="mt-1 block w-full" :value="old('email', $user->email)" required autocomplete="username" />
@@ -45,6 +47,21 @@
                     @endif
                 </div>
             @endif
+        </div>
+     <div>
+            <x-input-label for="headline" :value="__('headline')" />
+            <x-text-input id="headline" name="nheadlineame" type="text" class="mt-1 block w-full" :value="old('headline', $user->headline)" required autofocus autocomplete="headline" />
+            <x-input-error class="mt-2" :messages="$errors->get('headline')" />
+        </div>
+          <div>
+            <x-input-label for="image_url" :value="__('image_url')" />
+            <x-text-input id="image_url" name="image_url" type="text" class="mt-1 block w-full" :value="old('image_url', $user->image_url)" required autofocus autocomplete="image_url" />
+            <x-input-error class="mt-2" :messages="$errors->get('image_url')" />
+        </div>
+          <div>
+            <x-input-label for="company" :value="__('company')" />
+            <x-text-input id="company" name="company" type="text" class="mt-1 block w-full" :value="old('company', $user->company)"  autofocus autocomplete="company" />
+            <x-input-error class="mt-2" :messages="$errors->get('company')" />
         </div>
 
         <div class="flex items-center gap-4">

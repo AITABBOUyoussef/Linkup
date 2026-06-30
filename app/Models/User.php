@@ -3,6 +3,7 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -22,6 +23,9 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'image_url',
+        'company',
+        'headline',
     ];
 
     /**
@@ -49,4 +53,15 @@ class User extends Authenticatable
 public function posts(){
     return $this->hasMany(post::class);
 }
-    }
+
+protected function avatarUrl(): Attribute{
+    return Attribute::make(
+        get: function(){
+            if($this->image_url){
+                return $this->image_url;
+            }
+            return 'https://ui-avatars.com/api/?name=' . urlencode($this->name) . '&background=random&color=fff';
+        }
+    );
+}
+}
