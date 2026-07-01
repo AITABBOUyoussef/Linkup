@@ -58,13 +58,15 @@ app/Http/Controllers/Auth/PasswordController.php
 app/Http/Controllers/Auth/PasswordResetLinkController.php
 app/Http/Controllers/Auth/RegisteredUserController.php
 app/Http/Controllers/Auth/VerifyEmailController.php
+app/Http/Controllers/CommentController.php
 app/Http/Controllers/Controller.php
+app/Http/Controllers/LikeController.php
 app/Http/Controllers/PostController.php
 app/Http/Controllers/ProfileController.php
 app/Http/Requests/Auth/LoginRequest.php
 app/Http/Requests/ProfileUpdateRequest.php
-app/Models/comment.php
-app/Models/like.php
+app/Models/Comment.php
+app/Models/Like.php
 app/Models/Post.php
 app/Models/User.php
 app/Providers/AppServiceProvider.php
@@ -107,6 +109,7 @@ README.md
 resources/css/app.css
 resources/js/app.js
 resources/js/bootstrap.js
+resources/js/interface.js
 resources/views/auth/confirm-password.blade.php
 resources/views/auth/forgot-password.blade.php
 resources/views/auth/login.blade.php
@@ -126,6 +129,7 @@ resources/views/components/primary-button.blade.php
 resources/views/components/responsive-nav-link.blade.php
 resources/views/components/secondary-button.blade.php
 resources/views/components/text-input.blade.php
+resources/views/create_comment.blade.php
 resources/views/create.blade.php
 resources/views/dashboard.blade.php
 resources/views/edit.blade.php
@@ -167,107 +171,6 @@ vite.config.js
 
 <files>
 This section contains the contents of the repository's files.
-
-<file path="app/Models/comment.php">
-<?php
-
-namespace App\Models;
-
-use Illuminate\Database\Eloquent\Model;
-
-class comment extends Model
-{
-    public function poste(){
-        return $this->belongsTo(Post::class);
-    }
-    public  function user(){
-        return $this->belongsTo(user::class);
-    }
-}
-</file>
-
-<file path="app/Models/like.php">
-<?php
-
-namespace App\Models;
-
-use Illuminate\Database\Eloquent\Model;
-
-class like extends Model
-{
- public function post(){
-    return $this->belongsTo(post::class);
-}
-public function user(){
-        return $this->belongsTo(User::class);
-    }
-}
-</file>
-
-<file path="database/migrations/2026_06_30_142352_create_likes_table.php">
-<?php
-
-use Illuminate\Database\Migrations\Migration;
-use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Support\Facades\Schema;
-
-return new class extends Migration
-{
-    /**
-     * Run the migrations.
-     */
-    public function up(): void
-    {
-        Schema::create('likes', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('user_id')->constrained()->onDelete('cascade');
-            $table->foreignId('post-id')->constrained()->onDelete('cascade');
-            $table->timestamps();
-        });
-    }
-
-    /**
-     * Reverse the migrations.
-     */
-    public function down(): void
-    {
-        Schema::dropIfExists('likes');
-    }
-};
-</file>
-
-<file path="database/migrations/2026_06_30_142410_create_comments_table.php">
-<?php
-
-use Illuminate\Database\Migrations\Migration;
-use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Support\Facades\Schema;
-
-return new class extends Migration
-{
-    /**
-     * Run the migrations.
-     */
-    public function up(): void
-    {
-        Schema::create('comments', function (Blueprint $table) {
-            $table->id();
-             $table->foreignId('user_id')->constrained()->onDelete('cascade');
-            $table->foreignId('post-id')->constrained()->onDelete('cascade');
-            $table->text('content');
-            $table->timestamps();
-        });
-    }
-
-    /**
-     * Reverse the migrations.
-     */
-    public function down(): void
-    {
-        Schema::dropIfExists('comments');
-    }
-};
-</file>
 
 <file path=".editorconfig">
 root = true
@@ -653,14 +556,75 @@ class PasswordResetLinkController extends Controller
 }
 </file>
 
-<file path="app/Http/Controllers/Controller.php">
+<file path="app/Http/Controllers/CommentController.php">
 <?php
 
 namespace App\Http\Controllers;
 
-abstract class Controller
+use App\Http\Controllers\Controller;
+use App\Models\comment;
+use Illuminate\Http\Request;
+
+class CommentController extends Controller
 {
-    //
+    public function index()
+{
+    $comments = comment::latest()->get();
+
+    return view('feed', compact('comments'));
+}
+public function create(){
+    return view('create');
+}
+public function store(Request $request ){
+    // dd($request->all());
+$post_id = $request->input('post_id');
+$request->validate([
+     'content' => 'required',
+
+]);
+$comment = new comment();
+$comment->content = $request->content;
+$comment->user_id = $request->user()->id;
+$comment->post_id = $post_id;
+$comment->save();
+return redirect()->route('feed.index')->with('success', 'commant ajouté avec succès');
+}
+public  function edit(string $id){
+    $comment = comment::findOrFail($id);
+    return view('feed',compact('comment'));
+}
+public function update(Request $request, string $id){
+    $request->validate([
+        'content'=>'required',
+    ]);
+    $comment = comment::findOrFail($id);
+    $comment->content = $request->content;
+$comment->save();
+return redirect()->route('feed.index')->with('success', 'Post mis a jour avec succès');
+
+}
+
+public function destroy(string $id){
+    $comment = comment::findOrFail($id);
+    $comment->delete();
+    return redirect()->route('feed.index')->with('success', 'Post supprime avec succès');
+
+}
+}
+</file>
+
+<file path="app/Http/Controllers/LikeController.php">
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Http\Controllers\Controller;
+use Illuminate\Http\Request;
+
+class LikeController extends Controller
+{
+    
 }
 </file>
 
@@ -783,6 +747,28 @@ class ProfileUpdateRequest extends FormRequest
                 Rule::unique(User::class)->ignore($this->user()->id),
             ],
         ];
+    }
+}
+</file>
+
+<file path="app/Models/Like.php">
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Model;
+
+class like extends Model
+{
+    protected $fillable = [
+        'user_id',
+        'post_id',
+    ];
+ public function post(){
+    return $this->belongsTo(post::class);
+}
+public function user(){
+        return $this->belongsTo(User::class);
     }
 }
 </file>
@@ -2303,6 +2289,71 @@ return new class extends Migration
 };
 </file>
 
+<file path="database/migrations/2026_06_30_142352_create_likes_table.php">
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    /**
+     * Run the migrations.
+     */
+    public function up(): void
+    {
+        Schema::create('likes', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('user_id')->constrained()->onDelete('cascade');
+            $table->foreignId('post_id')->constrained()->onDelete('cascade');
+            $table->timestamps();
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        Schema::dropIfExists('likes');
+    }
+};
+</file>
+
+<file path="database/migrations/2026_06_30_142410_create_comments_table.php">
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    /**
+     * Run the migrations.
+     */
+    public function up(): void
+    {
+        Schema::create('comments', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('user_id')->constrained()->onDelete('cascade');
+            $table->foreignId('post_id')->constrained()->onDelete('cascade');
+            $table->text('content');
+            $table->timestamps();
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        Schema::dropIfExists('comments');
+    }
+};
+</file>
+
 <file path="phpunit.xml">
 <?xml version="1.0" encoding="UTF-8"?>
 <phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -2474,6 +2525,10 @@ import axios from 'axios';
 window.axios = axios;
 
 window.axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
+</file>
+
+<file path="resources/js/interface.js">
+
 </file>
 
 <file path="resources/views/auth/confirm-password.blade.php">
@@ -2819,6 +2874,47 @@ $classes = ($active ?? false)
 @props(['disabled' => false])
 
 <input @disabled($disabled) {{ $attributes->merge(['class' => 'border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm']) }}>
+</file>
+
+<file path="resources/views/create_comment.blade.php">
+<x-app-layout>
+<div class="max-w-2xl mx-auto">
+
+    <div class="mb-6">
+        <a href="/feed" class="text-blue-600 hover:underline text-sm font-semibold flex items-center mb-4">
+            &larr; Retour au fil d'actualité
+        </a>
+        <h2 class="text-2xl font-bold text-gray-800">Créer un nouveau comment</h2>
+    </div>
+
+    <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+
+        <form action="{{ route('commant.store',$post) }}" method="POST">
+
+            @csrf
+
+            <div class="mb-4">
+                <label for="content" class="block text-gray-700 text-sm font-bold mb-2">De quoi souhaitez-vous discuter ?</label>
+
+                <textarea name="content" id="content" rows="5"
+                          class="w-full bg-gray-50 border @error('content') border-red-500 @else border-gray-300 @enderror text-gray-900 rounded-lg focus:ring-blue-500 focus:border-blue-500 p-4 placeholder-gray-400 resize-none"
+                          placeholder="Partagez vos idées avec votre réseau..."></textarea>
+
+                {{-- @error('content')
+                    <p class="text-red-500 text-xs italic mt-2">{{ $message }}</p>
+                @enderror --}}
+            </div>
+
+            <div class="flex justify-end mt-4">
+                <button type="submit" class="bg-blue-700 hover:bg-blue-800 text-white font-bold py-2 px-6 rounded-full transition duration-200 ease-in-out shadow">
+                    Publier
+                </button>
+            </div>
+        </form>
+    </div>
+
+</div>
+</x-app-layout>
 </file>
 
 <file path="resources/views/layouts/guest.blade.php">
@@ -4091,6 +4187,17 @@ class VerifyEmailController extends Controller
 }
 </file>
 
+<file path="app/Http/Controllers/Controller.php">
+<?php
+
+namespace App\Http\Controllers;
+
+abstract class Controller
+{
+    
+}
+</file>
+
 <file path="app/Http/Controllers/ProfileController.php">
 <?php
 
@@ -4152,6 +4259,30 @@ class ProfileController extends Controller
         $request->session()->regenerateToken();
 
         return Redirect::to('/');
+    }
+}
+</file>
+
+<file path="app/Models/Comment.php">
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Model;
+
+class comment extends Model
+{
+      protected $fillable = [
+        'user_id',
+        'post_id',
+        'content',
+    ];
+
+    public function post(){
+        return $this->belongsTo(Post::class);
+    }
+    public  function user(){
+        return $this->belongsTo(user::class);
     }
 }
 </file>
@@ -4990,6 +5121,107 @@ class RegisteredUserController extends Controller
 }
 </file>
 
+<file path="resources/views/layouts/app.blade.php">
+<!DOCTYPE html>
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="csrf-token" content="{{ csrf_token() }}">
+
+        <title>{{ config('app.name', 'Laravel') }}</title>
+
+        <!-- Fonts -->
+        <link rel="preconnect" href="https://fonts.bunny.net">
+        <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
+
+        <!-- Scripts -->
+        @vite(['resources/css/app.css', 'resources/js/app.js'])
+    </head>
+    <body class="font-sans antialiased">
+        <div class="min-h-screen bg-gray-100 dark:bg-gray-900">
+            @include('layouts.navigation')
+
+            <!-- Page Heading -->
+            @isset($header)
+                <header class="bg-white dark:bg-gray-800 shadow">
+                    <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+                        {{ $header }}
+                    </div>
+                </header>
+            @endisset
+
+            <!-- Page Content -->
+            <main>
+                {{-- {{ $header }} --}}
+
+                {{ $slot }}
+            </main>
+        </div>
+    </body>
+</html>
+</file>
+
+<file path="app/Http/Controllers/PostController.php">
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Http\Controllers\Controller;
+use App\Models\Post;
+use App\Models\User;
+use Illuminate\Http\Request;
+
+class PostController extends Controller
+{
+
+    public function index()
+{
+    $posts = Post::with('comments')-> latest()->get();
+    // dd($posts);
+
+    return view('feed', compact('posts'));
+}
+public function create(){
+    return view('create');
+}
+public function store(Request $request){
+    // dd($request->all());
+
+$request->validate([
+     'content' => 'required',
+
+]);
+$post = new Post();
+$post->content = $request->content;
+$post->user_id = $request->user()->id;
+$post->save();
+return redirect()->route('feed.index')->with('success', 'Post ajouté avec succès');
+}
+public  function edit(string $id){
+    $post = Post::findOrFail($id);
+    return view('edit',compact('post'));
+}
+public function update(Request $request, string $id){
+    $request->validate([
+        'content'=>'required',
+    ]);
+    $post = Post::findOrFail($id);
+    $post->content = $request->content;
+$post->save();
+return redirect()->route('feed.index')->with('success', 'Post mis a jour avec succès');
+
+}
+
+public function destroy(string $id){
+    $post = Post::findOrFail($id);
+    $post->delete();
+    return redirect()->route('feed.index')->with('success', 'Post supprime avec succès');
+
+}
+}
+</file>
+
 <file path="app/Models/User.php">
 <?php
 
@@ -5063,133 +5295,6 @@ protected function avatarUrl(): Attribute{
         }
     );
 }
-}
-</file>
-
-<file path="resources/views/layouts/app.blade.php">
-<!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
-    <head>
-        <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-        <meta name="csrf-token" content="{{ csrf_token() }}">
-
-        <title>{{ config('app.name', 'Laravel') }}</title>
-
-        <!-- Fonts -->
-        <link rel="preconnect" href="https://fonts.bunny.net">
-        <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
-
-        <!-- Scripts -->
-        @vite(['resources/css/app.css', 'resources/js/app.js'])
-    </head>
-    <body class="font-sans antialiased">
-        <div class="min-h-screen bg-gray-100 dark:bg-gray-900">
-            @include('layouts.navigation')
-
-            <!-- Page Heading -->
-            @isset($header)
-                <header class="bg-white dark:bg-gray-800 shadow">
-                    <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
-                        {{ $header }}
-                    </div>
-                </header>
-            @endisset
-
-            <!-- Page Content -->
-            <main>
-                {{-- {{ $header }} --}}
-
-                {{ $slot }}
-            </main>
-        </div>
-    </body>
-</html>
-</file>
-
-<file path="app/Http/Controllers/PostController.php">
-<?php
-
-namespace App\Http\Controllers;
-
-use App\Http\Controllers\Controller;
-use App\Models\Post;
-use App\Models\User;
-use Illuminate\Http\Request;
-
-class PostController extends Controller
-{
-
-    public function index()
-{
-    $posts = Post::latest()->get();
-
-    return view('feed', compact('posts'));
-}
-public function create(){
-    return view('create');
-}
-public function store(Request $request){
-    // dd($request->all());
-
-$request->validate([
-     'content' => 'required',
-
-]);
-$post = new Post();
-$post->content = $request->content;
-$post->user_id = $request->user()->id;
-$post->save();
-return redirect()->route('feed.index')->with('success', 'Post ajouté avec succès');
-} 
-public  function edit(string $id){
-    $post = Post::findOrFail($id);
-    return view('edit',compact('post'));
-}
-public function update(Request $request, string $id){
-    $request->validate([
-        'content'=>'required',
-    ]);
-    $post = Post::findOrFail($id);
-    $post->content = $request->content;
-$post->save();
-return redirect()->route('feed.index')->with('success', 'Post mis a jour avec succès');
-
-}
-
-public function destroy(string $id){
-    $post = Post::findOrFail($id);
-    $post->delete();
-    return redirect()->route('feed.index')->with('success', 'Post supprime avec succès');
-
-}
-}
-</file>
-
-<file path="app/Models/Post.php">
-<?php
-
-namespace App\Models;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
-
-class Post extends Model
-{
-    use HasFactory;
-    protected $fillable = [
-        'user_id',
-        'content',
-    ];
-
-    public function user(){
-        return $this->belongsTo(User::class);
-    }
-     public function likes(){
-        return $this->hasMany(like::class);
-    }
-     public function comments(){
-        return $this->hasMany(comment::class);
-    }
 }
 </file>
 
@@ -5370,6 +5475,33 @@ class Post extends Model
 </nav>
 </file>
 
+<file path="app/Models/Post.php">
+<?php
+
+namespace App\Models;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+
+class Post extends Model
+{
+    use HasFactory;
+    protected $fillable = [
+        'user_id',
+        'content',
+    ];
+
+    public function user(){
+        return $this->belongsTo(User::class);
+    }
+     public function likes(){
+        return $this->hasMany(like::class);
+    }
+     public function comments(){
+        return $this->hasMany(comment::class);
+    }
+}
+</file>
+
 <file path="database/seeders/DatabaseSeeder.php">
 <?php
 
@@ -5443,10 +5575,70 @@ class DatabaseSeeder extends Seeder
                         <!-- Actions -->
                         <div class="px-4 py-3 border-t border-gray-100 flex gap-6">
                             <button class="text-sm text-gray-600 font-medium hover:text-blue-600 transition">J'aime</button>
-                            <button class="text-sm text-gray-600 font-medium hover:text-blue-600 transition">Commenter</button>
+                            <button  class="text-sm btn-commant text-gray-600 font-medium hover:text-blue-600 transition">Commenter</button>
+                             {{-- <a href="{{ route('feed_comment.store',$post->id) }}"
+                       class="flex-1 bg-white border border-gray-300 hover:bg-gray-50 text-gray-500 text-sm font-medium rounded-full py-3.5 px-5 transition cursor-pointer">
+                        Commencer un comment...
+
+                    </a> --}}
+                    {{--  --}}
+
                             <button class="text-sm text-gray-600 font-medium hover:text-blue-600 transition">Partager</button>
                         </div>
+                          <div  class="bg-white PlaceC p-6 rounded-lg shadow-sm border border-gray-200 hidden">
+
+        <form action="{{ route('feed_comment.store') }}" method="POST">
+
+            @csrf
+
+            <div class="mb-4">
+                <label for="content" class="block text-gray-700 text-sm font-bold mb-2">De quoi souhaitez-vous discuter ?</label>
+
+                <textarea name="content" id="content" rows="5" type="hidden" name="post_id" value="{{ $post->id }}"
+                          class="w-full bg-gray-50 border @error('content') border-red-500 @else border-gray-300 @enderror text-gray-900 rounded-lg focus:ring-blue-500 focus:border-blue-500 p-4 placeholder-gray-400 resize-none"
+                          placeholder="Partagez vos commant avec votre réseau..."></textarea>
+<input type="hidden" name="post_id" value="{{ $post->id }}">
+            </div>
+
+            <div class="flex justify-end mt-4">
+                <button type="submit" class="bg-blue-700 hover:bg-blue-800 text-white font-bold py-2 px-6 rounded-full transition duration-200 ease-in-out shadow">
+                    Publier
+                </button>
+            </div>
+        </form>
+        <div>
+
+
+          @foreach($post->comments as $comment)
+            <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                        <!-- Post Header -->
+                        <div class="p-4 flex items-center justify-between">
+                            <div class="flex items-center gap-3">
+                                <img src="{{ $comment->user->avatar_url ?? 'https://ui-avatars.com/api/?name='.urlencode($post->user->name).'&background=random' }}"
+                                     alt="Avatar" class="w-12 h-12 rounded-full object-cover">
+                                <div>
+                                    <h4 class="font-bold text-gray-900 text-sm">{{ $comment->user->name }}</h4>
+                                    <p class="text-xs text-gray-500">{{ $comment->created_at->diffForHumans() }}</p>
+                                </div>
+                            </div>
+
+                            @if ($comment->user_id == auth()->id())
+                                <div class="flex gap-2">
+                                    <a href="{{ route('feed_comment.edit', $comment->id) }}" class="text-gray-400 hover:text-blue-600 text-sm">Edit</a>
+                                    <form action="{{ route('feed_comment.destroy', $comment->id) }}" method="POST">
+                                        @csrf @method('DELETE')
+                                        <button type="submit" onclick="return confirm('Supprimer ce post ?')" class="text-gray-400 hover:text-red-600 text-sm">Delete</button>
+                                    </form>
+                                </div>
+                            @endif
+        </div>
+         <div class="px-4 pb-4">
+                            <p class="text-gray-800 text-sm leading-relaxed whitespace-pre-wrap">{{ $comment->content }}</p>
+                        </div>
+                              @endforeach
+    </div>
                     </div>
+
                 @empty
                     <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-8 text-center">
                         <p class="text-gray-500">Aucun post pour le moment.</p>
@@ -5456,12 +5648,25 @@ class DatabaseSeeder extends Seeder
             </div>
         </div>
     </div>
+    <script>
+      let btnC = document.querySelectorAll(".btn-commant");
+let PlaceC = document.querySelectorAll(".PlaceC");
+
+btnC.forEach((btn, index) => {
+    btn.addEventListener("click", () => {
+        PlaceC[index].classList.toggle("hidden");
+    });
+});
+
+
+    </script>
 </x-app-layout>
 </file>
 
 <file path="routes/web.php">
 <?php
 
+use App\Http\Controllers\CommentController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\PostController;
 use Illuminate\Support\Facades\Route;
@@ -5470,11 +5675,13 @@ use Illuminate\Support\Facades\Route;
 //     return view('welcome');
 // });
 
-Route::get('/feed', function () {
-    return view('feed');
-})->middleware(['auth', 'verified']);
+// Route::get('/feed', function () {
+//     return view('feed');
+// })->middleware(['auth', 'verified']);
 
 Route::resource('/feed', PostController::class)->middleware(['auth', 'verified']);
+Route::resource('/feed_comment', CommentController::class)->middleware(['auth', 'verified']);
+
 
 Route::middleware('auth')->group(function () {
     // Route::resource('/feed', PostController::class)->name('feed');

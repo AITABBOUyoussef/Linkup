@@ -12,7 +12,8 @@ class PostController extends Controller
 
     public function index()
 {
-    $posts = Post::latest()->get();
+    $posts = Post::with('comments')-> latest()->get();
+    // dd($posts);
 
     return view('feed', compact('posts'));
 }
@@ -31,7 +32,7 @@ $post->content = $request->content;
 $post->user_id = $request->user()->id;
 $post->save();
 return redirect()->route('feed.index')->with('success', 'Post ajouté avec succès');
-} 
+}
 public  function edit(string $id){
     $post = Post::findOrFail($id);
     return view('edit',compact('post'));
