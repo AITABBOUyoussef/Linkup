@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\CommentController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\PostController;
 use Illuminate\Support\Facades\Route;
@@ -13,6 +14,8 @@ use Illuminate\Support\Facades\Route;
 // })->middleware(['auth', 'verified']);
 
 Route::resource('/feed', PostController::class)->middleware(['auth', 'verified']);
+Route::resource('/feed_comment', CommentController::class)->middleware(['auth', 'verified']);
+
 
 Route::middleware('auth')->group(function () {
     // Route::resource('/feed', PostController::class)->name('feed');
