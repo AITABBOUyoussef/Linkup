@@ -47,8 +47,11 @@
 
                         <!-- Actions -->
                         <div class="px-4 py-3 border-t border-gray-100 flex gap-6">
-                            <button class="text-sm text-gray-600 font-medium hover:text-blue-600 transition">J'aime</button>
-                            <button class="text-sm btn-commant text-gray-600 font-medium hover:text-blue-600 transition">{{$post->comments->count()}}  Commenter</button>
+                            <button class="text-sm text-gray-600 font-medium hover:text-blue-600 transition">{{$post->likes>count()}}J'aime
+                                                             <input type="hidden" name="post_id" value="{{ $post->id }}">
+
+                            </button>
+                            <button class="text-sm btn-commant text-gray-600 font-medium hover:text-blue-600 transition">{{$post->comments->count()}}          return redirect()->route('feed.index')->with('success', 'Commentaire ajouté avec succès');Commenter</button>
                             <button class="text-sm text-gray-600 font-medium hover:text-blue-600 transition">Partager</button>
                         </div>
 
