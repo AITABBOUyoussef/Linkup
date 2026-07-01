@@ -12,8 +12,8 @@ class PostController extends Controller
 
     public function index()
 {
-    $posts = Post::with('comments')-> latest()->get();
-    // dd($posts);
+    $posts = Post::with('comments' , 'likes')-> latest()->get();
+    //  dd($posts);
 
     return view('feed', compact('posts'));
 }

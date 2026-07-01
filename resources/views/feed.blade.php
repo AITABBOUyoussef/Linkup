@@ -47,11 +47,46 @@
 
                         <!-- Actions -->
                         <div class="px-4 py-3 border-t border-gray-100 flex gap-6">
-                            <button class="text-sm text-gray-600 font-medium hover:text-blue-600 transition">{{$post->likes>count()}}J'aime
+                            {{-- <button class="text-sm text-gray-600 font-medium hover:text-blue-600 transition">{{$post->likes>count()}}J'aime
                                                              <input type="hidden" name="post_id" value="{{ $post->id }}">
 
-                            </button>
-                            <button class="text-sm btn-commant text-gray-600 font-medium hover:text-blue-600 transition">{{$post->comments->count()}}          return redirect()->route('feed.index')->with('success', 'Commentaire ajouté avec succès');Commenter</button>
+                            </button> --}}
+        @php
+    $hasLiked = $post->likes->contains('user_id', auth()->id());
+@endphp
+
+@if($hasLiked)
+<form action="{{ route('feed_like.destroy', $post) }}" method="POST" class="mb-4">
+        @csrf
+        @method('DELETE')
+           <input type="hidden" name="post_id" value="{{ $post->id }}">
+        <input type="hidden" name="user_id" value="{{ auth()->id()}}">
+        <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-1 px-4 text-sm rounded-full">
+            {{ $post->likes->count() }} Liké (Unlike)
+        </button>
+    </form>
+@else
+    <!-- حالة الـ Like: كنسيفطو طلب للـ store -->
+    <form action="{{ route('feed_like.store') }}" method="POST" class="mb-4">
+        @csrf
+        <input type="hidden" name="post_id" value="{{ $post->id }}">
+        <input type="hidden" name="user_id" value="{{ auth()->id()}}">
+        <button type="submit" class="bg-gray-200 hover:bg-gray-300 text-gray-700 font-medium py-1 px-4 text-sm rounded-full">
+            {{ $post->likes->count() }} Like
+        </button>
+    </form>
+@endif
+
+<form action="{{ route('feed_like.store') }}" method="POST">
+    @csrf
+    <input type="hidden" name="post_id" value="{{ $post->id }}">
+
+    <button  type="submit">
+        {{ $post->likes->count() }}
+        {{ $hasLiked ? 'Unlike' : 'Like' }}
+    </button>
+</form>
+                            <button class="text-sm btn-commant text-gray-600 font-medium hover:text-blue-600 transition">{{$post->comments->count()}}      Commenter</button>
                             <button class="text-sm text-gray-600 font-medium hover:text-blue-600 transition">Partager</button>
                         </div>
 

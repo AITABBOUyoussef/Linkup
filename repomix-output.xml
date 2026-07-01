@@ -129,9 +129,9 @@ resources/views/components/primary-button.blade.php
 resources/views/components/responsive-nav-link.blade.php
 resources/views/components/secondary-button.blade.php
 resources/views/components/text-input.blade.php
-resources/views/create_comment.blade.php
 resources/views/create.blade.php
 resources/views/dashboard.blade.php
+resources/views/edit_comment.blade.php
 resources/views/edit.blade.php
 resources/views/feed.blade.php
 resources/views/layouts/app.blade.php
@@ -556,78 +556,6 @@ class PasswordResetLinkController extends Controller
 }
 </file>
 
-<file path="app/Http/Controllers/CommentController.php">
-<?php
-
-namespace App\Http\Controllers;
-
-use App\Http\Controllers\Controller;
-use App\Models\comment;
-use Illuminate\Http\Request;
-
-class CommentController extends Controller
-{
-    public function index()
-{
-    $comments = comment::latest()->get();
-
-    return view('feed', compact('comments'));
-}
-public function create(){
-    return view('create');
-}
-public function store(Request $request ){
-    // dd($request->all());
-$post_id = $request->input('post_id');
-$request->validate([
-     'content' => 'required',
-
-]);
-$comment = new comment();
-$comment->content = $request->content;
-$comment->user_id = $request->user()->id;
-$comment->post_id = $post_id;
-$comment->save();
-return redirect()->route('feed.index')->with('success', 'commant ajouté avec succès');
-}
-public  function edit(string $id){
-    $comment = comment::findOrFail($id);
-    return view('feed',compact('comment'));
-}
-public function update(Request $request, string $id){
-    $request->validate([
-        'content'=>'required',
-    ]);
-    $comment = comment::findOrFail($id);
-    $comment->content = $request->content;
-$comment->save();
-return redirect()->route('feed.index')->with('success', 'Post mis a jour avec succès');
-
-}
-
-public function destroy(string $id){
-    $comment = comment::findOrFail($id);
-    $comment->delete();
-    return redirect()->route('feed.index')->with('success', 'Post supprime avec succès');
-
-}
-}
-</file>
-
-<file path="app/Http/Controllers/LikeController.php">
-<?php
-
-namespace App\Http\Controllers;
-
-use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
-
-class LikeController extends Controller
-{
-    
-}
-</file>
-
 <file path="app/Http/Requests/Auth/LoginRequest.php">
 <?php
 
@@ -747,28 +675,6 @@ class ProfileUpdateRequest extends FormRequest
                 Rule::unique(User::class)->ignore($this->user()->id),
             ],
         ];
-    }
-}
-</file>
-
-<file path="app/Models/Like.php">
-<?php
-
-namespace App\Models;
-
-use Illuminate\Database\Eloquent\Model;
-
-class like extends Model
-{
-    protected $fillable = [
-        'user_id',
-        'post_id',
-    ];
- public function post(){
-    return $this->belongsTo(post::class);
-}
-public function user(){
-        return $this->belongsTo(User::class);
     }
 }
 </file>
@@ -2876,38 +2782,38 @@ $classes = ($active ?? false)
 <input @disabled($disabled) {{ $attributes->merge(['class' => 'border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm']) }}>
 </file>
 
-<file path="resources/views/create_comment.blade.php">
+<file path="resources/views/edit_comment.blade.php">
 <x-app-layout>
-<div class="max-w-2xl mx-auto">
+<div class="max-w-2xl mx-auto py-10 px-4 sm:px-6 lg:px-8">
 
     <div class="mb-6">
-        <a href="/feed" class="text-blue-600 hover:underline text-sm font-semibold flex items-center mb-4">
+        <a href="{{ route('feed.index') }}" class="text-blue-600 hover:underline text-sm font-semibold flex items-center mb-4">
             &larr; Retour au fil d'actualité
         </a>
-        <h2 class="text-2xl font-bold text-gray-800">Créer un nouveau comment</h2>
+        <h2 class="text-2xl font-bold text-gray-800">Modifier votre commentaire</h2>
     </div>
 
-    <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+    <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
 
-        <form action="{{ route('commant.store',$post) }}" method="POST">
-
+        <form action="{{ route('feed_comment.update', $comment->id) }}" method="POST">
             @csrf
+            @method('PUT')
 
             <div class="mb-4">
-                <label for="content" class="block text-gray-700 text-sm font-bold mb-2">De quoi souhaitez-vous discuter ?</label>
+                <label for="content" class="block text-gray-700 text-sm font-bold mb-2">Votre commentaire</label>
 
-                <textarea name="content" id="content" rows="5"
-                          class="w-full bg-gray-50 border @error('content') border-red-500 @else border-gray-300 @enderror text-gray-900 rounded-lg focus:ring-blue-500 focus:border-blue-500 p-4 placeholder-gray-400 resize-none"
-                          placeholder="Partagez vos idées avec votre réseau..."></textarea>
+                <textarea name="content" id="content" rows="4"
+                          class="w-full bg-gray-50 border @error('content') border-red-500 @else border-gray-300 @enderror text-gray-900 rounded-lg focus:ring-blue-500 focus:border-blue-500 p-4 resize-none"
+                          required>{{ $comment->content }}</textarea>
 
-                {{-- @error('content')
+                @error('content')
                     <p class="text-red-500 text-xs italic mt-2">{{ $message }}</p>
-                @enderror --}}
+                @enderror
             </div>
 
             <div class="flex justify-end mt-4">
-                <button type="submit" class="bg-blue-700 hover:bg-blue-800 text-white font-bold py-2 px-6 rounded-full transition duration-200 ease-in-out shadow">
-                    Publier
+                <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-6 rounded-full transition duration-150 shadow-sm">
+                    Mettre à jour
                 </button>
             </div>
         </form>
@@ -4187,6 +4093,71 @@ class VerifyEmailController extends Controller
 }
 </file>
 
+<file path="app/Http/Controllers/CommentController.php">
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Http\Controllers\Controller;
+use App\Models\Comment; // Majuscule Hna
+use Illuminate\Http\Request;
+
+class CommentController extends Controller
+{
+    public function store(Request $request)
+    {
+        $request->validate([
+            'content' => 'required',
+            'post_id' => 'required|exists:posts,id'
+        ]);
+
+        $comment = new Comment();
+        $comment->content = $request->content;
+        $comment->user_id = $request->user()->id;
+        $comment->post_id = $request->post_id;
+        $comment->save();
+
+        return redirect()->route('feed.index')->with('success', 'Commentaire ajouté avec succès');
+    }
+
+    public function edit(string $id)
+    {
+        $comment = Comment::findOrFail($id);
+        return view('edit_comment', compact('comment'));
+    }
+
+    public function update(Request $request, string $id)
+    {
+        $request->validate([
+            'content' => 'required',
+        ]);
+
+        $comment = Comment::findOrFail($id);
+
+        if ($comment->user_id !== auth()->id()) {
+            abort(403, 'Unauthorized action.');
+        }
+
+        $comment->content = $request->content;
+        $comment->save();
+
+        return redirect()->route('feed.index')->with('success', 'Commentaire mis à jour avec succès');
+    }
+
+    public function destroy(string $id)
+    {
+        $comment = Comment::findOrFail($id);
+
+        if ($comment->user_id !== auth()->id()) {
+            abort(403, 'Unauthorized action.');
+        }
+
+        $comment->delete();
+        return redirect()->route('feed.index')->with('success', 'Commentaire supprimé avec succès');
+    }
+}
+</file>
+
 <file path="app/Http/Controllers/Controller.php">
 <?php
 
@@ -4195,6 +4166,39 @@ namespace App\Http\Controllers;
 abstract class Controller
 {
     
+}
+</file>
+
+<file path="app/Http/Controllers/LikeController.php">
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Http\Controllers\Controller;
+use App\Models\Like;
+use Illuminate\Http\Request;
+
+class LikeController extends Controller
+{
+public function store(Request $request){
+    // dd($request);
+    $request->validate(
+       [ 'post_id' => 'required|exists:posts,id',
+        'user_id' => 'required|exists:users,id',
+        ]);
+        $like = new Like();
+        $like->user_id = $request->user()->id;
+        $like->post_id = $request->post_id;
+        $like->save();
+      return redirect()->route('feed.index')->with('success', 'Like ajouté avec succès');
+}
+  public function destroy(string $id)
+    {
+        $like = Like::findOrFail($id);
+        $like->delete();
+        return redirect()->route('feed.index')->with('success', 'Commentaire supprimé avec succès');
+    }
+
 }
 </file>
 
@@ -4263,26 +4267,24 @@ class ProfileController extends Controller
 }
 </file>
 
-<file path="app/Models/Comment.php">
+<file path="app/Models/Like.php">
 <?php
 
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class comment extends Model
+class Like extends Model
 {
-      protected $fillable = [
+    protected $fillable = [
         'user_id',
         'post_id',
-        'content',
     ];
-
-    public function post(){
-        return $this->belongsTo(Post::class);
-    }
-    public  function user(){
-        return $this->belongsTo(user::class);
+ public function post(){
+    return $this->belongsTo(post::class);
+}
+public function user(){
+        return $this->belongsTo(User::class);
     }
 }
 </file>
@@ -5121,6 +5123,30 @@ class RegisteredUserController extends Controller
 }
 </file>
 
+<file path="app/Models/Comment.php">
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Model;
+
+class Comment extends Model
+{
+      protected $fillable = [
+        'user_id',
+        'post_id',
+        'content',
+    ];
+
+    public function post(){
+        return $this->belongsTo(Post::class);
+    }
+    public  function user(){
+        return $this->belongsTo(user::class);
+    }
+}
+</file>
+
 <file path="resources/views/layouts/app.blade.php">
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
@@ -5160,66 +5186,6 @@ class RegisteredUserController extends Controller
         </div>
     </body>
 </html>
-</file>
-
-<file path="app/Http/Controllers/PostController.php">
-<?php
-
-namespace App\Http\Controllers;
-
-use App\Http\Controllers\Controller;
-use App\Models\Post;
-use App\Models\User;
-use Illuminate\Http\Request;
-
-class PostController extends Controller
-{
-
-    public function index()
-{
-    $posts = Post::with('comments')-> latest()->get();
-    // dd($posts);
-
-    return view('feed', compact('posts'));
-}
-public function create(){
-    return view('create');
-}
-public function store(Request $request){
-    // dd($request->all());
-
-$request->validate([
-     'content' => 'required',
-
-]);
-$post = new Post();
-$post->content = $request->content;
-$post->user_id = $request->user()->id;
-$post->save();
-return redirect()->route('feed.index')->with('success', 'Post ajouté avec succès');
-}
-public  function edit(string $id){
-    $post = Post::findOrFail($id);
-    return view('edit',compact('post'));
-}
-public function update(Request $request, string $id){
-    $request->validate([
-        'content'=>'required',
-    ]);
-    $post = Post::findOrFail($id);
-    $post->content = $request->content;
-$post->save();
-return redirect()->route('feed.index')->with('success', 'Post mis a jour avec succès');
-
-}
-
-public function destroy(string $id){
-    $post = Post::findOrFail($id);
-    $post->delete();
-    return redirect()->route('feed.index')->with('success', 'Post supprime avec succès');
-
-}
-}
 </file>
 
 <file path="app/Models/User.php">
@@ -5475,6 +5441,66 @@ protected function avatarUrl(): Attribute{
 </nav>
 </file>
 
+<file path="app/Http/Controllers/PostController.php">
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Http\Controllers\Controller;
+use App\Models\Post;
+use App\Models\User;
+use Illuminate\Http\Request;
+
+class PostController extends Controller
+{
+
+    public function index()
+{
+    $posts = Post::with('comments' , 'likes')-> latest()->get();
+    //  dd($posts);
+
+    return view('feed', compact('posts'));
+}
+public function create(){
+    return view('create');
+}
+public function store(Request $request){
+    // dd($request->all());
+
+$request->validate([
+     'content' => 'required',
+
+]);
+$post = new Post();
+$post->content = $request->content;
+$post->user_id = $request->user()->id;
+$post->save();
+return redirect()->route('feed.index')->with('success', 'Post ajouté avec succès');
+}
+public  function edit(string $id){
+    $post = Post::findOrFail($id);
+    return view('edit',compact('post'));
+}
+public function update(Request $request, string $id){
+    $request->validate([
+        'content'=>'required',
+    ]);
+    $post = Post::findOrFail($id);
+    $post->content = $request->content;
+$post->save();
+return redirect()->route('feed.index')->with('success', 'Post mis a jour avec succès');
+
+}
+
+public function destroy(string $id){
+    $post = Post::findOrFail($id);
+    $post->delete();
+    return redirect()->route('feed.index')->with('success', 'Post supprime avec succès');
+
+}
+}
+</file>
+
 <file path="app/Models/Post.php">
 <?php
 
@@ -5524,6 +5550,38 @@ class DatabaseSeeder extends Seeder
 }
 </file>
 
+<file path="routes/web.php">
+<?php
+
+use App\Http\Controllers\CommentController;
+use App\Http\Controllers\LikeController;
+use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\PostController;
+use Illuminate\Support\Facades\Route;
+
+// Route::get('/', function () {
+//     return view('welcome');
+// });
+
+// Route::get('/feed', function () {
+//     return view('feed');
+// })->middleware(['auth', 'verified']);
+
+Route::resource('/feed', PostController::class)->middleware(['auth', 'verified']);
+Route::resource('/feed_comment', CommentController::class)->middleware(['auth', 'verified']);
+Route::resource('/feed_like', LikeController::class)->middleware(['auth', 'verified']);
+
+
+Route::middleware('auth')->group(function () {
+    // Route::resource('/feed', PostController::class)->name('feed');
+    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+});
+
+require __DIR__.'/auth.php';
+</file>
+
 <file path="resources/views/feed.blade.php">
 <x-app-layout>
     <div class="py-10 bg-[#F3F2EF] min-h-screen">
@@ -5558,10 +5616,10 @@ class DatabaseSeeder extends Seeder
 
                             @if ($post->user_id == auth()->id())
                                 <div class="flex gap-2">
-                                    <a href="{{ route('feed.edit', $post->id) }}" class="text-gray-400 hover:text-blue-600 text-sm">Edit</a>
+                                    <a href="{{ route('feed.edit', $post->id) }}" class="text-gray-400 hover:text-blue-600 text-sm">Modifier</a>
                                     <form action="{{ route('feed.destroy', $post->id) }}" method="POST">
                                         @csrf @method('DELETE')
-                                        <button type="submit" onclick="return confirm('Supprimer ce post ?')" class="text-gray-400 hover:text-red-600 text-sm">Delete</button>
+                                        <button type="submit" onclick="return confirm('Supprimer ce post ?')" class="text-gray-400 hover:text-red-600 text-sm">Supprimer</button>
                                     </form>
                                 </div>
                             @endif
@@ -5574,71 +5632,102 @@ class DatabaseSeeder extends Seeder
 
                         <!-- Actions -->
                         <div class="px-4 py-3 border-t border-gray-100 flex gap-6">
-                            <button class="text-sm text-gray-600 font-medium hover:text-blue-600 transition">J'aime</button>
-                            <button  class="text-sm btn-commant text-gray-600 font-medium hover:text-blue-600 transition">Commenter</button>
-                             {{-- <a href="{{ route('feed_comment.store',$post->id) }}"
-                       class="flex-1 bg-white border border-gray-300 hover:bg-gray-50 text-gray-500 text-sm font-medium rounded-full py-3.5 px-5 transition cursor-pointer">
-                        Commencer un comment...
+                            {{-- <button class="text-sm text-gray-600 font-medium hover:text-blue-600 transition">{{$post->likes>count()}}J'aime
+                                                             <input type="hidden" name="post_id" value="{{ $post->id }}">
 
-                    </a> --}}
-                    {{--  --}}
+                            </button> --}}
+                              @foreach($post->likes as $like)
+                          @if($post->like->user_id == auth()->id())
+      <form action="{{ route('feed_like.destroy') }}" method="POST" class="mb-4">
+                                @csrf
+                                <div class="flex gap-3">
 
+                                        <input type="hidden" name="post_id" value="{{ $post->id }}">
+                                        <input type="hidden" name="user_id" value="{{ auth()->id()}}">
+
+                                        <div class="flex justify-end mt-2">
+                                            <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-1 px-4 text-sm rounded-full transition duration-150 shadow-sm">
+                                              {{$post->likes->count()}} Like
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </form>
+                            @else
+
+                             <form action="{{ route('feed_like.store') }}" method="POST" class="mb-4">
+                                @csrf
+                                <div class="flex gap-3">
+
+                                        <input type="hidden" name="post_id" value="{{ $post->id }}">
+                                        <input type="hidden" name="user_id" value="{{ auth()->id()}}">
+
+                                        <div class="flex justify-end mt-2">
+                                            <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-1 px-4 text-sm rounded-full transition duration-150 shadow-sm">
+                                              {{$post->likes->count()}} Like
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </form>
+  @endif
+   @endforeach
+                            <button class="text-sm btn-commant text-gray-600 font-medium hover:text-blue-600 transition">{{$post->comments->count()}}      Commenter</button>
                             <button class="text-sm text-gray-600 font-medium hover:text-blue-600 transition">Partager</button>
                         </div>
-                          <div  class="bg-white PlaceC p-6 rounded-lg shadow-sm border border-gray-200 hidden">
 
-        <form action="{{ route('feed_comment.store') }}" method="POST">
+                        <!-- Zone de Commentaire (Masquée par défaut) -->
+                        <div class="bg-gray-50 PlaceC p-4 border-t border-gray-200 hidden">
+                            <!-- Formulaire Ajouter Commentaire -->
+                            <form action="{{ route('feed_comment.store') }}" method="POST" class="mb-4">
+                                @csrf
+                                <div class="flex gap-3">
+                                    <img src="{{ auth()->user()->avatar_url ?? 'https://ui-avatars.com/api/?name='.urlencode(auth()->user()->name).'&background=random' }}"
+                                        alt="Avatar" class="w-8 h-8 rounded-full object-cover">
+                                    <div class="flex-1">
+                                        <textarea name="content" rows="2" required
+                                                class="w-full bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 p-2 placeholder-gray-400 resize-none"
+                                                placeholder="Ajouter un commentaire..."></textarea>
+                                        <input type="hidden" name="post_id" value="{{ $post->id }}">
 
-            @csrf
-
-            <div class="mb-4">
-                <label for="content" class="block text-gray-700 text-sm font-bold mb-2">De quoi souhaitez-vous discuter ?</label>
-
-                <textarea name="content" id="content" rows="5" type="hidden" name="post_id" value="{{ $post->id }}"
-                          class="w-full bg-gray-50 border @error('content') border-red-500 @else border-gray-300 @enderror text-gray-900 rounded-lg focus:ring-blue-500 focus:border-blue-500 p-4 placeholder-gray-400 resize-none"
-                          placeholder="Partagez vos commant avec votre réseau..."></textarea>
-<input type="hidden" name="post_id" value="{{ $post->id }}">
-            </div>
-
-            <div class="flex justify-end mt-4">
-                <button type="submit" class="bg-blue-700 hover:bg-blue-800 text-white font-bold py-2 px-6 rounded-full transition duration-200 ease-in-out shadow">
-                    Publier
-                </button>
-            </div>
-        </form>
-        <div>
-
-
-          @foreach($post->comments as $comment)
-            <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-                        <!-- Post Header -->
-                        <div class="p-4 flex items-center justify-between">
-                            <div class="flex items-center gap-3">
-                                <img src="{{ $comment->user->avatar_url ?? 'https://ui-avatars.com/api/?name='.urlencode($post->user->name).'&background=random' }}"
-                                     alt="Avatar" class="w-12 h-12 rounded-full object-cover">
-                                <div>
-                                    <h4 class="font-bold text-gray-900 text-sm">{{ $comment->user->name }}</h4>
-                                    <p class="text-xs text-gray-500">{{ $comment->created_at->diffForHumans() }}</p>
+                                        <div class="flex justify-end mt-2">
+                                            <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-1 px-4 text-sm rounded-full transition duration-150 shadow-sm">
+                                                Publier
+                                            </button>
+                                        </div>
+                                    </div>
                                 </div>
+                            </form>
+
+                            <!-- Affichage des Commentaires -->
+                            <div class="space-y-3">
+                                @foreach($post->comments as $comment)
+                                    <div class="flex gap-3">
+                                        <img src="{{ $comment->user->avatar_url ?? 'https://ui-avatars.com/api/?name='.urlencode($comment->user->name).'&background=random' }}"
+                                            alt="Avatar" class="w-8 h-8 rounded-full object-cover mt-1">
+                                        <div class="flex-1 bg-white p-3 rounded-lg border border-gray-100 shadow-sm">
+                                            <div class="flex justify-between items-start">
+                                                <div>
+                                                    <h4 class="font-bold text-gray-900 text-xs">{{ $comment->user->name }}</h4>
+                                                    <p class="text-[10px] text-gray-500">{{ $comment->created_at->diffForHumans() }}</p>
+                                                </div>
+                                                @if ($comment->user_id == auth()->id())
+                                                    <div class="flex gap-2">
+                                                        <a href="{{ route('feed_comment.edit', $comment->id) }}" class="text-gray-400 hover:text-blue-600 text-xs">Modifier</a>
+                                                        <form action="{{ route('feed_comment.destroy', $comment->id) }}" method="POST">
+                                                            @csrf @method('DELETE')
+                                                            <button type="submit" onclick="return confirm('Supprimer ?')" class="text-gray-400 hover:text-red-600 text-xs">Supprimer</button>
+                                                        </form>
+                                                    </div>
+                                                @endif
+                                            </div>
+                                            <p class="text-gray-900 text-xl mt-1 whitespace-pre-wrap">{{ $comment->content }}</p>
+                                        </div>
+                                    </div>
+                                @endforeach
                             </div>
-
-                            @if ($comment->user_id == auth()->id())
-                                <div class="flex gap-2">
-                                    <a href="{{ route('feed_comment.edit', $comment->id) }}" class="text-gray-400 hover:text-blue-600 text-sm">Edit</a>
-                                    <form action="{{ route('feed_comment.destroy', $comment->id) }}" method="POST">
-                                        @csrf @method('DELETE')
-                                        <button type="submit" onclick="return confirm('Supprimer ce post ?')" class="text-gray-400 hover:text-red-600 text-sm">Delete</button>
-                                    </form>
-                                </div>
-                            @endif
-        </div>
-         <div class="px-4 pb-4">
-                            <p class="text-gray-800 text-sm leading-relaxed whitespace-pre-wrap">{{ $comment->content }}</p>
                         </div>
-                              @endforeach
-    </div>
                     </div>
-
                 @empty
                     <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-8 text-center">
                         <p class="text-gray-500">Aucun post pour le moment.</p>
@@ -5648,49 +5737,18 @@ class DatabaseSeeder extends Seeder
             </div>
         </div>
     </div>
+
     <script>
-      let btnC = document.querySelectorAll(".btn-commant");
-let PlaceC = document.querySelectorAll(".PlaceC");
+        let btnC = document.querySelectorAll(".btn-commant");
+        let PlaceC = document.querySelectorAll(".PlaceC");
 
-btnC.forEach((btn, index) => {
-    btn.addEventListener("click", () => {
-        PlaceC[index].classList.toggle("hidden");
-    });
-});
-
-
+        btnC.forEach((btn, index) => {
+            btn.addEventListener("click", () => {
+                PlaceC[index].classList.toggle("hidden");
+            });
+        });
     </script>
 </x-app-layout>
-</file>
-
-<file path="routes/web.php">
-<?php
-
-use App\Http\Controllers\CommentController;
-use App\Http\Controllers\ProfileController;
-use App\Http\Controllers\PostController;
-use Illuminate\Support\Facades\Route;
-
-// Route::get('/', function () {
-//     return view('welcome');
-// });
-
-// Route::get('/feed', function () {
-//     return view('feed');
-// })->middleware(['auth', 'verified']);
-
-Route::resource('/feed', PostController::class)->middleware(['auth', 'verified']);
-Route::resource('/feed_comment', CommentController::class)->middleware(['auth', 'verified']);
-
-
-Route::middleware('auth')->group(function () {
-    // Route::resource('/feed', PostController::class)->name('feed');
-    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
-    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
-    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
-});
-
-require __DIR__.'/auth.php';
 </file>
 
 </files>
