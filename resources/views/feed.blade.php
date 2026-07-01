@@ -48,7 +48,7 @@
                         <!-- Actions -->
                         <div class="px-4 py-3 border-t border-gray-100 flex gap-6">
                             <button class="text-sm text-gray-600 font-medium hover:text-blue-600 transition">J'aime</button>
-                            <button id="btn-commant" class="text-sm  text-gray-600 font-medium hover:text-blue-600 transition">Commenter</button>
+                            <button  class="text-sm btn-commant text-gray-600 font-medium hover:text-blue-600 transition">Commenter</button>
                              {{-- <a href="{{ route('feed_comment.store',$post->id) }}"
                        class="flex-1 bg-white border border-gray-300 hover:bg-gray-50 text-gray-500 text-sm font-medium rounded-full py-3.5 px-5 transition cursor-pointer">
                         Commencer un comment...
@@ -58,7 +58,7 @@
 
                             <button class="text-sm text-gray-600 font-medium hover:text-blue-600 transition">Partager</button>
                         </div>
-                          <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+                          <div  class="bg-white PlaceC p-6 rounded-lg shadow-sm border border-gray-200 hidden">
 
         <form action="{{ route('feed_comment.store') }}" method="POST">
 
@@ -90,4 +90,16 @@
             </div>
         </div>
     </div>
+    <script>
+      let btnC = document.querySelectorAll(".btn-commant");
+let PlaceC = document.querySelectorAll(".PlaceC");
+
+btnC.forEach((btn, index) => {
+    btn.addEventListener("click", () => {
+        PlaceC[index].classList.toggle("hidden");
+    });
+});
+
+
+    </script>
 </x-app-layout>
