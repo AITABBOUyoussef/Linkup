@@ -4169,39 +4169,6 @@ abstract class Controller
 }
 </file>
 
-<file path="app/Http/Controllers/LikeController.php">
-<?php
-
-namespace App\Http\Controllers;
-
-use App\Http\Controllers\Controller;
-use App\Models\Like;
-use Illuminate\Http\Request;
-
-class LikeController extends Controller
-{
-public function store(Request $request){
-    // dd($request);
-    $request->validate(
-       [ 'post_id' => 'required|exists:posts,id',
-        'user_id' => 'required|exists:users,id',
-        ]);
-        $like = new Like();
-        $like->user_id = $request->user()->id;
-        $like->post_id = $request->post_id;
-        $like->save();
-      return redirect()->route('feed.index')->with('success', 'Like ajouté avec succès');
-}
-  public function destroy(string $id)
-    {
-        $like = Like::findOrFail($id);
-        $like->delete();
-        return redirect()->route('feed.index')->with('success', 'Commentaire supprimé avec succès');
-    }
-
-}
-</file>
-
 <file path="app/Http/Controllers/ProfileController.php">
 <?php
 
@@ -5188,6 +5155,52 @@ class Comment extends Model
 </html>
 </file>
 
+<file path="app/Http/Controllers/LikeController.php">
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Http\Controllers\Controller;
+use App\Models\Like;
+use App\Models\Post;
+use Illuminate\Http\Request;
+
+class LikeController extends Controller
+{
+
+    public function store(Request $request)
+    {
+        $request->validate([
+            'post_id' => 'required|exists:posts,id',
+        ]);
+
+        $user_id = $request->user()->id;
+
+        $like = Like::where('post_id', $request->post_id)
+            ->where('user_id', $user_id)
+            ->first();
+
+        if ($like) {
+            // Unlike
+            $like->delete();
+
+            return redirect()->route('feed.index')
+                ->with('success', 'Like removed successfully.');
+        }
+
+        // Like
+        Like::create([
+            'post_id' => $request->post_id,
+            'user_id' => $user_id,
+        ]);
+
+        return redirect()->route('feed.index')
+            ->with('success', 'Like added successfully.');
+    }
+
+}
+</file>
+
 <file path="app/Models/User.php">
 <?php
 
@@ -5441,6 +5454,55 @@ protected function avatarUrl(): Attribute{
 </nav>
 </file>
 
+<file path="app/Models/Post.php">
+<?php
+
+namespace App\Models;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+
+class Post extends Model
+{
+    use HasFactory;
+    protected $fillable = [
+        'user_id',
+        'content',
+    ];
+
+    public function user(){
+        return $this->belongsTo(User::class);
+    }
+     public function likes(){
+        return $this->hasMany(like::class);
+    }
+     public function comments(){
+        return $this->hasMany(comment::class);
+    }
+}
+</file>
+
+<file path="database/seeders/DatabaseSeeder.php">
+<?php
+
+namespace Database\Seeders;
+
+use App\Models\User;
+use App\Models\Post;
+use Illuminate\Database\Seeder;
+
+class DatabaseSeeder extends Seeder
+{
+
+    /**
+     * Seed the application's database.
+     */
+    public function run(): void
+    {
+        User::factory(3)->has(Post::factory()->count(1))->create();
+    }
+}
+</file>
+
 <file path="app/Http/Controllers/PostController.php">
 <?php
 
@@ -5501,55 +5563,6 @@ public function destroy(string $id){
 }
 </file>
 
-<file path="app/Models/Post.php">
-<?php
-
-namespace App\Models;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
-
-class Post extends Model
-{
-    use HasFactory;
-    protected $fillable = [
-        'user_id',
-        'content',
-    ];
-
-    public function user(){
-        return $this->belongsTo(User::class);
-    }
-     public function likes(){
-        return $this->hasMany(like::class);
-    }
-     public function comments(){
-        return $this->hasMany(comment::class);
-    }
-}
-</file>
-
-<file path="database/seeders/DatabaseSeeder.php">
-<?php
-
-namespace Database\Seeders;
-
-use App\Models\User;
-use App\Models\Post;
-use Illuminate\Database\Seeder;
-
-class DatabaseSeeder extends Seeder
-{
-
-    /**
-     * Seed the application's database.
-     */
-    public function run(): void
-    {
-        User::factory(3)->has(Post::factory()->count(1))->create();
-    }
-}
-</file>
-
 <file path="routes/web.php">
 <?php
 
@@ -5570,6 +5583,7 @@ use Illuminate\Support\Facades\Route;
 Route::resource('/feed', PostController::class)->middleware(['auth', 'verified']);
 Route::resource('/feed_comment', CommentController::class)->middleware(['auth', 'verified']);
 Route::resource('/feed_like', LikeController::class)->middleware(['auth', 'verified']);
+
 
 
 Route::middleware('auth')->group(function () {
@@ -5636,42 +5650,21 @@ require __DIR__.'/auth.php';
                                                              <input type="hidden" name="post_id" value="{{ $post->id }}">
 
                             </button> --}}
-                              @foreach($post->likes as $like)
-                          @if($post->like->user_id == auth()->id())
-      <form action="{{ route('feed_like.destroy') }}" method="POST" class="mb-4">
-                                @csrf
-                                <div class="flex gap-3">
+                            {{-- //////////////////////////////////////////////////////// --}}
+         @php
+    $hasLiked = $post->likes->contains('user_id', auth()->id());
+@endphp
+                      {{-- //////////////////////////////////////////////////////// --}}
 
-                                        <input type="hidden" name="post_id" value="{{ $post->id }}">
-                                        <input type="hidden" name="user_id" value="{{ auth()->id()}}">
+<form action="{{ route('feed_like.store') }}" method="POST">
+    @csrf
+    <input type="hidden" name="post_id" value="{{ $post->id }}">
 
-                                        <div class="flex justify-end mt-2">
-                                            <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-1 px-4 text-sm rounded-full transition duration-150 shadow-sm">
-                                              {{$post->likes->count()}} Like
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
-                            </form>
-                            @else
-
-                             <form action="{{ route('feed_like.store') }}" method="POST" class="mb-4">
-                                @csrf
-                                <div class="flex gap-3">
-
-                                        <input type="hidden" name="post_id" value="{{ $post->id }}">
-                                        <input type="hidden" name="user_id" value="{{ auth()->id()}}">
-
-                                        <div class="flex justify-end mt-2">
-                                            <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-1 px-4 text-sm rounded-full transition duration-150 shadow-sm">
-                                              {{$post->likes->count()}} Like
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
-                            </form>
-  @endif
-   @endforeach
+    <button  type="submit" class= {{ $hasLiked ? "bg-blue-600 hover:bg-blue-700 text-white font-medium py-1 px-4 text-sm rounded-full" : "bg-gray-200 hover:bg-gray-300 text-gray-700 font-medium py-1 px-4 text-sm rounded-full"}} >
+        {{ $post->likes->count() }}
+        {{ $hasLiked ? 'Unlike' : 'Like' }}
+    </button>
+</form>
                             <button class="text-sm btn-commant text-gray-600 font-medium hover:text-blue-600 transition">{{$post->comments->count()}}      Commenter</button>
                             <button class="text-sm text-gray-600 font-medium hover:text-blue-600 transition">Partager</button>
                         </div>

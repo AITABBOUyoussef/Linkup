@@ -25,11 +25,18 @@ public function store(Request $request){
 
 $request->validate([
      'content' => 'required',
-
+     'photo' => 'image|mimes:jpeg,png,jpg,gif|max:2048',
 ]);
+//  dd($request);
 $post = new Post();
 $post->content = $request->content;
 $post->user_id = $request->user()->id;
+ if ($request->hasFile('photo')) {
+            $fileName = time() . '.' . $request->photo->extension();
+            $request->photo->move(public_path('photos'), $fileName);
+            $post->photo = $fileName;
+        }
+
 $post->save();
 return redirect()->route('feed.index')->with('success', 'Post ajouté avec succès');
 }
@@ -43,6 +50,15 @@ public function update(Request $request, string $id){
     ]);
     $post = Post::findOrFail($id);
     $post->content = $request->content;
+     if ($request->hasFile('photo')) {
+            // Supprimer l'ancienne photo si elle existe
+            if ($post->photo && file_exists(public_path('photos/' . $post->photo))) {
+                unlink(public_path('photos/' . $post->photo));
+            }
+            $fileName = time() . '.' . $request->photo->extension();
+            $request->photo->move(public_path('photos'), $fileName);
+            $post->photo = $fileName;
+        }
 $post->save();
 return redirect()->route('feed.index')->with('success', 'Post mis a jour avec succès');
 
@@ -50,6 +66,9 @@ return redirect()->route('feed.index')->with('success', 'Post mis a jour avec su
 
 public function destroy(string $id){
     $post = Post::findOrFail($id);
+    if ($post->photo && file_exists(public_path('photos/' . $post->photo))) {
+            unlink(public_path('photos/' . $post->photo));
+        }
     $post->delete();
     return redirect()->route('feed.index')->with('success', 'Post supprime avec succès');
 

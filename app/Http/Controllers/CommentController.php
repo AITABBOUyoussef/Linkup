@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
-use App\Models\Comment; // Majuscule Hna
+use App\Models\Comment;
 use Illuminate\Http\Request;
 
 class CommentController extends Controller
@@ -12,13 +12,14 @@ class CommentController extends Controller
     {
         $request->validate([
             'content' => 'required',
-            'post_id' => 'required|exists:posts,id'
+            'post_id' => 'required|exists:posts,id',
         ]);
 
         $comment = new Comment();
         $comment->content = $request->content;
         $comment->user_id = $request->user()->id;
         $comment->post_id = $request->post_id;
+
         $comment->save();
 
         return redirect()->route('feed.index')->with('success', 'Commentaire ajouté avec succès');

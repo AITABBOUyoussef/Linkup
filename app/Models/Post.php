@@ -10,6 +10,7 @@ class Post extends Model
     protected $fillable = [
         'user_id',
         'content',
+        'photo',
     ];
 
     public function user(){
