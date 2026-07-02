@@ -1,11 +1,10 @@
 <section>
     <header>
-        <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100">
-            {{ __('Profile Information') }}
+        <h2 class="text-xl font-semibold text-gray-900">
+            {{ __('Informations du profil') }}
         </h2>
-
-        <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">
-            {{ __("Update your account's profile information and email address.") }}
+        <p class="mt-1 text-sm text-gray-500">
+            {{ __("Mettez à jour les informations de profil et l'adresse e-mail de votre compte.") }}
         </p>
     </header>
 
@@ -13,68 +12,71 @@
         @csrf
     </form>
 
-    <form method="post" action="{{ route('profile.update') }}" class="mt-6 space-y-6">
+    <form method="post" action="{{ route('profile.update') }}" class="mt-6 space-y-5">
         @csrf
         @method('patch')
 
-        <div>
-            <x-input-label for="name" :value="__('Name')" />
-            <x-text-input id="name" name="name" type="text" class="mt-1 block w-full" :value="old('name', $user->name)" required autofocus autocomplete="name" />
-            <x-input-error class="mt-2" :messages="$errors->get('name')" />
+        <!-- Avatar Preview (Optional Visual) -->
+        <div class="flex items-center gap-4 mb-4">
+             <img src="{{ old('image_url', $user->image_url) ?? ($user->avatar_url ?? 'https://ui-avatars.com/api/?name='.urlencode($user->name).'&background=random') }}"
+                  alt="Profile Preview" class="w-16 h-16 rounded-full object-cover border-2 border-gray-200">
+             <div class="text-sm text-gray-500">Ceci est votre photo de profil actuelle.</div>
         </div>
 
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+            <div>
+                <x-input-label for="name" value="Nom complet" />
+                <x-text-input id="name" name="name" type="text" class="mt-1 block w-full border-gray-300 focus:border-[#0a66c2] focus:ring-[#0a66c2] rounded-md shadow-sm" :value="old('name', $user->name)" required autofocus autocomplete="name" />
+                <x-input-error class="mt-2" :messages="$errors->get('name')" />
+            </div>
 
+            <div>
+                <x-input-label for="email" value="Adresse e-mail" />
+                <x-text-input id="email" name="email" type="email" class="mt-1 block w-full border-gray-300 focus:border-[#0a66c2] focus:ring-[#0a66c2] rounded-md shadow-sm" :value="old('email', $user->email)" required autocomplete="username" />
+                <x-input-error class="mt-2" :messages="$errors->get('email')" />
 
-        <div>
-            <x-input-label for="email" :value="__('Email')" />
-            <x-text-input id="email" name="email" type="email" class="mt-1 block w-full" :value="old('email', $user->email)" required autocomplete="username" />
-            <x-input-error class="mt-2" :messages="$errors->get('email')" />
-
-            @if ($user instanceof \Illuminate\Contracts\Auth\MustVerifyEmail && ! $user->hasVerifiedEmail())
-                <div>
-                    <p class="text-sm mt-2 text-gray-800 dark:text-gray-200">
-                        {{ __('Your email address is unverified.') }}
-
-                        <button form="send-verification" class="underline text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:focus:ring-offset-gray-800">
-                            {{ __('Click here to re-send the verification email.') }}
-                        </button>
-                    </p>
-
-                    @if (session('status') === 'verification-link-sent')
-                        <p class="mt-2 font-medium text-sm text-green-600 dark:text-green-400">
-                            {{ __('A new verification link has been sent to your email address.') }}
+                @if ($user instanceof \Illuminate\Contracts\Auth\MustVerifyEmail && ! $user->hasVerifiedEmail())
+                    <div>
+                        <p class="text-sm mt-2 text-gray-800">
+                            Votre e-mail n'est pas vérifié.
+                            <button form="send-verification" class="underline text-sm text-[#0a66c2] hover:text-[#004182] focus:outline-none">
+                                Cliquez ici pour renvoyer l'e-mail.
+                            </button>
                         </p>
-                    @endif
-                </div>
-            @endif
-        </div>
-     <div>
-            <x-input-label for="headline" :value="__('headline')" />
-            <x-text-input id="headline" name="nheadlineame" type="text" class="mt-1 block w-full" :value="old('headline', $user->headline)" required autofocus autocomplete="headline" />
-            <x-input-error class="mt-2" :messages="$errors->get('headline')" />
-        </div>
-          <div>
-            <x-input-label for="image_url" :value="__('image_url')" />
-            <x-text-input id="image_url" name="image_url" type="text" class="mt-1 block w-full" :value="old('image_url', $user->image_url)" required autofocus autocomplete="image_url" />
-            <x-input-error class="mt-2" :messages="$errors->get('image_url')" />
-        </div>
-          <div>
-            <x-input-label for="company" :value="__('company')" />
-            <x-text-input id="company" name="company" type="text" class="mt-1 block w-full" :value="old('company', $user->company)"  autofocus autocomplete="company" />
-            <x-input-error class="mt-2" :messages="$errors->get('company')" />
+                    </div>
+                @endif
+            </div>
+
+            <div class="md:col-span-2">
+                <x-input-label for="headline" value="Titre professionnel (Headline)" />
+                <x-text-input id="headline" name="headline" type="text" class="mt-1 block w-full border-gray-300 focus:border-[#0a66c2] focus:ring-[#0a66c2] rounded-md shadow-sm" :value="old('headline', $user->headline)" required />
+                <x-input-error class="mt-2" :messages="$errors->get('headline')" />
+                <p class="mt-1 text-xs text-gray-400">Apparaît sous votre nom sur votre profil et vos posts.</p>
+            </div>
+
+            <div class="md:col-span-2">
+                <x-input-label for="company" value="Entreprise actuelle" />
+                <x-text-input id="company" name="company" type="text" class="mt-1 block w-full border-gray-300 focus:border-[#0a66c2] focus:ring-[#0a66c2] rounded-md shadow-sm" :value="old('company', $user->company)" />
+                <x-input-error class="mt-2" :messages="$errors->get('company')" />
+            </div>
+
+            <!-- URL Image Text Input (As per your logic) -->
+            <div class="md:col-span-2">
+                <x-input-label for="image_url" value="URL de la photo de profil" />
+                <x-text-input id="image_url" name="image_url" type="url" class="mt-1 block w-full border-gray-300 focus:border-[#0a66c2] focus:ring-[#0a66c2] rounded-md shadow-sm text-sm" :value="old('image_url', $user->image_url)" placeholder="https://exemple.com/photo.jpg" />
+                <x-input-error class="mt-2" :messages="$errors->get('image_url')" />
+            </div>
         </div>
 
-        <div class="flex items-center gap-4">
-            <x-primary-button>{{ __('Save') }}</x-primary-button>
+        <div class="flex items-center gap-4 pt-4 border-t border-gray-100 mt-6">
+            <button type="submit" class="inline-flex justify-center py-2 px-6 border border-transparent shadow-sm text-sm font-medium rounded-full text-white bg-[#0a66c2] hover:bg-[#004182] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#0a66c2] transition">
+                Enregistrer les modifications
+            </button>
 
             @if (session('status') === 'profile-updated')
-                <p
-                    x-data="{ show: true }"
-                    x-show="show"
-                    x-transition
-                    x-init="setTimeout(() => show = false, 2000)"
-                    class="text-sm text-gray-600 dark:text-gray-400"
-                >{{ __('Saved.') }}</p>
+                <p x-data="{ show: true }" x-show="show" x-transition x-init="setTimeout(() => show = false, 3000)" class="text-sm font-medium text-green-600 bg-green-50 px-3 py-1 rounded-md">
+                    Enregistré.
+                </p>
             @endif
         </div>
     </form>
