@@ -21,37 +21,27 @@
                           class="w-full bg-gray-50 border @error('content') border-red-500 @else border-gray-300 @enderror text-gray-900 rounded-lg focus:ring-blue-500 focus:border-blue-500 p-4 placeholder-gray-400 resize-none"
                           placeholder="Partagez vos idées avec votre réseau..."></textarea>
 
-              <div class="flex items-center justify-between mt-3 -mb-1">
-                    <button
-                        class="flex items-center gap-1.5 text-gray-500 hover:bg-gray-100 px-2 sm:px-3 py-2 rounded-lg transition text-[14px] font-semibold">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-blue-500" fill="none"
-                            viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"
-                                d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                        </svg>
-                      
-                         <label for="photo">Photo</label>
-                         <input type="file" name="photo" class="form-control">
-                    </button>
-                    <button
-                        class="flex items-center gap-1.5 text-gray-500 hover:bg-gray-100 px-2 sm:px-3 py-2 rounded-lg transition text-[14px] font-semibold">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-orange-500" fill="none"
-                            viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"
-                                d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2-2V12a2 2 0 002 2z" />
-                        </svg>
-                        <span class="hidden sm:inline">Événement</span>
-                    </button>
-                    <button
-                        class="flex items-center gap-1.5 text-gray-500 hover:bg-gray-100 px-2 sm:px-3 py-2 rounded-lg transition text-[14px] font-semibold">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-emerald-600" fill="none"
-                            viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"
-                                d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                        </svg>
-                        <span class="hidden sm:inline">Article</span>
-                    </button>
-                </div>
+              <div class="flex items-center justify-between mt-3 -mb-1 border-t border-gray-100 pt-2">
+    <!-- بوطون ديال التصويرة (Photo) -->
+    <label for="photo-upload" class="flex-1 cursor-pointer flex items-center justify-center gap-2 text-gray-500 hover:bg-gray-100 px-3 py-2.5 rounded-lg transition text-sm font-semibold">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+        </svg>
+        <span class="hidden sm:inline text-gray-600">Photo</span>
+        <!-- Input الحقيقي مخبي (hidden) باش مانشوفوش الديزاين ديالو القديم -->
+        <input type="file" id="photo-upload" name="photo" accept="image/*" class="hidden">
+    </label>
+
+    <!-- بوطون ديال الفيديو (Vidéo) -->
+    <label for="video-upload" class="flex-1 cursor-pointer flex items-center justify-center gap-2 text-gray-500 hover:bg-gray-100 px-3 py-2.5 rounded-lg transition text-sm font-semibold">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+        </svg>
+        <span class="hidden sm:inline text-gray-600">Vidéo</span>
+        <!-- Input الحقيقي مخبي (hidden) -->
+        <input type="file" id="video-upload" name="video" accept="video/*" class="hidden">
+    </label>
+</div>
             </div>
  {{-- <div class="form-group mt-3">
         <label for="photo">Photo</label>
