@@ -51,37 +51,17 @@
                                                              <input type="hidden" name="post_id" value="{{ $post->id }}">
 
                             </button> --}}
-        @php
+                            {{-- //////////////////////////////////////////////////////// --}}
+         @php
     $hasLiked = $post->likes->contains('user_id', auth()->id());
 @endphp
-
-@if($hasLiked)
-<form action="{{ route('feed_like.destroy', $post) }}" method="POST" class="mb-4">
-        @csrf
-        @method('DELETE')
-           <input type="hidden" name="post_id" value="{{ $post->id }}">
-        <input type="hidden" name="user_id" value="{{ auth()->id()}}">
-        <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-1 px-4 text-sm rounded-full">
-            {{ $post->likes->count() }} Liké (Unlike)
-        </button>
-    </form>
-@else
-    <!-- حالة الـ Like: كنسيفطو طلب للـ store -->
-    <form action="{{ route('feed_like.store') }}" method="POST" class="mb-4">
-        @csrf
-        <input type="hidden" name="post_id" value="{{ $post->id }}">
-        <input type="hidden" name="user_id" value="{{ auth()->id()}}">
-        <button type="submit" class="bg-gray-200 hover:bg-gray-300 text-gray-700 font-medium py-1 px-4 text-sm rounded-full">
-            {{ $post->likes->count() }} Like
-        </button>
-    </form>
-@endif
+                      {{-- //////////////////////////////////////////////////////// --}}
 
 <form action="{{ route('feed_like.store') }}" method="POST">
     @csrf
     <input type="hidden" name="post_id" value="{{ $post->id }}">
 
-    <button  type="submit">
+    <button  type="submit" class= {{ $hasLiked ? "bg-blue-600 hover:bg-blue-700 text-white font-medium py-1 px-4 text-sm rounded-full" : "bg-gray-200 hover:bg-gray-300 text-gray-700 font-medium py-1 px-4 text-sm rounded-full"}} >
         {{ $post->likes->count() }}
         {{ $hasLiked ? 'Unlike' : 'Like' }}
     </button>

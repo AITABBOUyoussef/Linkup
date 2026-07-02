@@ -16,10 +16,10 @@ class LikeController extends Controller
             'post_id' => 'required|exists:posts,id',
         ]);
 
-        $userId = $request->user()->id;
+        $user_id = $request->user()->id;
 
         $like = Like::where('post_id', $request->post_id)
-            ->where('user_id', $userId)
+            ->where('user_id', $user_id)
             ->first();
 
         if ($like) {
@@ -33,25 +33,11 @@ class LikeController extends Controller
         // Like
         Like::create([
             'post_id' => $request->post_id,
-            'user_id' => $userId,
+            'user_id' => $user_id,
         ]);
 
         return redirect()->route('feed.index')
             ->with('success', 'Like added successfully.');
     }
 
-    public function destroy(Post $post)
-    {
-        $like = Like::where('post_id', $post->id)
-            ->where('user_id', auth()->id())
-            ->first();
-
-        if (!$like) {
-            return back()->with('error', 'Like not found.');
-        }
-
-        $like->delete();
-
-        return redirect()->route('feed.index');
-    }
 }
