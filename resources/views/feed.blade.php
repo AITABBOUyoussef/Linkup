@@ -67,9 +67,9 @@
                                     <img src="{{ $post->user->avatar_url ?? 'https://ui-avatars.com/api/?name=' . urlencode($post->user->name) . '&background=random' }}"
                                         alt="Avatar" class="w-12 h-12 rounded-full object-cover border border-gray-100">
                                     <div class="leading-tight">
-                                        <h4 class="font-semibold text-gray-900 text-sm hover:text-[#0a66c2] hover:underline cursor-pointer leading-none">
+                                        <a href="{{ route('user_profil', $post->user_id) }}" class="font-semibold text-gray-900 text-sm hover:text-[#0a66c2] hover:underline cursor-pointer leading-none">
                                             {{ $post->user->name }}
-                                        </h4>
+                                        </a>
                                         <p class="text-xs text-gray-500 mt-0.5 line-clamp-1">{{ $post->user->headline ?? 'Membre' }} @if($post->user->company) chez {{ $post->user->company }} @endif</p>
                                         <p class="text-[11px] text-gray-500 flex items-center gap-1 mt-0.5">
                                             {{ $post->created_at->diffForHumans() }}

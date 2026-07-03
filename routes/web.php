@@ -23,6 +23,7 @@ Route::resource('/feed_like', LikeController::class)->middleware(['auth', 'verif
 Route::middleware('auth')->group(function () {
     // Route::resource('/feed', PostController::class)->name('feed');
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::get('/profileuser/{id}', [ProfileController::class, 'user_profil'])->name('user_profil');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
