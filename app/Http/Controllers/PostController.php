@@ -35,7 +35,10 @@ $post->user_id = $request->user()->id;
             $fileName = time() . '.' . $request->photo->extension();
             $request->photo->move(public_path('photos'), $fileName);
             $post->photo = $fileName;
+        }else{
+            $post->photo = "null";
         }
+
 
 $post->save();
 return redirect()->route('feed.index')->with('success', 'Post ajouté avec succès');

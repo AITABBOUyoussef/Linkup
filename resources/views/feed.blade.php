@@ -108,10 +108,12 @@
                             </div>
 
                             <!-- Content Image -->
-                            @if($post->photo)
+                            @if($post->photo !== "null")
                             <div class="w-full bg-gray-50">
                                 <img src="{{ asset('photos/' . $post->photo) }}" alt="Post image" class="w-full max-h-[500px] object-contain">
                             </div>
+                            @else
+<div></div>
                             @endif
 
                             <!-- Interactions Meta (Like/Comment Counts) -->

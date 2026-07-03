@@ -5,6 +5,7 @@ namespace App\Models;
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Database\Factories\UserFactory;
+use Dba\Connection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -56,6 +57,10 @@ public function posts(){
 public function likes(){
     return $this->hasMany(like::class);
 }
+public function connections(){
+    return $this->hasMany(Connection::class);
+}
+
 
  public function comments(){
         return $this->hasMany(comment::class);
