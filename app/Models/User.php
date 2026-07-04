@@ -5,7 +5,7 @@ namespace App\Models;
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Database\Factories\UserFactory;
-use Dba\Connection;
+use App\Models\Connection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -75,4 +75,34 @@ protected function avatarUrl(): Attribute{
         }
     );
 }
+
+  public function connectionStatus($otherUserId)
+    {
+        $connection = Connection::where(function($query) use ($otherUserId) {
+            $query->where('user_id', $this->id)
+                  ->where('connected_user_id', $otherUserId);
+        })->orWhere(function($query) use ($otherUserId) {
+            $query->where('user_id', $otherUserId)
+                  ->where('connected_user_id', $this->id);
+        })->first();
+
+        if (!$connection) {
+            return null;
+        }
+
+        return [
+            'id' => $connection->id,
+            'status' => $connection->status,
+            'sender_id' => $connection->user_id,
+        ];
+    }
+
+    public function getConnectionsCountAttribute()
+    {
+        return Connection::where('status', 'accepted')
+            ->where(function($q) {
+                $q->where('user_id', $this->id)
+                  ->orWhere('connected_user_id', $this->id);
+            })->count();
+    }
 }

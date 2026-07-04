@@ -59,13 +59,17 @@ app/Http/Controllers/Auth/PasswordResetLinkController.php
 app/Http/Controllers/Auth/RegisteredUserController.php
 app/Http/Controllers/Auth/VerifyEmailController.php
 app/Http/Controllers/CommentController.php
+app/Http/Controllers/ConnectionController.php
 app/Http/Controllers/Controller.php
 app/Http/Controllers/LikeController.php
+app/Http/Controllers/NetworkController.php
 app/Http/Controllers/PostController.php
 app/Http/Controllers/ProfileController.php
+app/Http/Middleware/is_auth.php
 app/Http/Requests/Auth/LoginRequest.php
 app/Http/Requests/ProfileUpdateRequest.php
 app/Models/Comment.php
+app/Models/Connection.php
 app/Models/Like.php
 app/Models/Post.php
 app/Models/User.php
@@ -97,6 +101,7 @@ database/migrations/0001_01_01_000002_create_jobs_table.php
 database/migrations/2026_06_22_150443_create_posts_table.php
 database/migrations/2026_06_30_142352_create_likes_table.php
 database/migrations/2026_06_30_142410_create_comments_table.php
+database/migrations/2026_07_03_163300_create_connections_table.php
 database/seeders/DatabaseSeeder.php
 package.json
 phpunit.xml
@@ -107,6 +112,14 @@ public/index.php
 public/photos/1783003819.png
 public/photos/1783004764.png
 public/photos/1783005160.png
+public/photos/1783008205.png
+public/photos/1783074190.png
+public/photos/1783078562.png
+public/photos/1783091906.png
+public/photos/1783095836.png
+public/photos/1783098621.png
+public/photos/1783099126.png
+public/photos/1783099293.png
 public/robots.txt
 README.md
 resources/css/app.css
@@ -140,10 +153,12 @@ resources/views/feed.blade.php
 resources/views/layouts/app.blade.php
 resources/views/layouts/guest.blade.php
 resources/views/layouts/navigation.blade.php
+resources/views/network.blade.php
 resources/views/profile/edit.blade.php
 resources/views/profile/partials/delete-user-form.blade.php
 resources/views/profile/partials/update-password-form.blade.php
 resources/views/profile/partials/update-profile-information-form.blade.php
+resources/views/user_profil.blade.php
 resources/views/welcome.blade.php
 routes/auth.php
 routes/console.php
@@ -174,6 +189,227 @@ vite.config.js
 
 <files>
 This section contains the contents of the repository's files.
+
+<file path="app/Http/Controllers/ConnectionController.php">
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Http\Controllers\Controller;
+use Illuminate\Http\Request;
+use App\Models\Connection;
+
+use Illuminate\Database\Connection as DatabaseConnection;
+use Illuminate\Database\Connectors\ConnectionFactory;
+
+class ConnectionController extends Controller
+{
+ public function store(Request $request)
+    {
+        $request->validate([
+            'connected_user_id' => 'required|exists:users,id',
+        ]);
+
+        $userId = auth()->id();
+        $connectedUserId = $request->connected_user_id;
+
+        if ($userId == $connectedUserId) {
+            return back()->with('error', 'Vous ne pouvez pas vous ajouter vous-même.');
+        }
+
+         $exists = Connection::where(function($query) use ($userId, $connectedUserId) {
+            $query->where('user_id', $userId)->where('connected_user_id', $connectedUserId);
+        })->orWhere(function($query) use ($userId, $connectedUserId) {
+            $query->where('user_id', $connectedUserId)->where('connected_user_id', $userId);
+        })->exists();
+
+        if ($exists) {
+            return back()->with('error', 'Une demande ou connexion existe déjà.');
+        }
+
+        Connection::create([
+            'user_id' => $userId,
+            'connected_user_id' => $connectedUserId,
+            'status' => 'pending',
+        ]);
+
+        return back()->with('success', 'Demande de connexion envoyée.');
+    }
+     public function accept(string $id)
+    {
+        $connection = Connection::findOrFail($id);
+
+        if ($connection->connected_user_id !== auth()->id()) {
+            abort(403, 'Action non autorisée.');
+        }
+
+        $connection->update([
+            'status' => 'accepted',
+        ]);
+
+        return back()->with('success', 'Vous êtes maintenant connectés !');
+    }
+     public function destroy(string $id)
+    {
+        $connection = Connection::findOrFail($id);
+
+        if ($connection->user_id !== auth()->id() && $connection->connected_user_id !== auth()->id()) {
+            abort(403, 'Action non autorisée.');
+        }
+
+        $connection->delete();
+
+        return back()->with('success', 'Connexion ou demande retirée.');
+    }
+}
+</file>
+
+<file path="app/Http/Controllers/NetworkController.php">
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Models\User;
+use App\Models\Connection;
+use Illuminate\Http\Request;
+
+class NetworkController extends Controller
+{
+    public function index(Request $request)
+    {
+        $query = $request->input('q');
+
+        if ($query) {
+            $users = User::where('name', 'LIKE', "%{$query}%")
+                ->where('id', '!=', auth()->id())
+                ->get();
+        } else {
+            $users = User::where('id', '!=', auth()->id())
+                ->inRandomOrder()
+                ->take(12)
+                ->get();
+        }
+
+        // جلب الطلبات المعلقة (اللي صيفطوها ليك ناس اخرين)
+        $pendingRequests = Connection::with('sender')
+            ->where('connected_user_id', auth()->id())
+            ->where('status', 'pending')
+            ->get();
+
+        return view('network', compact('users', 'query', 'pendingRequests'));
+    }
+}
+</file>
+
+<file path="app/Http/Middleware/is_auth.php">
+<?php
+
+namespace App\Http\Middleware;
+
+use Closure;
+use Illuminate\Http\Request;
+use Symfony\Component\HttpFoundation\Response;
+
+class is_auth
+{
+    /**
+     * Handle an incoming request.
+     *
+     * @param  Closure(Request): (Response)  $next
+     */
+    public function handle(Request $request, Closure $next): Response
+    {
+        return $next($request);
+    }
+}
+</file>
+
+<file path="resources/views/network.blade.php">
+<x-app-layout>
+    <div class="py-8 bg-[#f3f2ef] min-h-screen font-sans">
+        <div class="max-w-[1128px] mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 md:grid-cols-12 gap-6">
+
+            <!-- Left Sidebar: Pending requests -->
+            <div class="col-span-1 md:col-span-4 space-y-4">
+                <div class="bg-white rounded-xl shadow-[0_0_0_1px_rgba(0,0,0,0.08)] p-4">
+                    <h2 class="font-semibold text-gray-900 text-base mb-4">Invitations en attente</h2>
+                    @forelse($pendingRequests as $request)
+                        <div class="flex items-start gap-3 mb-4 pb-4 border-b border-gray-100 last:mb-0 last:pb-0 last:border-0">
+                            <img src="{{ $request->sender->avatar_url }}" class="w-12 h-12 rounded-full object-cover">
+                            <div class="flex-1">
+                                <a href="{{ route('user_profil', $request->sender->id) }}" class="font-semibold text-sm text-gray-900 hover:underline">{{ $request->sender->name }}</a>
+                                <p class="text-xs text-gray-500 mb-2">{{ $request->sender->headline ?? 'Membre' }}</p>
+                                <div class="flex gap-2">
+                                    <form action="{{ route('connections.accept', $request->id) }}" method="POST" class="flex-1">
+                                        @csrf @method('PATCH')
+                                        <button class="w-full bg-[#0a66c2] hover:bg-[#004182] text-white text-xs font-semibold py-1.5 rounded-full transition shadow-sm">Accepter</button>
+                                    </form>
+                                    <form action="{{ route('connections.destroy', $request->id) }}" method="POST" class="flex-1">
+                                        @csrf @method('DELETE')
+                                        <button class="w-full border border-gray-500 text-gray-600 hover:bg-gray-50 text-xs font-semibold py-1.5 rounded-full transition">Ignorer</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    @empty
+                        <p class="text-sm text-gray-500 text-center py-4">Aucune invitation en attente.</p>
+                    @endforelse
+                </div>
+            </div>
+
+            <!-- Main Content: Search Results / Suggestions -->
+            <div class="col-span-1 md:col-span-8 space-y-4">
+                <div class="bg-white rounded-xl shadow-[0_0_0_1px_rgba(0,0,0,0.08)] p-4">
+                    <h2 class="font-semibold text-gray-900 text-base mb-4">
+                        @if($query) Résultats de recherche pour "{{ $query }}" @else Connaissez-vous ces personnes ? @endif
+                    </h2>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                        @forelse($users as $u)
+                            <div class="border border-gray-200 rounded-xl overflow-hidden text-center relative flex flex-col hover:shadow-md transition">
+                                <div class="h-16 bg-gradient-to-r from-gray-200 to-gray-300 w-full"></div>
+                                <a href="{{ route('user_profil', $u->id) }}">
+                                    <img src="{{ $u->avatar_url }}" class="w-16 h-16 rounded-full object-cover border-2 border-white mx-auto -mt-8 bg-white hover:opacity-90 transition">
+                                </a>
+                                <div class="p-4 flex-1 flex flex-col">
+                                    <a href="{{ route('user_profil', $u->id) }}" class="font-semibold text-gray-900 hover:underline leading-tight">{{ $u->name }}</a>
+                                    <p class="text-xs text-gray-500 mt-1 line-clamp-2 flex-1">{{ $u->headline ?? 'Membre du réseau' }}</p>
+
+                                    <div class="mt-4">
+                                        @php $status = auth()->user()->connectionStatus($u->id); @endphp
+                                        @if(!$status)
+                                            <form action="{{ route('connections.store') }}" method="POST">
+                                                @csrf
+                                                <input type="hidden" name="connected_user_id" value="{{ $u->id }}">
+                                                <button type="submit" class="w-full border border-[#0a66c2] text-[#0a66c2] hover:bg-blue-50 font-semibold py-1.5 rounded-full transition text-sm flex items-center justify-center gap-1">
+                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"></path></svg>
+                                                    Se connecter
+                                                </button>
+                                            </form>
+                                        @elseif($status['status'] === 'pending')
+                                            <button class="w-full border border-gray-300 text-gray-500 bg-gray-50 font-semibold py-1.5 rounded-full text-sm cursor-default">
+                                                En attente
+                                            </button>
+                                        @elseif($status['status'] === 'accepted')
+                                            <button class="w-full border border-green-500 text-green-600 bg-green-50 font-semibold py-1.5 rounded-full text-sm cursor-default flex items-center justify-center gap-1">
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                                                Connecté
+                                            </button>
+                                        @endif
+                                    </div>
+                                </div>
+                            </div>
+                        @empty
+                            <p class="text-sm text-gray-500 col-span-full py-8 text-center">Aucun utilisateur trouvé.</p>
+                        @endforelse
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</x-app-layout>
+</file>
 
 <file path=".editorconfig">
 root = true
@@ -678,6 +914,32 @@ class ProfileUpdateRequest extends FormRequest
                 Rule::unique(User::class)->ignore($this->user()->id),
             ],
         ];
+    }
+}
+</file>
+
+<file path="app/Models/Connection.php">
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Model;
+
+class Connection extends Model
+{
+     protected $fillable = [
+        'user_id',
+        'connected_user_id',
+        'status',
+    ];
+     public function sender()
+    {
+        return $this->belongsTo(User::class, 'user_id');
+    }
+
+    public function receiver()
+    {
+        return $this->belongsTo(User::class, 'connected_user_id');
     }
 }
 </file>
@@ -2263,6 +2525,40 @@ return new class extends Migration
 };
 </file>
 
+<file path="database/migrations/2026_07_03_163300_create_connections_table.php">
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    /**
+     * Run the migrations.
+     */
+    public function up(): void
+    {
+        Schema::create('connections', function (Blueprint $table) {
+               $table->id();
+            $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
+            $table->foreignId('connected_user_id')->constrained('users')->onDelete('cascade');
+             $table->enum('status', ['pending', 'accepted'])->default('pending');
+            $table->timestamps();
+               $table->unique(['user_id', 'connected_user_id']);
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        Schema::dropIfExists('connections');
+    }
+};
+</file>
+
 <file path="phpunit.xml">
 <?xml version="1.0" encoding="UTF-8"?>
 <phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -2826,39 +3122,6 @@ $classes = ($active ?? false)
 </x-app-layout>
 </file>
 
-<file path="resources/views/layouts/guest.blade.php">
-<!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
-    <head>
-        <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-        <meta name="csrf-token" content="{{ csrf_token() }}">
-
-        <title>{{ config('app.name', 'Laravel') }}</title>
-
-        <!-- Fonts -->
-        <link rel="preconnect" href="https://fonts.bunny.net">
-        <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
-
-        <!-- Scripts -->
-        @vite(['resources/css/app.css', 'resources/js/app.js'])
-    </head>
-    <body class="font-sans text-gray-900 antialiased">
-        <div class="min-h-screen flex flex-col sm:justify-center items-center pt-6 sm:pt-0 bg-gray-100 dark:bg-gray-900">
-            <div>
-                <a href="/">
-                    <x-application-logo class="w-20 h-20 fill-current text-gray-500" />
-                </a>
-            </div>
-
-            <div class="w-full sm:max-w-md mt-6 px-6 py-4 bg-white dark:bg-gray-800 shadow-md overflow-hidden sm:rounded-lg">
-                {{ $slot }}
-            </div>
-        </div>
-    </body>
-</html>
-</file>
-
 <file path="resources/views/profile/edit.blade.php">
 <x-app-layout>
     <x-slot name="header">
@@ -2998,6 +3261,72 @@ $classes = ($active ?? false)
         </div>
     </form>
 </section>
+</file>
+
+<file path="resources/views/user_profil.blade.php">
+<!-- ... existing code ... -->
+                        <!-- Actions -->
+                        <div class="flex gap-2">
+                            @if(Auth::id() !== $user->id)
+                                @php
+                                    $status = auth()->user()->connectionStatus($user->id);
+                                @endphp
+
+                                @if(!$status)
+                                    <!-- ما كاين حتى علاقة، نقدرو نصيفطو طلب -->
+                                    <form action="{{ route('connections.store') }}" method="POST">
+                                        @csrf
+                                        <input type="hidden" name="connected_user_id" value="{{ $user->id }}">
+                                        <button type="submit" class="bg-[#0a66c2] hover:bg-[#004182] text-white font-semibold py-2 px-6 rounded-full transition shadow-sm">
+                                            Ajouter au réseau
+                                        </button>
+                                    </form>
+                                @elseif($status['status'] === 'pending')
+                                    @if($status['sender_id'] === Auth::id())
+                                        <!-- أنا صيفطت الطلب -->
+                                        <div class="flex items-center gap-3">
+                                            <span class="bg-gray-100 text-gray-600 font-semibold py-2 px-6 rounded-full">Invitation envoyée</span>
+                                            <form action="{{ route('connections.destroy', $status['id']) }}" method="POST">
+                                                @csrf @method('DELETE')
+                                                <button type="submit" class="text-red-500 hover:underline text-sm font-semibold">Annuler</button>
+                                            </form>
+                                        </div>
+                                    @else
+                                        <!-- هو صيفط ليا الطلب -->
+                                        <div class="flex gap-2">
+                                            <form action="{{ route('connections.accept', $status['id']) }}" method="POST">
+                                                @csrf @method('PATCH')
+                                                <button type="submit" class="bg-[#0a66c2] hover:bg-[#004182] text-white font-semibold py-2 px-6 rounded-full transition shadow-sm">Accepter</button>
+                                            </form>
+                                            <form action="{{ route('connections.destroy', $status['id']) }}" method="POST">
+                                                @csrf @method('DELETE')
+                                                <button type="submit" class="border border-red-500 text-red-500 hover:bg-red-50 font-semibold py-2 px-6 rounded-full transition">Refuser</button>
+                                            </form>
+                                        </div>
+                                    @endif
+                                @elseif($status['status'] === 'accepted')
+                                    <!-- مكونيكطيين -->
+                                    <div class="flex items-center gap-3">
+                                        <span class="bg-green-50 text-green-600 border border-green-200 font-semibold py-2 px-6 rounded-full flex items-center gap-1.5 shadow-sm">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path></svg>
+                                            Connecté
+                                        </span>
+                                        <form action="{{ route('connections.destroy', $status['id']) }}" method="POST">
+                                            @csrf @method('DELETE')
+                                            <button type="submit" onclick="return confirm('Retirer cette connexion ?')" class="text-gray-500 hover:text-red-500 hover:underline text-sm font-semibold transition">Retirer</button>
+                                        </form>
+                                    </div>
+                                @endif
+                            @else
+                                <a href="{{ route('profile.edit') }}" class="border border-[#0a66c2] text-[#0a66c2] hover:bg-blue-50 font-semibold py-2 px-6 rounded-full transition">
+                                    Modifier le profil
+                                </a>
+                            @endif
+                        </div>
+                    </div>
+                </div>
+            </div>
+<!-- ... existing code ... -->
 </file>
 
 <file path="resources/views/welcome.blade.php">
@@ -4096,71 +4425,6 @@ class VerifyEmailController extends Controller
 }
 </file>
 
-<file path="app/Http/Controllers/ProfileController.php">
-<?php
-
-namespace App\Http\Controllers;
-
-use App\Http\Requests\ProfileUpdateRequest;
-use Illuminate\Http\RedirectResponse;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Redirect;
-use Illuminate\View\View;
-
-class ProfileController extends Controller
-{
-    /**
-     * Display the user's profile form.
-     */
-
-    public function edit(Request $request): View
-    {
-        return view('profile.edit', [
-            'user' => $request->user(),
-        ]);
-    }
-
-    /**
-     * Update the user's profile information.
-     */
-    public function update(ProfileUpdateRequest $request): RedirectResponse
-    {
-        $request->user()->fill($request->validated());
-
-        if ($request->user()->isDirty('email')) {
-            $request->user()->email_verified_at = null;
-        }
-        $request->user()->company = $request->company;
-        $request->user()->image_url = $request->image_url;
-        $request->user()->save();
-
-        return Redirect::route('profile.edit')->with('status', 'profile-updated');
-    }
-
-    /**
-     * Delete the user's account.
-     */
-    public function destroy(Request $request): RedirectResponse
-    {
-        $request->validateWithBag('userDeletion', [
-            'password' => ['required', 'current_password'],
-        ]);
-
-        $user = $request->user();
-
-        Auth::logout();
-
-        $user->delete();
-
-        $request->session()->invalidate();
-        $request->session()->regenerateToken();
-
-        return Redirect::to('/');
-    }
-}
-</file>
-
 <file path="app/Models/Like.php">
 <?php
 
@@ -4606,127 +4870,6 @@ window.Alpine = Alpine;
 Alpine.start();
 </file>
 
-<file path="resources/views/auth/login.blade.php">
-<x-guest-layout>
-    <!-- Session Status -->
-    <x-auth-session-status class="mb-4" :status="session('status')" />
-
-
-  <form method="POST" action="{{ route('login') }}">
-        @csrf
-
-        <!-- Email Address -->
-        <div>
-            <x-input-label for="email" :value="__('Email')" />
-            <x-text-input id="email" class="block mt-1 w-full" type="email" name="email" :value="old('email')" required autofocus autocomplete="username" />
-            <x-input-error :messages="$errors->get('email')" class="mt-2" />
-        </div>
-
-        <!-- Password -->
-        <div class="mt-4">
-            <x-input-label for="password" :value="__('Password')" />
-
-            <x-text-input id="password" class="block mt-1 w-full"
-                            type="password"
-                            name="password"
-                            required autocomplete="current-password" />
-
-            <x-input-error :messages="$errors->get('password')" class="mt-2" />
-        </div>
-
-        <!-- Remember Me -->
-        <div class="block mt-4">
-            <label for="remember_me" class="inline-flex items-center">
-                <input id="remember_me" type="checkbox" class="rounded dark:bg-gray-900 border-gray-300 dark:border-gray-700 text-indigo-600 shadow-sm focus:ring-indigo-500 dark:focus:ring-indigo-600 dark:focus:ring-offset-gray-800" name="remember">
-                <span class="ms-2 text-sm text-gray-600 dark:text-gray-400">{{ __('Remember me') }}</span>
-            </label>
-        </div>
-
-        <div class="flex items-center justify-end mt-4">
-            @if (Route::has('password.request'))
-                <a class="underline text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:focus:ring-offset-gray-800" href="{{ route('password.request') }}">
-                    {{ __('Forgot your password?') }}
-                </a>
-            @endif
-
-            <x-primary-button class="ms-3">
-                {{ __('Log in') }}
-            </x-primary-button>
-
-        </div>
-    </form>
-
-
-                           <a
-                                href="{{ route('register') }}"
-                                class="inline-block px-5 py-1.5 dark:text-[#EDEDEC] border-[#19140035] hover:border-[#1915014a] border text-[#1b1b18] dark:border-[#3E3E3A] dark:hover:border-[#62605b] rounded-sm text-sm leading-normal">
-                                Register
-                            </a>
-                   
-
-
-</x-guest-layout>
-</file>
-
-<file path="resources/views/auth/register.blade.php">
-<x-guest-layout>
-    <form method="POST" action="{{ route('register') }}">
-        @csrf
-
-        <!-- Name -->
-        <div>
-            <x-input-label for="name" :value="__('Name')" />
-            <x-text-input id="name" class="block mt-1 w-full" type="text" name="name" :value="old('name')" required autofocus autocomplete="name" />
-            <x-input-error :messages="$errors->get('name')" class="mt-2" />
-        </div>
-
-        <!-- Email Address -->
-        <div class="mt-4">
-            <x-input-label for="email" :value="__('Email')" />
-            <x-text-input id="email" class="block mt-1 w-full" type="email" name="email" :value="old('email')" required autocomplete="username" />
-            <x-input-error :messages="$errors->get('email')" class="mt-2" />
-        </div>
-   <div>
-            <x-input-label for="headline" :value="__('headline')" />
-            <x-text-input id="headline" class="block mt-1 w-full" type="text" name="headline" :value="old('headline')" required autofocus autocomplete="headline" />
-            <x-input-error :messages="$errors->get('headline')" class="mt-2" />
-        </div>
-        <!-- Password -->
-        <div class="mt-4">
-            <x-input-label for="password" :value="__('Password')" />
-
-            <x-text-input id="password" class="block mt-1 w-full"
-                            type="password"
-                            name="password"
-                            required autocomplete="new-password" />
-
-            <x-input-error :messages="$errors->get('password')" class="mt-2" />
-        </div>
-
-        <!-- Confirm Password -->
-        <div class="mt-4">
-            <x-input-label for="password_confirmation" :value="__('Confirm Password')" />
-
-            <x-text-input id="password_confirmation" class="block mt-1 w-full"
-                            type="password"
-                            name="password_confirmation" required autocomplete="new-password" />
-
-            <x-input-error :messages="$errors->get('password_confirmation')" class="mt-2" />
-        </div>
-
-        <div class="flex items-center justify-end mt-4">
-            <a class="underline text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:focus:ring-offset-gray-800" href="{{ route('login') }}">
-                {{ __('Already registered?') }}
-            </a>
-
-            <x-primary-button class="ms-4">
-                {{ __('Register') }}
-            </x-primary-button>
-        </div>
-    </form>
-</x-guest-layout>
-</file>
-
 <file path="resources/views/dashboard.blade.php">
 {{-- <x-app-layout>
     <x-slot name="header">
@@ -4747,88 +4890,33 @@ Alpine.start();
 </x-app-layout> --}}
 </file>
 
-<file path="resources/views/profile/partials/update-profile-information-form.blade.php">
-<section>
-    <header>
-        <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100">
-            {{ __('Profile Information') }}
-        </h2>
+<file path="resources/views/layouts/guest.blade.php">
+<!DOCTYPE html>
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="csrf-token" content="{{ csrf_token() }}">
 
-        <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">
-            {{ __("Update your account's profile information and email address.") }}
-        </p>
-    </header>
+        <title>{{ config('app.name', 'Laravel') }}</title>
 
-    <form id="send-verification" method="post" action="{{ route('verification.send') }}">
-        @csrf
-    </form>
+        <link rel="preconnect" href="https://fonts.bunny.net">
+        <link href="https://fonts.bunny.net/css?family=inter:400,500,600,700&display=swap" rel="stylesheet" />
 
-    <form method="post" action="{{ route('profile.update') }}" class="mt-6 space-y-6">
-        @csrf
-        @method('patch')
+        @vite(['resources/css/app.css', 'resources/js/app.js'])
 
-        <div>
-            <x-input-label for="name" :value="__('Name')" />
-            <x-text-input id="name" name="name" type="text" class="mt-1 block w-full" :value="old('name', $user->name)" required autofocus autocomplete="name" />
-            <x-input-error class="mt-2" :messages="$errors->get('name')" />
+        <style>
+            body { font-family: 'Inter', sans-serif; }
+        </style>
+    </head>
+    <body class="antialiased bg-[#f3f2ef]">
+        <div class="min-h-screen flex flex-col justify-center items-center pt-6 sm:pt-0 pb-10">
+            <div class="w-full px-4 sm:px-0">
+                {{ $slot }}
+            </div>
         </div>
-
-
-
-        <div>
-            <x-input-label for="email" :value="__('Email')" />
-            <x-text-input id="email" name="email" type="email" class="mt-1 block w-full" :value="old('email', $user->email)" required autocomplete="username" />
-            <x-input-error class="mt-2" :messages="$errors->get('email')" />
-
-            @if ($user instanceof \Illuminate\Contracts\Auth\MustVerifyEmail && ! $user->hasVerifiedEmail())
-                <div>
-                    <p class="text-sm mt-2 text-gray-800 dark:text-gray-200">
-                        {{ __('Your email address is unverified.') }}
-
-                        <button form="send-verification" class="underline text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:focus:ring-offset-gray-800">
-                            {{ __('Click here to re-send the verification email.') }}
-                        </button>
-                    </p>
-
-                    @if (session('status') === 'verification-link-sent')
-                        <p class="mt-2 font-medium text-sm text-green-600 dark:text-green-400">
-                            {{ __('A new verification link has been sent to your email address.') }}
-                        </p>
-                    @endif
-                </div>
-            @endif
-        </div>
-     <div>
-            <x-input-label for="headline" :value="__('headline')" />
-            <x-text-input id="headline" name="nheadlineame" type="text" class="mt-1 block w-full" :value="old('headline', $user->headline)" required autofocus autocomplete="headline" />
-            <x-input-error class="mt-2" :messages="$errors->get('headline')" />
-        </div>
-          <div>
-            <x-input-label for="image_url" :value="__('image_url')" />
-            <x-text-input id="image_url" name="image_url" type="text" class="mt-1 block w-full" :value="old('image_url', $user->image_url)" required autofocus autocomplete="image_url" />
-            <x-input-error class="mt-2" :messages="$errors->get('image_url')" />
-        </div>
-          <div>
-            <x-input-label for="company" :value="__('company')" />
-            <x-text-input id="company" name="company" type="text" class="mt-1 block w-full" :value="old('company', $user->company)"  autofocus autocomplete="company" />
-            <x-input-error class="mt-2" :messages="$errors->get('company')" />
-        </div>
-
-        <div class="flex items-center gap-4">
-            <x-primary-button>{{ __('Save') }}</x-primary-button>
-
-            @if (session('status') === 'profile-updated')
-                <p
-                    x-data="{ show: true }"
-                    x-show="show"
-                    x-transition
-                    x-init="setTimeout(() => show = false, 2000)"
-                    class="text-sm text-gray-600 dark:text-gray-400"
-                >{{ __('Saved.') }}</p>
-            @endif
-        </div>
-    </form>
-</section>
+    </body>
+</html>
 </file>
 
 <file path="vite.config.js">
@@ -5037,137 +5125,146 @@ return new class extends Migration
 };
 </file>
 
-<file path="resources/views/create.blade.php">
-<x-app-layout>
-<div class="max-w-2xl mx-auto">
-
-    <div class="mb-6">
-        <a href="/feed" class="text-blue-600 hover:underline text-sm font-semibold flex items-center mb-4">
-            &larr; Retour au fil d'actualité
-        </a>
-        <h2 class="text-2xl font-bold text-gray-800">Créer un nouveau post</h2>
-    </div>
-
-    <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
-
-        <form action="{{ route('feed.store') }}" method="POST" enctype="multipart/form-data">
-
-            @csrf
-
-            <div class="mb-4">
-                <label for="content" class="block text-gray-700 text-sm font-bold mb-2">De quoi souhaitez-vous discuter ?</label>
-
-                <textarea name="content" id="content" rows="5"
-                          class="w-full bg-gray-50 border @error('content') border-red-500 @else border-gray-300 @enderror text-gray-900 rounded-lg focus:ring-blue-500 focus:border-blue-500 p-4 placeholder-gray-400 resize-none"
-                          placeholder="Partagez vos idées avec votre réseau..."></textarea>
-
-              <div class="flex items-center justify-between mt-3 -mb-1 border-t border-gray-100 pt-2">
-    <!-- بوطون ديال التصويرة (Photo) -->
-    <label for="photo-upload" class="flex-1 cursor-pointer flex items-center justify-center gap-2 text-gray-500 hover:bg-gray-100 px-3 py-2.5 rounded-lg transition text-sm font-semibold">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-        </svg>
-        <span class="hidden sm:inline text-gray-600">Photo</span>
-        <!-- Input الحقيقي مخبي (hidden) باش مانشوفوش الديزاين ديالو القديم -->
-        <input type="file" id="photo-upload" name="photo" accept="image/*" class="hidden">
-    </label>
-
-    <!-- بوطون ديال الفيديو (Vidéo) -->
-    <label for="video-upload" class="flex-1 cursor-pointer flex items-center justify-center gap-2 text-gray-500 hover:bg-gray-100 px-3 py-2.5 rounded-lg transition text-sm font-semibold">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
-        </svg>
-        <span class="hidden sm:inline text-gray-600">Vidéo</span>
-        <!-- Input الحقيقي مخبي (hidden) -->
-        <input type="file" id="video-upload" name="video" accept="video/*" class="hidden">
-    </label>
-</div>
+<file path="resources/views/auth/login.blade.php">
+<x-guest-layout>
+    <div class="w-full sm:max-w-md mx-auto">
+        <!-- Logo -->
+        <div class="flex justify-center mb-8">
+             <div class="text-[#0a66c2] text-3xl font-bold tracking-tight flex items-center gap-1">
+                Professional<span class="bg-[#0a66c2] text-white px-1.5 py-0.5 rounded-sm text-2xl">Connect</span>
             </div>
- {{-- <div class="form-group mt-3">
-        <label for="photo">Photo</label>
-        <input type="file" name="photo" class="form-control">
-    </div> --}}
-            <div class="flex justify-end mt-4">
-                <button type="submit" class="bg-blue-700 hover:bg-blue-800 text-white font-bold py-2 px-6 rounded-full transition duration-200 ease-in-out shadow">
-                    Publier
-                </button>
+        </div>
+
+        <div class="bg-white px-8 py-8 shadow-[0_4px_12px_rgba(0,0,0,0.15)] sm:rounded-xl border border-gray-100">
+            <div class="mb-6">
+                <h1 class="text-3xl font-semibold text-gray-900 mb-1">S'identifier</h1>
+                <p class="text-sm text-gray-500">Restez au courant de votre monde professionnel</p>
             </div>
-        </form>
-    </div>
 
-</div>
-</x-app-layout>
-</file>
+            <x-auth-session-status class="mb-4" :status="session('status')" />
 
-<file path="resources/views/edit.blade.php">
-<x-app-layout>
-<div class="max-w-2xl mx-auto">
+            <form method="POST" action="{{ route('login') }}" class="space-y-4">
+                @csrf
 
-    <div class="mb-6">
-        <a href="/feed" class="text-blue-600 hover:underline text-sm font-semibold flex items-center mb-4">
-            &larr; Retour au fil d'actualité
-        </a>
-        <h2 class="text-2xl font-bold text-gray-800">Créer un nouveau post</h2>
-    </div>
+                <!-- Email -->
+                <div>
+                    <label for="email" class="block text-sm font-medium text-gray-700 mb-1">E-mail ou téléphone</label>
+                    <input id="email" type="email" name="email" value="{{ old('email') }}" required autofocus autocomplete="username"
+                           class="block w-full border-gray-300 rounded-md focus:border-[#0a66c2] focus:ring-[#0a66c2] sm:text-sm py-2.5 px-3 border transition-colors shadow-sm">
+                    <x-input-error :messages="$errors->get('email')" class="mt-1" />
+                </div>
 
-    <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+                <!-- Password -->
+                <div>
+                    <label for="password" class="block text-sm font-medium text-gray-700 mb-1">Mot de passe</label>
+                    <input id="password" type="password" name="password" required autocomplete="current-password"
+                           class="block w-full border-gray-300 rounded-md focus:border-[#0a66c2] focus:ring-[#0a66c2] sm:text-sm py-2.5 px-3 border transition-colors shadow-sm">
+                    <x-input-error :messages="$errors->get('password')" class="mt-1" />
+                </div>
 
-        <form action="{{ route('feed.update',$post->id) }}" method="POST" enctype="multipart/form-data">
+                @if (Route::has('password.request'))
+                    <div class="flex items-center justify-start">
+                        <a class="text-sm font-medium text-[#0a66c2] hover:text-[#004182] hover:underline transition" href="{{ route('password.request') }}">
+                            Mot de passe oublié ?
+                        </a>
+                    </div>
+                @endif
 
-            @csrf
- @method('PUT')
-            <div class="mb-4">
-                <label for="content" class="block text-gray-700 text-sm font-bold mb-2">De quoi souhaitez-vous discuter ?</label>
-
-                <textarea name="content"  id="content" rows="5"
-                          class="w-full bg-gray-50 border @error('content') border-red-500 @else border-gray-300 @enderror text-gray-900 rounded-lg focus:ring-blue-500 focus:border-blue-500 p-4 placeholder-gray-400 resize-none"
-                          required>{{  $post->content }}</textarea>
-
-                @error('content')
-                    <p class="text-red-500 text-xs italic mt-2">{{ $message }}</p>
-                @enderror
-            </div>
-  <div class="flex items-center justify-between mt-3 -mb-1">
-                    <button
-                        class="flex items-center gap-1.5 text-gray-500 hover:bg-gray-100 px-2 sm:px-3 py-2 rounded-lg transition text-[14px] font-semibold">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-blue-500" fill="none"
-                            viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"
-                                d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                        </svg>
-
-                         <label for="photo">Photo</label>
-                         <input type="file" name="photo" class="form-control">
-                    </button>
-                    <button
-                        class="flex items-center gap-1.5 text-gray-500 hover:bg-gray-100 px-2 sm:px-3 py-2 rounded-lg transition text-[14px] font-semibold">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-orange-500" fill="none"
-                            viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"
-                                d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2-2V12a2 2 0 002 2z" />
-                        </svg>
-                        <span class="hidden sm:inline">Événement</span>
-                    </button>
-                    <button
-                        class="flex items-center gap-1.5 text-gray-500 hover:bg-gray-100 px-2 sm:px-3 py-2 rounded-lg transition text-[14px] font-semibold">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-emerald-600" fill="none"
-                            viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"
-                                d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                        </svg>
-                        <span class="hidden sm:inline">Article</span>
+                <div class="pt-2">
+                    <button type="submit" class="w-full flex justify-center py-3 px-4 border border-transparent rounded-full shadow-sm text-base font-semibold text-white bg-[#0a66c2] hover:bg-[#004182] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#0a66c2] transition-colors duration-200">
+                        S'identifier
                     </button>
                 </div>
-            <div class="flex justify-end mt-4">
-                <button type="submit" class="bg-blue-700 hover:bg-blue-800 text-white font-bold py-2 px-6 rounded-full transition duration-200 ease-in-out shadow">
-                    Publier
-                </button>
-            </div>
-        </form>
-    </div>
+            </form>
 
-</div>
-</x-app-layout>
+            <div class="mt-6 text-center text-sm">
+                <span class="text-gray-500">Nouveau sur ProfessionalConnect ?</span>
+                <a href="{{ route('register') }}" class="font-semibold text-[#0a66c2] hover:text-[#004182] hover:underline transition ml-1">
+                    S'inscrire
+                </a>
+            </div>
+        </div>
+    </div>
+</x-guest-layout>
+</file>
+
+<file path="resources/views/auth/register.blade.php">
+<x-guest-layout>
+    <div class="w-full sm:max-w-md mx-auto">
+        <!-- Logo -->
+        <div class="flex justify-center mb-8">
+             <div class="text-[#0a66c2] text-3xl font-bold tracking-tight flex items-center gap-1">
+                Professional<span class="bg-[#0a66c2] text-white px-1.5 py-0.5 rounded-sm text-2xl">Connect</span>
+            </div>
+        </div>
+
+        <div class="bg-white px-8 py-8 shadow-[0_4px_12px_rgba(0,0,0,0.15)] sm:rounded-xl border border-gray-100">
+            <div class="mb-6 text-center">
+                <h1 class="text-2xl font-semibold text-gray-900 mb-1">Tirez le meilleur parti de votre vie professionnelle</h1>
+            </div>
+
+            <form method="POST" action="{{ route('register') }}" class="space-y-4">
+                @csrf
+
+                <!-- Name -->
+                <div>
+                    <label for="name" class="block text-sm font-medium text-gray-700 mb-1">Prénom et nom</label>
+                    <input id="name" type="text" name="name" value="{{ old('name') }}" required autofocus autocomplete="name"
+                           class="block w-full border-gray-300 rounded-md focus:border-[#0a66c2] focus:ring-[#0a66c2] sm:text-sm py-2.5 px-3 border transition-colors shadow-sm">
+                    <x-input-error :messages="$errors->get('name')" class="mt-1" />
+                </div>
+
+                <!-- Email Address -->
+                <div>
+                    <label for="email" class="block text-sm font-medium text-gray-700 mb-1">E-mail</label>
+                    <input id="email" type="email" name="email" value="{{ old('email') }}" required autocomplete="username"
+                           class="block w-full border-gray-300 rounded-md focus:border-[#0a66c2] focus:ring-[#0a66c2] sm:text-sm py-2.5 px-3 border transition-colors shadow-sm">
+                    <x-input-error :messages="$errors->get('email')" class="mt-1" />
+                </div>
+
+                <!-- Headline -->
+                <div>
+                    <label for="headline" class="block text-sm font-medium text-gray-700 mb-1">Titre professionnel (ex: Développeur Web)</label>
+                    <input id="headline" type="text" name="headline" value="{{ old('headline') }}" required autocomplete="headline"
+                           class="block w-full border-gray-300 rounded-md focus:border-[#0a66c2] focus:ring-[#0a66c2] sm:text-sm py-2.5 px-3 border transition-colors shadow-sm">
+                    <x-input-error :messages="$errors->get('headline')" class="mt-1" />
+                </div>
+
+                <!-- Password -->
+                <div>
+                    <label for="password" class="block text-sm font-medium text-gray-700 mb-1">Mot de passe (6 caractères minimum)</label>
+                    <input id="password" type="password" name="password" required autocomplete="new-password"
+                           class="block w-full border-gray-300 rounded-md focus:border-[#0a66c2] focus:ring-[#0a66c2] sm:text-sm py-2.5 px-3 border transition-colors shadow-sm">
+                    <x-input-error :messages="$errors->get('password')" class="mt-1" />
+                </div>
+
+                <!-- Confirm Password -->
+                <div>
+                    <label for="password_confirmation" class="block text-sm font-medium text-gray-700 mb-1">Confirmer le mot de passe</label>
+                    <input id="password_confirmation" type="password" name="password_confirmation" required autocomplete="new-password"
+                           class="block w-full border-gray-300 rounded-md focus:border-[#0a66c2] focus:ring-[#0a66c2] sm:text-sm py-2.5 px-3 border transition-colors shadow-sm">
+                    <x-input-error :messages="$errors->get('password_confirmation')" class="mt-1" />
+                </div>
+
+                <div class="pt-4">
+                    <p class="text-xs text-gray-500 text-center mb-4">
+                        En cliquant sur S’inscrire, vous acceptez les Conditions d’utilisation, la Politique de confidentialité et la Politique relative aux cookies de ProfessionalConnect.
+                    </p>
+                    <button type="submit" class="w-full flex justify-center py-3 px-4 border border-transparent rounded-full shadow-sm text-base font-semibold text-white bg-[#0a66c2] hover:bg-[#004182] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#0a66c2] transition-colors duration-200">
+                        Accepter et s'inscrire
+                    </button>
+                </div>
+            </form>
+
+            <div class="mt-6 text-center text-sm">
+                <span class="text-gray-500">Vous avez déjà un compte ?</span>
+                <a href="{{ route('login') }}" class="font-semibold text-[#0a66c2] hover:text-[#004182] hover:underline transition ml-1">
+                    S'identifier
+                </a>
+            </div>
+        </div>
+    </div>
+</x-guest-layout>
 </file>
 
 <file path="resources/views/layouts/app.blade.php">
@@ -5209,6 +5306,92 @@ return new class extends Migration
         </div>
     </body>
 </html>
+</file>
+
+<file path="resources/views/profile/partials/update-profile-information-form.blade.php">
+<section>
+    <header>
+        <h2 class="text-xl font-semibold text-gray-900">
+            {{ __('Informations du profil') }}
+        </h2>
+        <p class="mt-1 text-sm text-gray-500">
+            {{ __("Mettez à jour les informations de profil et l'adresse e-mail de votre compte.") }}
+        </p>
+    </header>
+
+    <form id="send-verification" method="post" action="{{ route('verification.send') }}">
+        @csrf
+    </form>
+
+    <form method="post" action="{{ route('profile.update') }}" class="mt-6 space-y-5">
+        @csrf
+        @method('patch')
+
+        <!-- Avatar Preview (Optional Visual) -->
+        <div class="flex items-center gap-4 mb-4">
+             <img src="{{ old('image_url', $user->image_url) ?? ($user->avatar_url ?? 'https://ui-avatars.com/api/?name='.urlencode($user->name).'&background=random') }}"
+                  alt="Profile Preview" class="w-16 h-16 rounded-full object-cover border-2 border-gray-200">
+             <div class="text-sm text-gray-500">Ceci est votre photo de profil actuelle.</div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+            <div>
+                <x-input-label for="name" value="Nom complet" />
+                <x-text-input id="name" name="name" type="text" class="mt-1 block w-full border-gray-300 focus:border-[#0a66c2] focus:ring-[#0a66c2] rounded-md shadow-sm" :value="old('name', $user->name)" required autofocus autocomplete="name" />
+                <x-input-error class="mt-2" :messages="$errors->get('name')" />
+            </div>
+
+            <div>
+                <x-input-label for="email" value="Adresse e-mail" />
+                <x-text-input id="email" name="email" type="email" class="mt-1 block w-full border-gray-300 focus:border-[#0a66c2] focus:ring-[#0a66c2] rounded-md shadow-sm" :value="old('email', $user->email)" required autocomplete="username" />
+                <x-input-error class="mt-2" :messages="$errors->get('email')" />
+
+                @if ($user instanceof \Illuminate\Contracts\Auth\MustVerifyEmail && ! $user->hasVerifiedEmail())
+                    <div>
+                        <p class="text-sm mt-2 text-gray-800">
+                            Votre e-mail n'est pas vérifié.
+                            <button form="send-verification" class="underline text-sm text-[#0a66c2] hover:text-[#004182] focus:outline-none">
+                                Cliquez ici pour renvoyer l'e-mail.
+                            </button>
+                        </p>
+                    </div>
+                @endif
+            </div>
+
+            <div class="md:col-span-2">
+                <x-input-label for="headline" value="Titre professionnel (Headline)" />
+                <x-text-input id="headline" name="headline" type="text" class="mt-1 block w-full border-gray-300 focus:border-[#0a66c2] focus:ring-[#0a66c2] rounded-md shadow-sm" :value="old('headline', $user->headline)" required />
+                <x-input-error class="mt-2" :messages="$errors->get('headline')" />
+                <p class="mt-1 text-xs text-gray-400">Apparaît sous votre nom sur votre profil et vos posts.</p>
+            </div>
+
+            <div class="md:col-span-2">
+                <x-input-label for="company" value="Entreprise actuelle" />
+                <x-text-input id="company" name="company" type="text" class="mt-1 block w-full border-gray-300 focus:border-[#0a66c2] focus:ring-[#0a66c2] rounded-md shadow-sm" :value="old('company', $user->company)" />
+                <x-input-error class="mt-2" :messages="$errors->get('company')" />
+            </div>
+
+            <!-- URL Image Text Input (As per your logic) -->
+            <div class="md:col-span-2">
+                <x-input-label for="image_url" value="URL de la photo de profil" />
+                <x-text-input id="image_url" name="image_url" type="url" class="mt-1 block w-full border-gray-300 focus:border-[#0a66c2] focus:ring-[#0a66c2] rounded-md shadow-sm text-sm" :value="old('image_url', $user->image_url)" placeholder="https://exemple.com/photo.jpg" />
+                <x-input-error class="mt-2" :messages="$errors->get('image_url')" />
+            </div>
+        </div>
+
+        <div class="flex items-center gap-4 pt-4 border-t border-gray-100 mt-6">
+            <button type="submit" class="inline-flex justify-center py-2 px-6 border border-transparent shadow-sm text-sm font-medium rounded-full text-white bg-[#0a66c2] hover:bg-[#004182] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#0a66c2] transition">
+                Enregistrer les modifications
+            </button>
+
+            @if (session('status') === 'profile-updated')
+                <p x-data="{ show: true }" x-show="show" x-transition x-init="setTimeout(() => show = false, 3000)" class="text-sm font-medium text-green-600 bg-green-50 px-3 py-1 rounded-md">
+                    Enregistré.
+                </p>
+            @endif
+        </div>
+    </form>
+</section>
 </file>
 
 <file path="app/Http/Controllers/LikeController.php">
@@ -5257,6 +5440,132 @@ class LikeController extends Controller
 }
 </file>
 
+<file path="app/Http/Controllers/ProfileController.php">
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Http\Requests\ProfileUpdateRequest;
+use App\Models\Post;
+use App\Models\User;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Redirect;
+use Illuminate\View\View;
+
+class ProfileController extends Controller
+{
+    /**
+     * Display the user's profile form.
+     */
+
+    public function edit(Request $request): View
+    {
+        return view('profile.edit', [
+            'user' => $request->user(),
+        ]);
+    }
+      public function user_profil(string $id) {
+
+ $user = User::findOrFail($id);
+//  dd($user);
+  return view('user_profil', compact('user'));
+
+    }
+
+    /**
+     * Update the user's profile information.
+     */
+    public function update(ProfileUpdateRequest $request): RedirectResponse
+    {
+        $request->user()->fill($request->validated());
+
+        if ($request->user()->isDirty('email')) {
+            $request->user()->email_verified_at = null;
+        }
+        $request->user()->company = $request->company;
+        $request->user()->image_url = $request->image_url;
+        $request->user()->save();
+
+        return Redirect::route('profile.edit')->with('status', 'profile-updated');
+    }
+
+    /**
+     * Delete the user's account.
+     */
+    public function destroy(Request $request): RedirectResponse
+    {
+        $request->validateWithBag('userDeletion', [
+            'password' => ['required', 'current_password'],
+        ]);
+
+        $user = $request->user();
+
+        Auth::logout();
+
+        $user->delete();
+
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+
+        return Redirect::to('/');
+    }
+}
+</file>
+
+<file path="resources/views/edit.blade.php">
+<x-app-layout>
+<div class="max-w-2xl mx-auto">
+
+    <div class="mb-6">
+        <a href="/feed" class="text-blue-600 hover:underline text-sm font-semibold flex items-center mb-4">
+            &larr; Retour au fil d'actualité
+        </a>
+        <h2 class="text-2xl font-bold text-gray-800">Modifier votre post</h2>
+    </div>
+
+    <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+
+        <form action="{{ route('feed.update',$post->id) }}" method="POST" enctype="multipart/form-data">
+
+            @csrf
+ @method('PUT')
+            <div class="mb-4">
+                <label for="content" class="block text-gray-700 text-sm font-bold mb-2">De quoi souhaitez-vous discuter ?</label>
+
+                <textarea name="content"  id="content" rows="5"
+                          class="w-full bg-gray-50 border @error('content') border-red-500 @else border-gray-300 @enderror text-gray-900 rounded-lg focus:ring-blue-500 focus:border-blue-500 p-4 placeholder-gray-400 resize-none"
+                          required>{{  $post->content }}</textarea>
+
+                @error('content')
+                    <p class="text-red-500 text-xs italic mt-2">{{ $message }}</p>
+                @enderror
+            </div>
+          <div class="flex items-center justify-between mt-3 -mb-1 border-t border-gray-100 pt-2">
+    <!-- -->
+    <label for="photo-upload" class="flex-1 cursor-pointer flex items-center justify-center gap-2 text-gray-500 hover:bg-gray-100 px-3 py-2.5 rounded-lg transition text-sm font-semibold">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+        </svg>
+        <span class="hidden sm:inline text-gray-600">Photo</span>
+        <!-- -->
+        <input type="file" id="photo-upload" name="photo" accept="image/*" class="hidden">
+    </label>
+
+</div>
+            <div class="flex justify-end mt-4">
+                <button type="submit" class="bg-blue-700 hover:bg-blue-800 text-white font-bold py-2 px-6 rounded-full transition duration-200 ease-in-out shadow">
+                   Mettre à jour
+                </button>
+            </div>
+        </form>
+    </div>
+
+</div>
+</x-app-layout>
+</file>
+
 <file path="app/Models/User.php">
 <?php
 
@@ -5265,6 +5574,7 @@ namespace App\Models;
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Database\Factories\UserFactory;
+use App\Models\Connection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -5316,6 +5626,10 @@ public function posts(){
 public function likes(){
     return $this->hasMany(like::class);
 }
+public function connections(){
+    return $this->hasMany(Connection::class);
+}
+
 
  public function comments(){
         return $this->hasMany(comment::class);
@@ -5330,184 +5644,37 @@ protected function avatarUrl(): Attribute{
         }
     );
 }
+
+  public function connectionStatus($otherUserId)
+    {
+        $connection = Connection::where(function($query) use ($otherUserId) {
+            $query->where('user_id', $this->id)
+                  ->where('connected_user_id', $otherUserId);
+        })->orWhere(function($query) use ($otherUserId) {
+            $query->where('user_id', $otherUserId)
+                  ->where('connected_user_id', $this->id);
+        })->first();
+
+        if (!$connection) {
+            return null;
+        }
+
+        return [
+            'id' => $connection->id,
+            'status' => $connection->status,
+            'sender_id' => $connection->user_id,
+        ];
+    }
+
+    public function getConnectionsCountAttribute()
+    {
+        return Connection::where('status', 'accepted')
+            ->where(function($q) {
+                $q->where('user_id', $this->id)
+                  ->orWhere('connected_user_id', $this->id);
+            })->count();
+    }
 }
-</file>
-
-<file path="resources/views/layouts/navigation.blade.php">
-<nav x-data="{ open: false }" class="bg-white border-b border-gray-200 sticky top-0 z-50 shadow-sm">
-    <!-- Primary Navigation Menu -->
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex justify-between h-14">
-            <!-- Left Side: Logo & Search -->
-            <div class="flex items-center">
-                <!-- Logo -->
-                <div class="shrink-0 flex items-center">
-                    <a href="{{ route('feed.index') }}" class="flex items-center gap-1 transition transform hover:scale-105">
-                        <div class="bg-blue-600 text-white p-1 rounded font-bold text-xl leading-none flex items-center justify-center w-8 h-8">
-                            in
-                        </div>
-                    </a>
-                </div>
-
-                <!-- Search Bar (Hidden on very small screens) -->
-                <div class="hidden sm:flex items-center ml-4">
-                    <div class="relative group">
-                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                            <svg class="h-4 w-4 text-gray-500 group-focus-within:text-blue-500 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                            </svg>
-                        </div>
-                        <input type="text"
-                               class="block w-64 pl-10 pr-3 py-1.5 border border-transparent rounded-md leading-5 bg-[#EEF3F8] text-gray-900 placeholder-gray-500 focus:outline-none focus:bg-white focus:border-gray-300 focus:ring-0 sm:text-sm transition-all duration-300 ease-in-out focus:w-80"
-                               placeholder="Recherche...">
-                    </div>
-                </div>
-            </div>
-
-            <!-- Right Side: Navigation Icons & Profile Dropdown -->
-            <div class="hidden sm:flex sm:items-center sm:ms-6 h-full space-x-1 md:space-x-4">
-
-                <!-- Icon: Accueil -->
-                <a href="{{ route('feed.index') }}"
-                   class="flex flex-col items-center justify-center w-16 h-full border-b-2 transition duration-150 ease-in-out {{ request()->routeIs('feed.index') ? 'border-black text-black' : 'border-transparent text-gray-500 hover:text-black' }}">
-                    <svg class="w-6 h-6" fill="{{ request()->routeIs('feed.index') ? 'currentColor' : 'none' }}" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
-                    </svg>
-                    <span class="text-[10px] hidden md:block mt-0.5 font-medium">Accueil</span>
-                </a>
-
-                <!-- Icon: Réseau (Placeholder) -->
-                <a href="#" class="flex flex-col items-center justify-center w-16 h-full border-b-2 border-transparent text-gray-500 hover:text-black transition duration-150 ease-in-out">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path>
-                    </svg>
-                    <span class="text-[10px] hidden md:block mt-0.5 font-medium">Réseau</span>
-                </a>
-
-                <!-- Icon: Emplois (Placeholder) -->
-                <a href="#" class="flex flex-col items-center justify-center w-16 h-full border-b-2 border-transparent text-gray-500 hover:text-black transition duration-150 ease-in-out">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
-                    </svg>
-                    <span class="text-[10px] hidden md:block mt-0.5 font-medium">Emplois</span>
-                </a>
-
-                <!-- Diviseur vertical -->
-                <div class="h-8 w-px bg-gray-200 mx-2 hidden md:block"></div>
-
-                <!-- Settings Dropdown -->
-                <div class="flex items-center h-full">
-                    <x-dropdown align="right" width="48">
-                        <x-slot name="trigger">
-                            <button class="flex flex-col items-center justify-center w-12 h-full text-gray-500 hover:text-black focus:outline-none transition duration-150 ease-in-out">
-                                <img class="h-6 w-6 rounded-full object-cover border border-gray-200"
-                                     src="{{ auth()->user()->avatar_url ?? 'https://ui-avatars.com/api/?name='.urlencode(auth()->user()->name).'&background=random' }}"
-                                     alt="Profile">
-                                <div class="hidden md:flex items-center mt-0.5">
-                                    <span class="text-[10px] font-medium">Vous</span>
-                                    <svg class="fill-current h-3 w-3 ml-0.5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
-                                        <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
-                                    </svg>
-                                </div>
-                            </button>
-                        </x-slot>
-
-                        <x-slot name="content">
-                            <!-- User Info Header -->
-                            <div class="px-4 py-3 border-b border-gray-100">
-                                <p class="text-sm font-semibold text-gray-900 truncate">{{ Auth::user()->name }}</p>
-                                <p class="text-xs text-gray-500 truncate">{{ Auth::user()->headline ?? 'Membre' }}</p>
-                            </div>
-
-                            <x-dropdown-link :href="route('profile.edit')" class="font-medium mt-1">
-                                {{ __('Voir le profil') }}
-                            </x-dropdown-link>
-
-                            <div class="border-t border-gray-100 mt-1"></div>
-
-                            <!-- Authentication -->
-                            <form method="POST" action="{{ route('logout') }}">
-                                @csrf
-                                <x-dropdown-link :href="route('logout')"
-                                        onclick="event.preventDefault();
-                                                    this.closest('form').submit();" class="text-red-600 hover:text-red-700">
-                                    {{ __('Déconnexion') }}
-                                </x-dropdown-link>
-                            </form>
-                        </x-slot>
-                    </x-dropdown>
-                </div>
-            </div>
-
-            <!-- Hamburger (Mobile) -->
-            <div class="-me-2 flex items-center sm:hidden">
-                <button @click="open = ! open" class="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:bg-gray-100 focus:text-gray-500 transition duration-150 ease-in-out">
-                    <svg class="h-6 w-6" stroke="currentColor" fill="none" viewBox="0 0 24 24">
-                        <path :class="{'hidden': open, 'inline-flex': ! open }" class="inline-flex" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
-                        <path :class="{'hidden': ! open, 'inline-flex': open }" class="hidden" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Responsive Navigation Menu (Mobile) -->
-    <div :class="{'block': open, 'hidden': ! open}" class="hidden sm:hidden border-t border-gray-200">
-
-        <!-- Mobile Search (Visible only on mobile when menu opens) -->
-        <div class="p-4 border-b border-gray-200">
-            <div class="relative">
-                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <svg class="h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                    </svg>
-                </div>
-                <input type="text" class="block w-full pl-10 pr-3 py-2 border border-transparent rounded-md leading-5 bg-[#EEF3F8] text-gray-900 placeholder-gray-500 focus:outline-none focus:bg-white focus:border-blue-500 sm:text-sm" placeholder="Recherche...">
-            </div>
-        </div>
-
-        <div class="pt-2 pb-3 space-y-1">
-            <x-responsive-nav-link :href="route('feed.index')" :active="request()->routeIs('feed.index')">
-                {{ __('Accueil') }}
-            </x-responsive-nav-link>
-            <x-responsive-nav-link href="#">
-                {{ __('Réseau') }}
-            </x-responsive-nav-link>
-            <x-responsive-nav-link href="#">
-                {{ __('Emplois') }}
-            </x-responsive-nav-link>
-        </div>
-
-        <!-- Responsive Settings Options -->
-        <div class="pt-4 pb-1 border-t border-gray-200">
-            <div class="px-4 flex items-center gap-3 mb-3">
-                <img class="h-10 w-10 rounded-full object-cover border border-gray-200"
-                     src="{{ auth()->user()->avatar_url ?? 'https://ui-avatars.com/api/?name='.urlencode(auth()->user()->name).'&background=random' }}"
-                     alt="Profile">
-                <div>
-                    <div class="font-medium text-base text-gray-800">{{ Auth::user()->name }}</div>
-                    <div class="font-medium text-sm text-gray-500">{{ Auth::user()->headline ?? Auth::user()->email }}</div>
-                </div>
-            </div>
-
-            <div class="mt-3 space-y-1">
-                <x-responsive-nav-link :href="route('profile.edit')">
-                    {{ __('Voir le profil') }}
-                </x-responsive-nav-link>
-
-                <!-- Authentication -->
-                <form method="POST" action="{{ route('logout') }}">
-                    @csrf
-                    <x-responsive-nav-link :href="route('logout')"
-                            onclick="event.preventDefault();
-                                        this.closest('form').submit();" class="text-red-600">
-                        {{ __('Déconnexion') }}
-                    </x-responsive-nav-link>
-                </form>
-            </div>
-        </div>
-    </div>
-</nav>
 </file>
 
 <file path="database/seeders/DatabaseSeeder.php">
@@ -5530,6 +5697,119 @@ class DatabaseSeeder extends Seeder
         User::factory(3)->has(Post::factory()->count(1))->create();
     }
 }
+</file>
+
+<file path="resources/views/create.blade.php">
+<x-app-layout>
+<div class="max-w-2xl mx-auto">
+
+    <div class="mb-6">
+        <a href="/feed" class="text-blue-600 hover:underline text-sm font-semibold flex items-center mb-4">
+            &larr; Retour au fil d'actualité
+        </a>
+        <h2 class="text-2xl font-bold text-gray-800">Créer un nouveau post</h2>
+    </div>
+
+    <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+
+        <form action="{{ route('feed.store') }}" method="POST" enctype="multipart/form-data">
+
+            @csrf
+
+            <div class="mb-4">
+                <label for="content" class="block text-gray-700 text-sm font-bold mb-2">De quoi souhaitez-vous discuter ?</label>
+
+                <textarea name="content" id="content" rows="5"
+                          class="w-full bg-gray-50 border @error('content') border-red-500 @else border-gray-300 @enderror text-gray-900 rounded-lg focus:ring-blue-500 focus:border-blue-500 p-4 placeholder-gray-400 resize-none"
+                          placeholder="Partagez vos idées avec votre réseau..."></textarea>
+
+              <div class="flex items-center justify-between mt-3 -mb-1 border-t border-gray-100 pt-2">
+    <!-- -->
+    <label for="photo-upload" class="flex-1 cursor-pointer flex items-center justify-center gap-2 text-gray-500 hover:bg-gray-100 px-3 py-2.5 rounded-lg transition text-sm font-semibold">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+        </svg>
+        <span class="hidden sm:inline text-gray-600">Photo</span>
+        <!-- -->
+        <input type="file" id="photo-upload" name="photo" accept="image/*" class="hidden">
+    </label>
+
+</div>
+            </div>
+ {{-- <div class="form-group mt-3">
+        <label for="photo">Photo</label>
+        <input type="file" name="photo" class="form-control">
+    </div> --}}
+            <div class="flex justify-end mt-4">
+                <button type="submit" class="bg-blue-700 hover:bg-blue-800 text-white font-bold py-2 px-6 rounded-full transition duration-200 ease-in-out shadow">
+                    Publier
+                </button>
+            </div>
+        </form>
+    </div>
+
+</div>
+</x-app-layout>
+</file>
+
+<file path="resources/views/layouts/navigation.blade.php">
+<!-- ... existing code ... -->
+                <!-- Search Bar (Hidden on very small screens) -->
+                <div class="hidden sm:flex items-center ml-4">
+                    <form action="{{ route('network.index') }}" method="GET" class="relative group">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <svg class="h-4 w-4 text-gray-500 group-focus-within:text-blue-500 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                            </svg>
+                        </div>
+                        <input type="text" name="q" value="{{ request('q') }}"
+                               class="block w-64 pl-10 pr-3 py-1.5 border border-transparent rounded-md leading-5 bg-[#EEF3F8] text-gray-900 placeholder-gray-500 focus:outline-none focus:bg-white focus:border-gray-300 focus:ring-0 sm:text-sm transition-all duration-300 ease-in-out focus:w-80"
+                               placeholder="Recherche...">
+                    </form>
+                </div>
+            </div>
+
+            <!-- Right Side: Navigation Icons & Profile Dropdown -->
+            <div class="hidden sm:flex sm:items-center sm:ms-6 h-full space-x-1 md:space-x-4">
+
+                <!-- Icon: Accueil -->
+<!-- ... existing code ... -->
+                </a>
+
+                <!-- Icon: Réseau -->
+                <a href="{{ route('network.index') }}" class="flex flex-col items-center justify-center w-16 h-full border-b-2 {{ request()->routeIs('network.index') ? 'border-black text-black' : 'border-transparent text-gray-500 hover:text-black' }} transition duration-150 ease-in-out">
+                    <svg class="w-6 h-6" fill="{{ request()->routeIs('network.index') ? 'currentColor' : 'none' }}" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path>
+                    </svg>
+                    <span class="text-[10px] hidden md:block mt-0.5 font-medium">Réseau</span>
+                </a>
+
+                <!-- Icon: Emplois (Placeholder) -->
+<!-- ... existing code ... -->
+    <!-- Responsive Navigation Menu (Mobile) -->
+    <div :class="{'block': open, 'hidden': ! open}" class="hidden sm:hidden border-t border-gray-200">
+
+        <!-- Mobile Search (Visible only on mobile when menu opens) -->
+        <div class="p-4 border-b border-gray-200">
+            <form action="{{ route('network.index') }}" method="GET" class="relative">
+                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <svg class="h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                    </svg>
+                </div>
+                <input type="text" name="q" value="{{ request('q') }}" class="block w-full pl-10 pr-3 py-2 border border-transparent rounded-md leading-5 bg-[#EEF3F8] text-gray-900 placeholder-gray-500 focus:outline-none focus:bg-white focus:border-blue-500 sm:text-sm" placeholder="Recherche...">
+            </form>
+        </div>
+
+        <div class="pt-2 pb-3 space-y-1">
+            <x-responsive-nav-link :href="route('feed.index')" :active="request()->routeIs('feed.index')">
+                {{ __('Accueil') }}
+            </x-responsive-nav-link>
+            <x-responsive-nav-link :href="route('network.index')" :active="request()->routeIs('network.index')">
+                {{ __('Réseau') }}
+            </x-responsive-nav-link>
+            <x-responsive-nav-link href="#">
+<!-- ... existing code ... -->
 </file>
 
 <file path="app/Models/Post.php">
@@ -5598,7 +5878,10 @@ $post->user_id = $request->user()->id;
             $fileName = time() . '.' . $request->photo->extension();
             $request->photo->move(public_path('photos'), $fileName);
             $post->photo = $fileName;
+        }else{
+            $post->photo = "null";
         }
+
 
 $post->save();
 return redirect()->route('feed.index')->with('success', 'Post ajouté avec succès');
@@ -5643,30 +5926,28 @@ public function destroy(string $id){
 <?php
 
 use App\Http\Controllers\CommentController;
+use App\Http\Controllers\ConnectionController;
 use App\Http\Controllers\LikeController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\PostController;
 use Illuminate\Support\Facades\Route;
 
-// Route::get('/', function () {
-//     return view('welcome');
-// });
-
-// Route::get('/feed', function () {
-//     return view('feed');
-// })->middleware(['auth', 'verified']);
-
 Route::resource('/feed', PostController::class)->middleware(['auth', 'verified']);
 Route::resource('/feed_comment', CommentController::class)->middleware(['auth', 'verified']);
 Route::resource('/feed_like', LikeController::class)->middleware(['auth', 'verified']);
 
-
-
 Route::middleware('auth')->group(function () {
     // Route::resource('/feed', PostController::class)->name('feed');
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::get('/profileuser/{id}', [ProfileController::class, 'user_profil'])->name('user_profil');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+
+    Route::post('/connections', [ConnectionController::class, 'store'])->name('connections.store');
+    Route::patch('/connections/{id}/accept', [ConnectionController::class, 'accept'])->name('connections.accept');
+    Route::delete('/connections/{id}', [ConnectionController::class, 'destroy'])->name('connections.destroy');
+
+    Route::get('/network', [App\Http\Controllers\NetworkController::class, 'index'])->name('network.index');
 });
 
 require __DIR__.'/auth.php';
@@ -5674,285 +5955,347 @@ require __DIR__.'/auth.php';
 
 <file path="resources/views/feed.blade.php">
 <x-app-layout>
-    <div class="py-6 bg-[#F4F2EE] min-h-screen">
-        <div class="max-w-[555px] mx-auto px-4 sm:px-0 space-y-3">
+    <div class="py-8 bg-[#f3f2ef] min-h-screen font-sans">
+        <!-- Main Grid Container -->
+        <div class="max-w-[1128px] mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 md:grid-cols-12 gap-6">
 
-            <!-- Create Post Area -->
-            <div class="bg-white rounded-lg shadow-[0_0_0_1px_rgba(0,0,0,0.08),0_2px_3px_rgba(0,0,0,0.08)] p-4">
-                <div class="flex items-center gap-2">
-                    <img
-                        src="{{ auth()->user()->avatar_url ?? 'https://ui-avatars.com/api/?name=' . urlencode(auth()->user()->name) . '&background=0a66c2&color=fff' }}"
-                        alt="Avatar" class="w-12 h-12 rounded-full object-cover flex-shrink-0">
-                    <a href="{{ route('feed.create') }}"
-                        class="flex-1 border border-gray-300 hover:bg-gray-100 text-gray-600 text-[15px] font-medium rounded-full py-3 px-4 transition duration-150">
-                        Commencer un post
-                    </a>
-                </div>
-                <div class="flex items-center justify-between mt-3 -mb-1">
-                    <button
-                        class="flex items-center gap-1.5 text-gray-500 hover:bg-gray-100 px-2 sm:px-3 py-2 rounded-lg transition text-[14px] font-semibold">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-blue-500" fill="none"
-                            viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"
-                                d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                        </svg>
-                        <span class="hidden sm:inline">Photo</span>
-                    </button>
-                    <button
-                        class="flex items-center gap-1.5 text-gray-500 hover:bg-gray-100 px-2 sm:px-3 py-2 rounded-lg transition text-[14px] font-semibold">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-orange-500" fill="none"
-                            viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"
-                                d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2-2V12a2 2 0 002 2z" />
-                        </svg>
-                        <span class="hidden sm:inline">Événement</span>
-                    </button>
-                    <button
-                        class="flex items-center gap-1.5 text-gray-500 hover:bg-gray-100 px-2 sm:px-3 py-2 rounded-lg transition text-[14px] font-semibold">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-emerald-600" fill="none"
-                            viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"
-                                d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                        </svg>
-                        <span class="hidden sm:inline">Article</span>
-                    </button>
+            <!-- Left Sidebar (Profile Snippet - Hidden on Mobile) -->
+            <div class="hidden md:block md:col-span-3 space-y-4">
+                <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden text-center pb-4">
+                    <div class="h-16 bg-gray-200" style="background-image: url('https://images.unsplash.com/photo-1579546929518-9e396f3cc809?q=80&w=2070&auto=format&fit=crop'); background-size: cover; background-position: center;"></div>
+                    <div class="flex justify-center -mt-8 mb-2">
+                        <img src="{{ auth()->user()->avatar_url ?? 'https://ui-avatars.com/api/?name='.urlencode(auth()->user()->name).'&background=random' }}" alt="Profile" class="w-16 h-16 rounded-full border-2 border-white object-cover bg-white">
+                    </div>
+                    <h3 class="font-semibold text-gray-900 text-base leading-tight hover:underline cursor-pointer"><a href="{{ route('profile.edit') }}">{{ auth()->user()->name }}</a></h3>
+                    <p class="text-xs text-gray-500 mt-1 px-4 line-clamp-2">{{ auth()->user()->headline ?? 'Membre' }}</p>
+
+                    <div class="border-t border-gray-100 mt-4 pt-4 text-left px-4">
+                         <a href="{{ route('network.index') }}" class="flex justify-between items-center text-xs font-semibold text-gray-500 hover:bg-gray-50 cursor-pointer p-1 rounded transition">
+                             <span>Relations</span>
+                             <span class="text-[#0a66c2]">{{ auth()->user()->connections_count }}</span>
+                         </a>
+                         <p class="text-xs font-bold text-gray-900 ml-1 mt-1">Développez votre réseau</p>
+                    </div>
                 </div>
             </div>
 
-            <!-- Feed -->
-            <div class="space-y-3">
-                @forelse ($posts as $post)
-                    <div class="bg-white rounded-lg shadow-[0_0_0_1px_rgba(0,0,0,0.08),0_2px_3px_rgba(0,0,0,0.08)] overflow-hidden">
+            <!-- Center Feed (Posts) -->
+            <div class="col-span-1 md:col-span-6 space-y-4">
 
-                        <!-- Post Header -->
-                        <div class="px-4 pt-3 pb-1 flex items-start justify-between">
-                            <div class="flex items-start gap-2">
-                                <img
-                                    src="{{ $post->user->avatar_url ?? 'https://ui-avatars.com/api/?name=' . urlencode($post->user->name) . '&background=random' }}"
-                                    alt="Avatar" class="w-12 h-12 rounded-full object-cover">
-                                <div class="leading-tight">
-                                    <h4
-                                        class="font-semibold text-gray-900 text-[14px] hover:text-blue-700 hover:underline cursor-pointer">
-                                        {{ $post->user->name }}
-                                    </h4>
-                                    <p class="text-[12px] text-gray-500">Membre du réseau</p>
-                                    <p class="text-[12px] text-gray-500 flex items-center gap-1">
-                                        {{ $post->created_at->diffForHumans() }}
-                                        <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-                                            <path fill-rule="evenodd"
-                                                d="M10 18a8 8 0 100-16 8 8 0 000 16zm0-14a6 6 0 016 6c0 1.887-.898 3.566-2.29 4.633L10 18l-3.71-3.367A5.978 5.978 0 014 10a6 6 0 016-6z"
-                                                clip-rule="evenodd" />
-                                        </svg>
-                                    </p>
-                                </div>
-                            </div>
-                            @if ($post->user_id == auth()->id())
-                                <div class="relative inline-block text-left dropdown">
-                                    <button type="button"
-                                        class="p-2 hover:bg-gray-100 rounded-full transition dropdown-btn">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-500"
-                                            fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                d="M5 12h.01M12 12h.01M19 12h.01M6 12a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0z" />
-                                        </svg>
-                                    </button>
-                                    <div
-                                        class="dropdown-menu absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-1 hidden z-30">
-                                        <a href="{{ route('feed.edit', $post->id) }}"
-                                            class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
-                                            <svg class="mr-3 h-4 w-4 text-gray-400" fill="none" stroke="currentColor"
-                                                viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                    d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                                            </svg>
-                                            Modifier le post
-                                        </a>
-                                        <form action="{{ route('feed.destroy', $post->id) }}" method="POST"
-                                            class="w-full">
-                                            @csrf @method('DELETE')
-                                            <button type="submit" onclick="return confirm('Supprimer ce post ?')"
-                                                class="flex items-center w-full px-4 py-2 text-sm text-red-600 hover:bg-red-50">
-                                                <svg class="mr-3 h-4 w-4 text-red-400" fill="none"
-                                                    stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                                        stroke-width="2"
-                                                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                                </svg>
-                                                Supprimer
-                                            </button>
-                                        </form>
+                <!-- Create Post Box -->
+                <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
+                    <div class="flex items-center gap-2">
+                        <img src="{{ auth()->user()->avatar_url ?? 'https://ui-avatars.com/api/?name='.urlencode(auth()->user()->name).'&background=random' }}" alt="Avatar" class="w-12 h-12 rounded-full object-cover shrink-0 border border-gray-100">
+                        <a href="{{ route('feed.create') }}" class="flex-1 border border-gray-400 hover:bg-gray-100 text-gray-500 text-sm font-medium rounded-full py-3 px-5 transition text-left cursor-text">
+                            Commencer un post
+                        </a>
+                    </div>
+
+                    <div class="flex items-center justify-around mt-3 pt-2">
+                        <a href="{{ route('feed.create') }}" class="flex items-center gap-2 text-gray-500 hover:bg-gray-100 px-3 py-2 rounded-md transition text-sm font-semibold cursor-pointer">
+                            <svg class="h-6 w-6 text-blue-500" fill="currentColor" viewBox="0 0 24 24"><path d="M19 4H5a3 3 0 00-3 3v10a3 3 0 003 3h14a3 3 0 003-3V7a3 3 0 00-3-3zm1 13a1 1 0 01-1 1H5a1 1 0 01-1-1v-4.586l3.293-3.293a1 1 0 011.414 0l3.346 3.346a1 1 0 001.414 0l3.536-3.536a1 1 0 011.414 0L20 12.586V17zm0-6.414l-3.293-3.293a3 3 0 00-4.242 0l-3.536 3.536-2.586-2.586a3 3 0 00-4.242 0L2 10.586V7a1 1 0 011-1h14a1 1 0 011 1v3.586z"></path></svg>
+                            <span class="hidden sm:inline">Média</span>
+                        </a>
+                        <a href="{{ route('feed.create') }}" class="flex items-center gap-2 text-gray-500 hover:bg-gray-100 px-3 py-2 rounded-md transition text-sm font-semibold cursor-pointer">
+                            <svg class="h-6 w-6 text-orange-500" fill="currentColor" viewBox="0 0 24 24"><path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V10h14v10zm0-12H5V6h14v2zm-7 5h5v5h-5v-5z"></path></svg>
+                            <span class="hidden sm:inline">Événement</span>
+                        </a>
+                        <a href="{{ route('feed.create') }}" class="flex items-center gap-2 text-gray-500 hover:bg-gray-100 px-3 py-2 rounded-md transition text-sm font-semibold cursor-pointer">
+                            <svg class="h-6 w-6 text-orange-800" fill="currentColor" viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm-5 14H4v-4h11v4zm0-5H4V9h11v4zm5 5h-4V9h4v9z"></path></svg>
+                            <span class="hidden sm:inline">Article</span>
+                        </a>
+                    </div>
+                </div>
+
+                <div class="flex items-center my-2">
+                    <hr class="flex-grow border-gray-300">
+                    <span class="px-2 text-xs text-gray-500">Classer par: <strong class="text-black">Pertinence</strong></span>
+                </div>
+
+                <!-- Feed Posts -->
+                <div class="space-y-4 pb-20 md:pb-0">
+                    @forelse ($posts as $post)
+                        <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+
+                            <!-- Post Header -->
+                            <div class="px-4 pt-3 pb-1 flex items-start justify-between">
+                                <div class="flex items-start gap-3">
+                                    <img src="{{ $post->user->avatar_url ?? 'https://ui-avatars.com/api/?name=' . urlencode($post->user->name) . '&background=random' }}"
+                                        alt="Avatar" class="w-12 h-12 rounded-full object-cover border border-gray-100">
+                                    <div class="leading-tight">
+                                        <h4 class="font-semibold text-gray-900 text-sm hover:text-[#0a66c2] hover:underline cursor-pointer leading-none">
+                                            {{ $post->user->name }}
+                                        </h4>
+                                        <p class="text-xs text-gray-500 mt-0.5 line-clamp-1">{{ $post->user->headline ?? 'Membre' }} @if($post->user->company) chez {{ $post->user->company }} @endif</p>
+                                        <p class="text-[11px] text-gray-500 flex items-center gap-1 mt-0.5">
+                                            {{ $post->created_at->diffForHumans() }}
+                                            <span class="w-1 h-1 bg-gray-400 rounded-full inline-block mx-0.5"></span>
+                                            <svg class="w-3 h-3 fill-current text-gray-400" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM4.332 8.027a6.012 6.012 0 011.912-2.706C6.512 5.73 6.974 6 7.5 6A1.5 1.5 0 019 7.5V8a2 2 0 004 0 2 2 0 011.523-1.943A5.977 5.977 0 0116 10c0 .34-.028.675-.083 1H15a2 2 0 00-2 2v2.197A5.973 5.973 0 0110 16v-2a2 2 0 00-2-2 2 2 0 01-2-2 2 2 0 00-1.668-1.973z" clip-rule="evenodd" /></svg>
+                                        </p>
                                     </div>
                                 </div>
-                            @endif
-                        </div>
 
-                        <!-- Content -->
-                        <div class="px-4 pb-3 pt-1">
-                            <p class="text-gray-900 text-[14px] leading-normal whitespace-pre-wrap">{{ $post->content }}</p>
-                        </div>
-                           <div class="px-4 pb-3 pt-1">
-                             <img
-                                    src="{{ asset('photos/' . $post->photo) }}" alt="{{ $post->user->name }}""
-                                    alt="Avatar" class="w-full flex justify-center h-40 rounded-xl object-cover">
-                            <p class="text-gray-900  leading-normal whitespace-pre-wrap">{{ $post->fileName }}</p>
-                        </div>
-
-
-                        <!-- Interactions Meta -->
-                        <div class="px-4 pb-2 flex items-center justify-between text-[12px] text-gray-500">
-                            <div class="flex items-center gap-1">
-                                @if ($post->likes->count() > 0)
-                                    <span
-                                        class="bg-blue-600 text-white rounded-full w-4 h-4 flex items-center justify-center text-[9px]">👍</span>
-                                    <span class="hover:text-blue-700 hover:underline cursor-pointer">{{ $post->likes->count() }}</span>
+                                <!-- Post Options Dropdown -->
+                                @if ($post->user_id == auth()->id())
+                                    <div class="relative inline-block text-left dropdown">
+                                        <button type="button" class="p-1.5 hover:bg-gray-100 rounded-full transition dropdown-btn text-gray-500 focus:outline-none">
+                                            <svg class="h-6 w-6" fill="currentColor" viewBox="0 0 24 24"><path d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"></path></svg>
+                                        </button>
+                                        <div class="dropdown-menu absolute right-0 mt-1 w-48 bg-white rounded-lg shadow-xl border border-gray-200 py-1 hidden z-30">
+                                            <a href="{{ route('feed.edit', $post->id) }}" class="flex items-center px-4 py-2.5 text-sm text-gray-700 font-medium hover:bg-gray-100">
+                                                <svg class="mr-3 h-5 w-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg>
+                                                Modifier le post
+                                            </a>
+                                            <form action="{{ route('feed.destroy', $post->id) }}" method="POST" class="w-full m-0">
+                                                @csrf @method('DELETE')
+                                                <button type="submit" onclick="return confirm('Êtes-vous sûr de vouloir supprimer ce post ?')" class="flex items-center w-full px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-100">
+                                                    <svg class="mr-3 h-5 w-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                                                    Supprimer le post
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </div>
                                 @endif
                             </div>
-                            <div class="hover:text-blue-700 hover:underline cursor-pointer">
-                                {{ $post->comments->count() }} commentaire{{ $post->comments->count() > 1 ? 's' : '' }}
+
+                            <!-- Content Text -->
+                            <div class="px-4 pb-2 pt-1">
+                                <p class="text-gray-900 text-[15px] leading-relaxed whitespace-pre-wrap break-words">{{ $post->content }}</p>
                             </div>
-                        </div>
 
-                        <!-- Actions Bar -->
-                        <div class="mx-4 border-t border-gray-200"></div>
-                        <div class="px-1 py-1 flex justify-around">
-                            @php $hasLiked = $post->likes->contains('user_id', auth()->id()); @endphp
-                            <form action="{{ route('feed_like.store') }}" method="POST" class="flex-1">
-                                @csrf
-                                <input type="hidden" name="post_id" value="{{ $post->id }}">
-                                <button type="submit"
-                                    class="w-full flex items-center justify-center gap-2 py-2.5 rounded-lg transition-colors text-[14px] {{ $hasLiked ? 'text-blue-600 font-semibold' : 'text-gray-600 hover:bg-gray-100 font-semibold' }}">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5"
-                                        fill="{{ $hasLiked ? 'currentColor' : 'none' }}" viewBox="0 0 24 24"
-                                        stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M14 10h4.757c1.246 0 2.25 1.004 2.25 2.25 0 .58-.223 1.144-.627 1.573L15.5 19H7V10l7-7v7z" />
-                                    </svg>
-                                    <span>J'aime</span>
+                            <!-- Content Image -->
+                            @if($post->photo)
+                            <div class="w-full bg-gray-50">
+                                <img src="{{ asset('photos/' . $post->photo) }}" alt="Post image" class="w-full max-h-[500px] object-contain">
+                            </div>
+                            @endif
+
+                            <!-- Interactions Meta (Like/Comment Counts) -->
+                            <div class="px-4 py-2 flex items-center justify-between text-xs text-gray-500 border-b border-gray-100 mt-1">
+                                <div class="flex items-center gap-1">
+                                    @if ($post->likes->count() > 0)
+                                        <div class="relative flex items-center">
+                                            <img class="w-4 h-4 rounded-full border border-white z-10 relative" src="https://static.licdn.com/aero-v1/sc/h/8ekq8gho1ruaf8i7f86vd1ftt" alt="Like">
+                                        </div>
+                                        <span class="hover:text-blue-700 hover:underline cursor-pointer ml-1">{{ $post->likes->count() }}</span>
+                                    @endif
+                                </div>
+                                @if($post->comments->count() > 0)
+                                <div class="hover:text-blue-700 hover:underline cursor-pointer">
+                                    {{ $post->comments->count() }} commentaire{{ $post->comments->count() > 1 ? 's' : '' }}
+                                </div>
+                                @endif
+                            </div>
+
+                            <!-- Actions Bar (Like, Comment, Share) -->
+                            <div class="px-2 py-1 flex justify-around items-center">
+                                @php $hasLiked = $post->likes->contains('user_id', auth()->id()); @endphp
+
+                                <!-- Like Form -->
+                                <form action="{{ route('feed_like.store') }}" method="POST" class="flex-1 m-0">
+                                    @csrf
+                                    <input type="hidden" name="post_id" value="{{ $post->id }}">
+                                    <button type="submit" class="w-full flex items-center justify-center gap-2 py-3 rounded-md transition-colors text-sm font-semibold {{ $hasLiked ? 'text-[#0a66c2] hover:bg-blue-50' : 'text-gray-500 hover:bg-gray-100' }}">
+                                        @if($hasLiked)
+                                            <!-- Liked Icon (Filled) -->
+                                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-6 h-6"><path d="M1 19V9h4v10H1zm22-4.5c0 1.25-.8 2.34-1.97 2.47l-6.19.74c-.58.07-1.12.35-1.53.8l-1.8 1.93c-.23.25-.56.36-.9.36-.6 0-1.1-.47-1.17-1.07l-.3-2.61c-.08-.75-.43-1.44-.98-1.95L4.5 12V9.5l6.45-6.2c.42-.4.99-.61 1.58-.58L16 3c1.1 0 2 .9 2 2v2.5h2.5c1.1 0 2 .9 2 2v5z"></path></svg>
+                                            <span>J'aime</span>
+                                        @else
+                                            <!-- Unliked Icon (Outline) -->
+                                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-6 h-6"><path d="M19.46 11l-3.91-3.91a1.54 1.54 0 01-.46-1V4a2 2 0 00-2-2h-1.47a2.5 2.5 0 00-1.56.54l-7.13 5.46a1.5 1.5 0 00-.53 1.2v7.1a1.5 1.5 0 00.53 1.2l7.13 5.46a2.5 2.5 0 001.56.54h1.47a2 2 0 002-2v-2.09a1.54 1.54 0 01.46-1l3.91-3.91a2 2 0 000-2.82zM15 18a1 1 0 01-1 1h-1.47a1.5 1.5 0 01-.94-.32l-7-5.36v-6.64l7-5.36a1.5 1.5 0 01.94-.32H14a1 1 0 011 1v2.09c0 .79.31 1.55.88 2.11l3.54 3.54a1 1 0 010 1.42l-3.54 3.54a2.98 2.98 0 00-.88 2.11V18z"></path><path d="M3 8H1v12h2V8z"></path></svg>
+                                            <span>J'aime</span>
+                                        @endif
+                                    </button>
+                                </form>
+
+                                <button class="flex-1 btn-comment flex items-center justify-center gap-2 py-3 text-gray-500 hover:bg-gray-100 font-semibold rounded-md transition-colors text-sm">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-6 h-6"><path d="M7 9h10v1H7zm0 4h7v-1H7zm16-2a6.78 6.78 0 01-2.84 5.61L12 22v-4H8A7 7 0 018 4h8a7 7 0 017 7zm-2 0a5 5 0 00-5-5H8a5 5 0 000 10h6v2.28L19 15a4.79 4.79 0 002-4z"></path></svg>
+                                    <span>Commenter</span>
                                 </button>
-                            </form>
-                            <button
-                                class="flex-1 btn-comment flex items-center justify-center gap-2 py-2.5 text-gray-600 hover:bg-gray-100 font-semibold rounded-lg transition-colors text-[14px]">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none"
-                                    viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-                                </svg>
-                                <span>Commenter</span>
-                            </button>
-                            <button
-                                class="flex-1 flex items-center justify-center gap-2 py-2.5 text-gray-600 hover:bg-gray-100 font-semibold rounded-lg transition-colors text-[14px]">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none"
-                                    viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
-                                </svg>
-                                <span>Partager</span>
-                            </button>
-                        </div>
+                                <button class="flex-1 flex items-center justify-center gap-2 py-3 text-gray-500 hover:bg-gray-100 font-semibold rounded-md transition-colors text-sm">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-6 h-6"><path d="M21 3L0 10l7.66 4.26L16 8l-6.26 8.34L14 24l7-21z"></path></svg>
+                                    <span>Partager</span>
+                                </button>
+                            </div>
 
-                        <!-- Comment Area -->
-                        <div class="bg-white comment-area px-4 pb-4 border-t border-gray-100 hidden">
-                            <form action="{{ route('feed_comment.store') }}" method="POST" class="mt-3 mb-4">
-                                @csrf
-                                <div class="flex gap-2">
-                                    <img
-                                        src="{{ auth()->user()->avatar_url ?? 'https://ui-avatars.com/api/?name=' . urlencode(auth()->user()->name) . '&background=random' }}"
-                                        alt="Avatar" class="w-8 h-8 rounded-full object-cover">
-                                    <div class="flex-1">
-                                        <textarea name="content" rows="1" required
-                                            class="w-full bg-gray-100 border-0 text-[13px] rounded-2xl focus:ring-1 focus:ring-blue-400 focus:bg-white py-2.5 px-4 placeholder-gray-500 resize-none transition"
-                                            placeholder="Ajouter un commentaire..."></textarea>
-                                        <input type="hidden" name="post_id" value="{{ $post->id }}">
-                                        <div class="flex justify-end mt-2">
-                                            <button type="submit"
-                                                class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-1.5 px-5 rounded-full text-[12px] transition active:scale-95">
+                            <!-- Comment Area (Hidden initially) -->
+                            <div class="comment-area px-4 pb-4 hidden transition-all duration-300">
+                                <form action="{{ route('feed_comment.store') }}" method="POST" class="mt-1 mb-4">
+                                    @csrf
+                                    <div class="flex gap-2 items-start">
+                                        <img src="{{ auth()->user()->avatar_url ?? 'https://ui-avatars.com/api/?name=' . urlencode(auth()->user()->name) . '&background=random' }}"
+                                            alt="Avatar" class="w-10 h-10 rounded-full object-cover shrink-0 mt-0.5">
+                                        <div class="flex-1 flex flex-col items-end">
+                                            <textarea name="content" rows="1" required
+                                                class="w-full border border-gray-400 text-sm rounded-full focus:ring-1 focus:ring-gray-500 focus:border-gray-500 py-2.5 px-4 placeholder-gray-500 resize-none transition-all shadow-sm"
+                                                placeholder="Ajouter un commentaire..."
+                                                oninput="this.style.height = ''; this.style.height = Math.min(this.scrollHeight, 150) + 'px'; this.classList.remove('rounded-full'); this.classList.add('rounded-xl'); if(this.value === '') { this.classList.add('rounded-full'); this.classList.remove('rounded-xl'); }"
+                                                ></textarea>
+                                            <input type="hidden" name="post_id" value="{{ $post->id }}">
+                                            <button type="submit" class="mt-2 bg-[#0a66c2] hover:bg-[#004182] text-white font-semibold py-1.5 px-4 rounded-full text-sm transition shadow-sm">
                                                 Publier
                                             </button>
                                         </div>
                                     </div>
-                                </div>
-                            </form>
-                            <div class="space-y-3">
-                                @foreach ($post->comments as $comment)
-                                    <div class="flex gap-2">
-                                        <img
-                                            src="{{ $comment->user->avatar_url ?? 'https://ui-avatars.com/api/?name=' . urlencode($comment->user->name) . '&background=random' }}"
-                                            alt="Avatar" class="w-8 h-8 rounded-full object-cover mt-0.5">
-                                        <div class="flex-1">
-                                            <div class="bg-gray-100 px-3 py-2 rounded-2xl inline-block max-w-full">
-                                                <h4 class="font-semibold text-gray-900 text-[12px]">
-                                                    {{ $comment->user->name }}
-                                                </h4>
-                                                <p class="text-gray-800 text-[13px] leading-snug">{{ $comment->content }}</p>
-                                            </div>
-                                            <div class="flex items-center gap-3 mt-1 ml-3 text-[11px] font-semibold text-gray-500">
-                                                <span>{{ $comment->created_at->diffForHumans() }}</span>
-                                                @if ($comment->user_id == auth()->id())
-                                                    <a href="{{ route('feed_comment.edit', $comment->id) }}"
-                                                        class="hover:text-blue-600 hover:underline transition">Modifier</a>
-                                                    <form action="{{ route('feed_comment.destroy', $comment->id) }}"
-                                                        method="POST">
-                                                        @csrf @method('DELETE')
-                                                        <button type="submit" onclick="return confirm('Supprimer ?')"
-                                                            class="hover:text-red-600 hover:underline transition">Supprimer</button>
-                                                    </form>
-                                                @endif
+                                </form>
+
+                                <!-- Comments List -->
+                                <div class="space-y-4">
+                                    @foreach ($post->comments as $comment)
+                                        <div class="flex gap-2 items-start">
+                                            <img src="{{ $comment->user->avatar_url ?? 'https://ui-avatars.com/api/?name=' . urlencode($comment->user->name) . '&background=random' }}"
+                                                alt="Avatar" class="w-10 h-10 rounded-full object-cover mt-0.5 shrink-0 hover:opacity-80 cursor-pointer">
+
+                                            <div class="flex-1">
+                                                <div class="bg-[#f2f2f2] px-3.5 py-2.5 rounded-br-xl rounded-bl-xl rounded-tr-xl inline-block w-full">
+                                                    <div class="flex justify-between items-start">
+                                                        <div>
+                                                            <h4 class="font-bold text-gray-900 text-sm hover:text-blue-700 hover:underline cursor-pointer leading-tight">
+                                                                {{ $comment->user->name }}
+                                                            </h4>
+                                                            <p class="text-xs text-gray-500 mb-1 leading-tight line-clamp-1">{{ $comment->user->headline ?? 'Membre' }}</p>
+                                                        </div>
+                                                        <span class="text-xs text-gray-500 shrink-0 ml-4">{{ $comment->created_at->diffForHumans(null, true, true) }}</span>
+                                                    </div>
+                                                    <p class="text-gray-900 text-sm leading-snug whitespace-pre-wrap break-words mt-1">{{ $comment->content }}</p>
+                                                </div>
+
+                                                <!-- Comment Meta Actions -->
+                                                <div class="flex items-center gap-4 mt-1 ml-3 text-xs font-semibold text-gray-500">
+                                                    <button class="hover:bg-gray-200 px-2 py-0.5 rounded transition">J'aime</button>
+                                                    <span class="text-gray-300">|</span>
+                                                    @if ($comment->user_id == auth()->id())
+                                                        <a href="{{ route('feed_comment.edit', $comment->id) }}" class="hover:bg-gray-200 px-2 py-0.5 rounded transition">Modifier</a>
+                                                        <span class="text-gray-300">|</span>
+                                                        <form action="{{ route('feed_comment.destroy', $comment->id) }}" method="POST" class="inline m-0">
+                                                            @csrf @method('DELETE')
+                                                            <button type="submit" onclick="return confirm('Supprimer ce commentaire ?')" class="hover:bg-red-50 hover:text-red-600 px-2 py-0.5 rounded transition">Supprimer</button>
+                                                        </form>
+                                                    @endif
+                                                </div>
                                             </div>
                                         </div>
-                                    </div>
-                                @endforeach
+                                    @endforeach
+                                </div>
+                            </div>
+                        </div>
+                    @empty
+                        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-12 text-center">
+                            <div class="w-20 h-20 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-4 border border-gray-100">
+                                <svg class="w-10 h-10 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10l4 4v10a2 2 0 01-2 2z"></path>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M14 3v5h5"></path>
+                                </svg>
+                            </div>
+                            <h3 class="text-lg font-semibold text-gray-900 mb-2">Votre fil d'actualité est vide</h3>
+                            <p class="text-gray-500 text-sm mb-6 max-w-sm mx-auto">Partagez vos pensées, idées ou articles avec votre réseau professionnel.</p>
+                            <a href="{{ route('feed.create') }}" class="inline-flex justify-center px-6 py-2.5 bg-[#0a66c2] border border-transparent shadow-sm text-sm font-medium rounded-full text-white hover:bg-[#004182] transition-colors">
+                                Rédiger un post
+                            </a>
+                        </div>
+                    @endforelse
+                </div>
+            </div>
+
+            <!-- Right Sidebar (Suggestions - Hidden on Mobile/Tablet) -->
+            <div class="hidden lg:block lg:col-span-3 space-y-4">
+                <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
+                    <h2 class="font-semibold text-gray-900 text-base mb-4">Ajouter à votre fil d'actualité</h2>
+
+                    <div class="space-y-4">
+                        <!-- Suggestion Item Placeholder -->
+                        <div class="flex gap-3">
+                            <div class="w-12 h-12 rounded-full bg-gray-200 shrink-0"></div>
+                            <div>
+                                <h4 class="font-semibold text-sm text-gray-900 leading-tight">Entreprise X</h4>
+                                <p class="text-xs text-gray-500 mt-0.5 line-clamp-2">Technologie de l'information et services</p>
+                                <button class="mt-2 flex items-center justify-center gap-1 border border-gray-600 text-gray-600 hover:bg-gray-100 hover:border-gray-900 hover:text-gray-900 font-semibold text-sm px-4 py-1 rounded-full transition-colors">
+                                    <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M14 12L8 3v18l6-9z"></path></svg>
+                                    Suivre
+                                </button>
+                            </div>
+                        </div>
+                        <div class="flex gap-3">
+                            <div class="w-12 h-12 rounded-full bg-gray-200 shrink-0"></div>
+                            <div>
+                                <h4 class="font-semibold text-sm text-gray-900 leading-tight">Personne Y</h4>
+                                <p class="text-xs text-gray-500 mt-0.5 line-clamp-2">Développeur Full Stack | Laravel | Vue.js</p>
+                                <button class="mt-2 flex items-center justify-center gap-1 border border-gray-600 text-gray-600 hover:bg-gray-100 hover:border-gray-900 hover:text-gray-900 font-semibold text-sm px-4 py-1 rounded-full transition-colors">
+                                    <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M14 12L8 3v18l6-9z"></path></svg>
+                                    Suivre
+                                </button>
                             </div>
                         </div>
                     </div>
-                @empty
-                    <div class="bg-white rounded-lg shadow-[0_0_0_1px_rgba(0,0,0,0.08),0_2px_3px_rgba(0,0,0,0.08)] p-12 text-center">
-                        <div class="w-20 h-20 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-4">
-                            <svg class="w-10 h-10 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10l4 4v10a2 2 0 01-2 2z" stroke-width="2"
-                                    stroke-linecap="round" stroke-linejoin="round"></path>
-                                <path d="M14 3v5h5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
-                            </svg>
-                        </div>
-                        <h3 class="text-lg font-bold text-gray-900 mb-2">Aucun post pour le moment</h3>
-                        <p class="text-gray-500 text-sm mb-6">Partagez vos pensées avec votre réseau professionnel.</p>
-                        <a href="{{ route('feed.create') }}"
-                            class="inline-flex items-center px-8 py-2.5 bg-blue-600 text-white font-bold rounded-full hover:bg-blue-700 transition shadow-sm active:scale-95">
-                            Commencer un post
-                        </a>
-                    </div>
-                @endforelse
+
+                    <a href="#" class="inline-flex items-center gap-1 mt-4 text-sm font-semibold text-gray-600 hover:bg-gray-100 px-2 py-1 rounded transition">
+                        Voir toutes les suggestions
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                    </a>
+                </div>
+
+                <!-- Footer Links -->
+                <div class="text-center px-4">
+                    <ul class="flex flex-wrap justify-center gap-x-3 gap-y-1 text-xs text-gray-500">
+                        <li><a href="#" class="hover:text-blue-600 hover:underline">À propos</a></li>
+                        <li><a href="#" class="hover:text-blue-600 hover:underline">Accessibilité</a></li>
+                        <li><a href="#" class="hover:text-blue-600 hover:underline">Assistance</a></li>
+                        <li><a href="#" class="hover:text-blue-600 hover:underline">Confidentialité et conditions</a></li>
+                        <li><a href="#" class="hover:text-blue-600 hover:underline">Préférences publicitaires</a></li>
+                    </ul>
+                    <p class="text-xs text-gray-500 mt-2">ProfessionalConnect Corporation © 2026</p>
+                </div>
             </div>
+
         </div>
     </div>
 
+    <!-- Scripts for Interactions -->
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            // Dropdown Toggle
-            document.querySelectorAll('.dropdown-btn').forEach(btn => {
-                btn.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    const menu = btn.nextElementSibling;
-                    const isOpen = !menu.classList.contains('hidden');
-                    document.querySelectorAll('.dropdown-menu').forEach(m => m.classList.add('hidden'));
-                    if (!isOpen) menu.classList.remove('hidden');
-                });
-            });
+            // Dropdown Menu Logic
+            const dropdownBtns = document.querySelectorAll('.dropdown-btn');
 
-            // Comment Toggle
-            document.querySelectorAll('.btn-comment').forEach((btn, index) => {
-                btn.addEventListener('click', () => {
-                    const area = document.querySelectorAll('.comment-area')[index];
-                    area.classList.toggle('hidden');
-                    if (!area.classList.contains('hidden')) {
-                        const textarea = area.querySelector('textarea');
-                        if (textarea) textarea.focus();
+            dropdownBtns.forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.stopPropagation(); // Prevent document click from immediately closing it
+                    const menu = btn.nextElementSibling;
+                    const isCurrentlyHidden = menu.classList.contains('hidden');
+
+                    // Close all other dropdowns first
+                    document.querySelectorAll('.dropdown-menu').forEach(m => {
+                        m.classList.add('hidden');
+                    });
+
+                    // Toggle current
+                    if (isCurrentlyHidden) {
+                        menu.classList.remove('hidden');
                     }
                 });
             });
 
-            // Global Click to close
-            window.addEventListener('click', () => {
-                document.querySelectorAll('.dropdown-menu').forEach(m => m.classList.add('hidden'));
+            // Close dropdowns when clicking anywhere outside
+            document.addEventListener('click', () => {
+                document.querySelectorAll('.dropdown-menu').forEach(m => {
+                    m.classList.add('hidden');
+                });
+            });
+
+            // Comment Toggle Logic
+            const commentBtns = document.querySelectorAll('.btn-comment');
+            commentBtns.forEach((btn, index) => {
+                btn.addEventListener('click', () => {
+                    const commentAreas = document.querySelectorAll('.comment-area');
+                    const area = commentAreas[index];
+
+                    area.classList.toggle('hidden');
+
+                    // Optional: focus the textarea when opened
+                    if (!area.classList.contains('hidden')) {
+                        const textarea = area.querySelector('textarea');
+                        if(textarea) textarea.focus();
+                    }
+                });
             });
         });
     </script>

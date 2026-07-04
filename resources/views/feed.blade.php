@@ -14,11 +14,11 @@
                     <p class="text-xs text-gray-500 mt-1 px-4 line-clamp-2">{{ auth()->user()->headline ?? 'Membre' }}</p>
 
                     <div class="border-t border-gray-100 mt-4 pt-4 text-left px-4">
-                         <div class="flex justify-between items-center text-xs font-semibold text-gray-500 hover:bg-gray-50 cursor-pointer p-1 rounded transition">
+                         <a href="{{ route('network.index') }}" class="flex justify-between items-center text-xs font-semibold text-gray-500 hover:bg-gray-50 cursor-pointer p-1 rounded transition">
                              <span>Relations</span>
-                             <span class="text-[#0a66c2]">0</span>
-                         </div>
-                         <p class="text-xs font-bold text-gray-900 ml-1">Développez votre réseau</p>
+                             <span class="text-[#0a66c2]">{{ auth()->user()->connections_count }}</span>
+                         </a>
+                         <p class="text-xs font-bold text-gray-900 ml-1 mt-1">Développez votre réseau</p>
                     </div>
                 </div>
             </div>
@@ -67,9 +67,9 @@
                                     <img src="{{ $post->user->avatar_url ?? 'https://ui-avatars.com/api/?name=' . urlencode($post->user->name) . '&background=random' }}"
                                         alt="Avatar" class="w-12 h-12 rounded-full object-cover border border-gray-100">
                                     <div class="leading-tight">
-                                        <a href="{{ route('user_profil', $post->user_id) }}" class="font-semibold text-gray-900 text-sm hover:text-[#0a66c2] hover:underline cursor-pointer leading-none">
+                                        <h4 class="font-semibold text-gray-900 text-sm hover:text-[#0a66c2] hover:underline cursor-pointer leading-none">
                                             {{ $post->user->name }}
-                                        </a>
+                                        </h4>
                                         <p class="text-xs text-gray-500 mt-0.5 line-clamp-1">{{ $post->user->headline ?? 'Membre' }} @if($post->user->company) chez {{ $post->user->company }} @endif</p>
                                         <p class="text-[11px] text-gray-500 flex items-center gap-1 mt-0.5">
                                             {{ $post->created_at->diffForHumans() }}
@@ -108,12 +108,10 @@
                             </div>
 
                             <!-- Content Image -->
-                            @if($post->photo !== "null")
+                            @if($post->photo)
                             <div class="w-full bg-gray-50">
                                 <img src="{{ asset('photos/' . $post->photo) }}" alt="Post image" class="w-full max-h-[500px] object-contain">
                             </div>
-                            @else
-<div></div>
                             @endif
 
                             <!-- Interactions Meta (Like/Comment Counts) -->

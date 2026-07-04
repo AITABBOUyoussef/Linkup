@@ -26,7 +26,7 @@ class ProfileController extends Controller
       public function user_profil(string $id) {
 
  $user = User::findOrFail($id);
- dd($user);
+//  dd($user);
   return view('user_profil', compact('user'));
 
     }
