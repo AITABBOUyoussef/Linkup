@@ -23,7 +23,6 @@ class NetworkController extends Controller
                 ->get();
         }
 
-        // جلب الطلبات المعلقة (اللي صيفطوها ليك ناس اخرين)
         $pendingRequests = Connection::with('sender')
             ->where('connected_user_id', auth()->id())
             ->where('status', 'pending')

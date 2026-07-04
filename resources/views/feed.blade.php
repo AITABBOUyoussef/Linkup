@@ -67,9 +67,9 @@
                                     <img src="{{ $post->user->avatar_url ?? 'https://ui-avatars.com/api/?name=' . urlencode($post->user->name) . '&background=random' }}"
                                         alt="Avatar" class="w-12 h-12 rounded-full object-cover border border-gray-100">
                                     <div class="leading-tight">
-                                        <h4 class="font-semibold text-gray-900 text-sm hover:text-[#0a66c2] hover:underline cursor-pointer leading-none">
+                                        <a href="{{route('user_profil' ,$post->user_id )}}" class="font-semibold text-gray-900 text-sm hover:text-[#0a66c2] hover:underline cursor-pointer leading-none">
                                             {{ $post->user->name }}
-                                        </h4>
+                                        </a>
                                         <p class="text-xs text-gray-500 mt-0.5 line-clamp-1">{{ $post->user->headline ?? 'Membre' }} @if($post->user->company) chez {{ $post->user->company }} @endif</p>
                                         <p class="text-[11px] text-gray-500 flex items-center gap-1 mt-0.5">
                                             {{ $post->created_at->diffForHumans() }}
@@ -108,10 +108,12 @@
                             </div>
 
                             <!-- Content Image -->
-                            @if($post->photo)
+                            @if($post->photo !== "null")
                             <div class="w-full bg-gray-50">
                                 <img src="{{ asset('photos/' . $post->photo) }}" alt="Post image" class="w-full max-h-[500px] object-contain">
                             </div>
+                            @else
+                            <div></div>
                             @endif
 
                             <!-- Interactions Meta (Like/Comment Counts) -->
@@ -194,7 +196,7 @@
                                                 <div class="bg-[#f2f2f2] px-3.5 py-2.5 rounded-br-xl rounded-bl-xl rounded-tr-xl inline-block w-full">
                                                     <div class="flex justify-between items-start">
                                                         <div>
-                                                            <h4 class="font-bold text-gray-900 text-sm hover:text-blue-700 hover:underline cursor-pointer leading-tight">
+                                                            <h4  class="font-bold text-gray-900 text-sm hover:text-blue-700 hover:underline cursor-pointer leading-tight">
                                                                 {{ $comment->user->name }}
                                                             </h4>
                                                             <p class="text-xs text-gray-500 mb-1 leading-tight line-clamp-1">{{ $comment->user->headline ?? 'Membre' }}</p>
