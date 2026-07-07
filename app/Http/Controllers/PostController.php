@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Post;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class PostController extends Controller
 {
@@ -76,4 +77,18 @@ public function destroy(string $id){
     return redirect()->route('feed.index')->with('success', 'Post supprime avec succès');
 
 }
+
+public function savedPosts()
+{
+     $savedPostIds = DB::table('saves')
+                      ->where('user_id', auth()->id())
+                      ->pluck('post_id');
+
+   $posts = Post::whereIn('id', $savedPostIds)
+                 ->latest()
+                 ->get();
+
+    return view('feed', compact('posts'));
+}
+
 }

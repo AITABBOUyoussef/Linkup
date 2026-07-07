@@ -1,68 +1,12 @@
 <x-app-layout>
-    <div class="py-8 bg-[#f3f2ef] min-h-screen font-sans">
-        <!-- Main Grid Container -->
-        <div class="max-w-[1128px] mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 md:grid-cols-12 gap-6">
 
-            <!-- Left Sidebar (Profile Snippet - Hidden on Mobile) -->
-            <div class="hidden md:block md:col-span-3 space-y-4">
-                <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden text-center pb-4">
-                    <div class="h-16 bg-gray-200" style="background-image: url('https://images.unsplash.com/photo-1579546929518-9e396f3cc809?q=80&w=2070&auto=format&fit=crop'); background-size: cover; background-position: center;"></div>
-                    <div class="flex justify-center -mt-8 mb-2">
-                        <img src="{{ auth()->user()->avatar_url ?? 'https://ui-avatars.com/api/?name='.urlencode(auth()->user()->name).'&background=random' }}" alt="Profile" class="w-16 h-16 rounded-full border-2 border-white object-cover bg-white">
-                    </div>
-                    <h3 class="font-semibold text-gray-900 text-base leading-tight hover:underline cursor-pointer"><a href="{{ route('profile.edit') }}">{{ auth()->user()->name }}</a></h3>
-                    <p class="text-xs text-gray-500 mt-1 px-4 line-clamp-2">{{ auth()->user()->headline ?? 'Membre' }}</p>
+         <div class="space-y-4 pb-20 md:pb-0">
+            {{-- @if($post->saves->user_id == auth()->id() && $post->saves->post_id == $post->id)
 
-                    <div class="border-t border-gray-100 mt-4 pt-4 text-left px-4">
-                         <a href="{{ route('network.index') }}" class="flex justify-between items-center text-xs font-semibold text-gray-500 hover:bg-gray-50 cursor-pointer p-1 rounded transition">
-                             <span>Relations</span>
-                             <span class="text-[#0a66c2]">{{ auth()->user()->connections_count }}</span>
-                         </a>
-                         <p class="text-xs font-bold text-gray-900 ml-1 mt-1">Développez votre réseau</p>
-                          <a href="{{ route('feed.savedPosts') }}" class="flex justify-between items-center text-xs font-semibold text-gray-500 hover:bg-gray-50 cursor-pointer p-1 rounded transition">
-                             <span>Save</span>
-                             {{-- <span class="text-[#0a66c2]">{{ auth()->user()->connections_count }}</span> --}}
-                         </a>
-                    </div>
-                </div>
-            </div>
+            @endif --}}
 
-            <!-- Center Feed (Posts) -->
-            <div class="col-span-1 md:col-span-6 space-y-4">
-
-                <!-- Create Post Box -->
-                <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
-                    <div class="flex items-center gap-2">
-                        <img src="{{ auth()->user()->avatar_url ?? 'https://ui-avatars.com/api/?name='.urlencode(auth()->user()->name).'&background=random' }}" alt="Avatar" class="w-12 h-12 rounded-full object-cover shrink-0 border border-gray-100">
-                        <a href="{{ route('feed.create') }}" class="flex-1 border border-gray-400 hover:bg-gray-100 text-gray-500 text-sm font-medium rounded-full py-3 px-5 transition text-left cursor-text">
-                            Commencer un post
-                        </a>
-                    </div>
-
-                    <div class="flex items-center justify-around mt-3 pt-2">
-                        <a href="{{ route('feed.create') }}" class="flex items-center gap-2 text-gray-500 hover:bg-gray-100 px-3 py-2 rounded-md transition text-sm font-semibold cursor-pointer">
-                            <svg class="h-6 w-6 text-blue-500" fill="currentColor" viewBox="0 0 24 24"><path d="M19 4H5a3 3 0 00-3 3v10a3 3 0 003 3h14a3 3 0 003-3V7a3 3 0 00-3-3zm1 13a1 1 0 01-1 1H5a1 1 0 01-1-1v-4.586l3.293-3.293a1 1 0 011.414 0l3.346 3.346a1 1 0 001.414 0l3.536-3.536a1 1 0 011.414 0L20 12.586V17zm0-6.414l-3.293-3.293a3 3 0 00-4.242 0l-3.536 3.536-2.586-2.586a3 3 0 00-4.242 0L2 10.586V7a1 1 0 011-1h14a1 1 0 011 1v3.586z"></path></svg>
-                            <span class="hidden sm:inline">Média</span>
-                        </a>
-                        <a href="{{ route('feed.create') }}" class="flex items-center gap-2 text-gray-500 hover:bg-gray-100 px-3 py-2 rounded-md transition text-sm font-semibold cursor-pointer">
-                            <svg class="h-6 w-6 text-orange-500" fill="currentColor" viewBox="0 0 24 24"><path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V10h14v10zm0-12H5V6h14v2zm-7 5h5v5h-5v-5z"></path></svg>
-                            <span class="hidden sm:inline">Événement</span>
-                        </a>
-                        <a href="{{ route('feed.create') }}" class="flex items-center gap-2 text-gray-500 hover:bg-gray-100 px-3 py-2 rounded-md transition text-sm font-semibold cursor-pointer">
-                            <svg class="h-6 w-6 text-orange-800" fill="currentColor" viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm-5 14H4v-4h11v4zm0-5H4V9h11v4zm5 5h-4V9h4v9z"></path></svg>
-                            <span class="hidden sm:inline">Article</span>
-                        </a>
-                    </div>
-                </div>
-
-                <div class="flex items-center my-2">
-                    <hr class="flex-grow border-gray-300">
-                    <span class="px-2 text-xs text-gray-500">Classer par: <strong class="text-black">Pertinence</strong></span>
-                </div>
-
-                <!-- Feed Posts -->
-                <div class="space-y-4 pb-20 md:pb-0">
                     @forelse ($posts as $post)
+                    @php $hassave = $post->saves->contains('user_id', auth()->id()); @endphp
                         <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
 
                             <!-- Post Header -->
@@ -172,7 +116,7 @@
                                 <button  type="submit" class="w-full flex items-center justify-center gap-2 py-3 rounded-md transition-colors text-sm font-semibold {{ $hassave ? 'text-grey-700 bg-gray-300 hover:bg-gray-100' : 'text-gray-500 hover:bg-gray-100' }}">
                                    <svg width="800px" height="800px" class="w-6 h-6 " viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
 <path fill-rule="evenodd" clip-rule="evenodd" d="M6.75 6L7.5 5.25H16.5L17.25 6V19.3162L12 16.2051L6.75 19.3162V6ZM8.25 6.75V16.6838L12 14.4615L15.75 16.6838V6.75H8.25Z" fill="#080341"/>
-</svg>                          <span>Save</span>
+</svg> <span>Save</span>
                                 </button>
                                 </form>
                             </div>
@@ -255,108 +199,5 @@
                         </div>
                     @endforelse
                 </div>
-            </div>
 
-            <!-- Right Sidebar (Suggestions - Hidden on Mobile/Tablet) -->
-            <div class="hidden lg:block lg:col-span-3 space-y-4">
-                <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
-                    <h2 class="font-semibold text-gray-900 text-base mb-4">Ajouter à votre fil d'actualité</h2>
-
-                    <div class="space-y-4">
-                        <!-- Suggestion Item Placeholder -->
-                        <div class="flex gap-3">
-                            <div class="w-12 h-12 rounded-full bg-gray-200 shrink-0"></div>
-                            <div>
-                                <h4 class="font-semibold text-sm text-gray-900 leading-tight">Entreprise X</h4>
-                                <p class="text-xs text-gray-500 mt-0.5 line-clamp-2">Technologie de l'information et services</p>
-                                <button class="mt-2 flex items-center justify-center gap-1 border border-gray-600 text-gray-600 hover:bg-gray-100 hover:border-gray-900 hover:text-gray-900 font-semibold text-sm px-4 py-1 rounded-full transition-colors">
-                                    <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M14 12L8 3v18l6-9z"></path></svg>
-                                    Suivre
-                                </button>
-                            </div>
-                        </div>
-                        <div class="flex gap-3">
-                            <div class="w-12 h-12 rounded-full bg-gray-200 shrink-0"></div>
-                            <div>
-                                <h4 class="font-semibold text-sm text-gray-900 leading-tight">Personne Y</h4>
-                                <p class="text-xs text-gray-500 mt-0.5 line-clamp-2">Développeur Full Stack | Laravel | Vue.js</p>
-                                <button class="mt-2 flex items-center justify-center gap-1 border border-gray-600 text-gray-600 hover:bg-gray-100 hover:border-gray-900 hover:text-gray-900 font-semibold text-sm px-4 py-1 rounded-full transition-colors">
-                                    <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M14 12L8 3v18l6-9z"></path></svg>
-                                    Suivre
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-
-                    <a href="#" class="inline-flex items-center gap-1 mt-4 text-sm font-semibold text-gray-600 hover:bg-gray-100 px-2 py-1 rounded transition">
-                        Voir toutes les suggestions
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
-                    </a>
-                </div>
-
-                <!-- Footer Links -->
-                <div class="text-center px-4">
-                    <ul class="flex flex-wrap justify-center gap-x-3 gap-y-1 text-xs text-gray-500">
-                        <li><a href="#" class="hover:text-blue-600 hover:underline">À propos</a></li>
-                        <li><a href="#" class="hover:text-blue-600 hover:underline">Accessibilité</a></li>
-                        <li><a href="#" class="hover:text-blue-600 hover:underline">Assistance</a></li>
-                        <li><a href="#" class="hover:text-blue-600 hover:underline">Confidentialité et conditions</a></li>
-                        <li><a href="#" class="hover:text-blue-600 hover:underline">Préférences publicitaires</a></li>
-                    </ul>
-                    <p class="text-xs text-gray-500 mt-2">ProfessionalConnect Corporation © 2026</p>
-                </div>
-            </div>
-
-        </div>
-    </div>
-
-    <!-- Scripts for Interactions -->
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            // Dropdown Menu Logic
-            const dropdownBtns = document.querySelectorAll('.dropdown-btn');
-
-            dropdownBtns.forEach(btn => {
-                btn.addEventListener('click', (e) => {
-                    e.stopPropagation(); // Prevent document click from immediately closing it
-                    const menu = btn.nextElementSibling;
-                    const isCurrentlyHidden = menu.classList.contains('hidden');
-
-                    // Close all other dropdowns first
-                    document.querySelectorAll('.dropdown-menu').forEach(m => {
-                        m.classList.add('hidden');
-                    });
-
-                    // Toggle current
-                    if (isCurrentlyHidden) {
-                        menu.classList.remove('hidden');
-                    }
-                });
-            });
-
-            // Close dropdowns when clicking anywhere outside
-            document.addEventListener('click', () => {
-                document.querySelectorAll('.dropdown-menu').forEach(m => {
-                    m.classList.add('hidden');
-                });
-            });
-
-            // Comment Toggle Logic
-            const commentBtns = document.querySelectorAll('.btn-comment');
-            commentBtns.forEach((btn, index) => {
-                btn.addEventListener('click', () => {
-                    const commentAreas = document.querySelectorAll('.comment-area');
-                    const area = commentAreas[index];
-
-                    area.classList.toggle('hidden');
-
-                    // Optional: focus the textarea when opened
-                    if (!area.classList.contains('hidden')) {
-                        const textarea = area.querySelector('textarea');
-                        if(textarea) textarea.focus();
-                    }
-                });
-            });
-        });
-    </script>
 </x-app-layout>

@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Route;
 
 Route::middleware('auth')->group(function () {
     // Feed & Posts
+    Route::get('/feed/saved-posts', [PostController::class, 'savedPosts'])->name('feed.savedPosts');
     Route::resource('/feed', PostController::class);
     Route::resource('/feed_comment', CommentController::class);
     Route::resource('/feed_like', LikeController::class);
