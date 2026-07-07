@@ -120,6 +120,7 @@ public/photos/1783095836.png
 public/photos/1783098621.png
 public/photos/1783099126.png
 public/photos/1783099293.png
+public/photos/1783173342.png
 public/robots.txt
 README.md
 resources/css/app.css
@@ -189,227 +190,6 @@ vite.config.js
 
 <files>
 This section contains the contents of the repository's files.
-
-<file path="app/Http/Controllers/ConnectionController.php">
-<?php
-
-namespace App\Http\Controllers;
-
-use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
-use App\Models\Connection;
-
-use Illuminate\Database\Connection as DatabaseConnection;
-use Illuminate\Database\Connectors\ConnectionFactory;
-
-class ConnectionController extends Controller
-{
- public function store(Request $request)
-    {
-        $request->validate([
-            'connected_user_id' => 'required|exists:users,id',
-        ]);
-
-        $userId = auth()->id();
-        $connectedUserId = $request->connected_user_id;
-
-        if ($userId == $connectedUserId) {
-            return back()->with('error', 'Vous ne pouvez pas vous ajouter vous-même.');
-        }
-
-         $exists = Connection::where(function($query) use ($userId, $connectedUserId) {
-            $query->where('user_id', $userId)->where('connected_user_id', $connectedUserId);
-        })->orWhere(function($query) use ($userId, $connectedUserId) {
-            $query->where('user_id', $connectedUserId)->where('connected_user_id', $userId);
-        })->exists();
-
-        if ($exists) {
-            return back()->with('error', 'Une demande ou connexion existe déjà.');
-        }
-
-        Connection::create([
-            'user_id' => $userId,
-            'connected_user_id' => $connectedUserId,
-            'status' => 'pending',
-        ]);
-
-        return back()->with('success', 'Demande de connexion envoyée.');
-    }
-     public function accept(string $id)
-    {
-        $connection = Connection::findOrFail($id);
-
-        if ($connection->connected_user_id !== auth()->id()) {
-            abort(403, 'Action non autorisée.');
-        }
-
-        $connection->update([
-            'status' => 'accepted',
-        ]);
-
-        return back()->with('success', 'Vous êtes maintenant connectés !');
-    }
-     public function destroy(string $id)
-    {
-        $connection = Connection::findOrFail($id);
-
-        if ($connection->user_id !== auth()->id() && $connection->connected_user_id !== auth()->id()) {
-            abort(403, 'Action non autorisée.');
-        }
-
-        $connection->delete();
-
-        return back()->with('success', 'Connexion ou demande retirée.');
-    }
-}
-</file>
-
-<file path="app/Http/Controllers/NetworkController.php">
-<?php
-
-namespace App\Http\Controllers;
-
-use App\Models\User;
-use App\Models\Connection;
-use Illuminate\Http\Request;
-
-class NetworkController extends Controller
-{
-    public function index(Request $request)
-    {
-        $query = $request->input('q');
-
-        if ($query) {
-            $users = User::where('name', 'LIKE', "%{$query}%")
-                ->where('id', '!=', auth()->id())
-                ->get();
-        } else {
-            $users = User::where('id', '!=', auth()->id())
-                ->inRandomOrder()
-                ->take(12)
-                ->get();
-        }
-
-        // جلب الطلبات المعلقة (اللي صيفطوها ليك ناس اخرين)
-        $pendingRequests = Connection::with('sender')
-            ->where('connected_user_id', auth()->id())
-            ->where('status', 'pending')
-            ->get();
-
-        return view('network', compact('users', 'query', 'pendingRequests'));
-    }
-}
-</file>
-
-<file path="app/Http/Middleware/is_auth.php">
-<?php
-
-namespace App\Http\Middleware;
-
-use Closure;
-use Illuminate\Http\Request;
-use Symfony\Component\HttpFoundation\Response;
-
-class is_auth
-{
-    /**
-     * Handle an incoming request.
-     *
-     * @param  Closure(Request): (Response)  $next
-     */
-    public function handle(Request $request, Closure $next): Response
-    {
-        return $next($request);
-    }
-}
-</file>
-
-<file path="resources/views/network.blade.php">
-<x-app-layout>
-    <div class="py-8 bg-[#f3f2ef] min-h-screen font-sans">
-        <div class="max-w-[1128px] mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 md:grid-cols-12 gap-6">
-
-            <!-- Left Sidebar: Pending requests -->
-            <div class="col-span-1 md:col-span-4 space-y-4">
-                <div class="bg-white rounded-xl shadow-[0_0_0_1px_rgba(0,0,0,0.08)] p-4">
-                    <h2 class="font-semibold text-gray-900 text-base mb-4">Invitations en attente</h2>
-                    @forelse($pendingRequests as $request)
-                        <div class="flex items-start gap-3 mb-4 pb-4 border-b border-gray-100 last:mb-0 last:pb-0 last:border-0">
-                            <img src="{{ $request->sender->avatar_url }}" class="w-12 h-12 rounded-full object-cover">
-                            <div class="flex-1">
-                                <a href="{{ route('user_profil', $request->sender->id) }}" class="font-semibold text-sm text-gray-900 hover:underline">{{ $request->sender->name }}</a>
-                                <p class="text-xs text-gray-500 mb-2">{{ $request->sender->headline ?? 'Membre' }}</p>
-                                <div class="flex gap-2">
-                                    <form action="{{ route('connections.accept', $request->id) }}" method="POST" class="flex-1">
-                                        @csrf @method('PATCH')
-                                        <button class="w-full bg-[#0a66c2] hover:bg-[#004182] text-white text-xs font-semibold py-1.5 rounded-full transition shadow-sm">Accepter</button>
-                                    </form>
-                                    <form action="{{ route('connections.destroy', $request->id) }}" method="POST" class="flex-1">
-                                        @csrf @method('DELETE')
-                                        <button class="w-full border border-gray-500 text-gray-600 hover:bg-gray-50 text-xs font-semibold py-1.5 rounded-full transition">Ignorer</button>
-                                    </form>
-                                </div>
-                            </div>
-                        </div>
-                    @empty
-                        <p class="text-sm text-gray-500 text-center py-4">Aucune invitation en attente.</p>
-                    @endforelse
-                </div>
-            </div>
-
-            <!-- Main Content: Search Results / Suggestions -->
-            <div class="col-span-1 md:col-span-8 space-y-4">
-                <div class="bg-white rounded-xl shadow-[0_0_0_1px_rgba(0,0,0,0.08)] p-4">
-                    <h2 class="font-semibold text-gray-900 text-base mb-4">
-                        @if($query) Résultats de recherche pour "{{ $query }}" @else Connaissez-vous ces personnes ? @endif
-                    </h2>
-
-                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                        @forelse($users as $u)
-                            <div class="border border-gray-200 rounded-xl overflow-hidden text-center relative flex flex-col hover:shadow-md transition">
-                                <div class="h-16 bg-gradient-to-r from-gray-200 to-gray-300 w-full"></div>
-                                <a href="{{ route('user_profil', $u->id) }}">
-                                    <img src="{{ $u->avatar_url }}" class="w-16 h-16 rounded-full object-cover border-2 border-white mx-auto -mt-8 bg-white hover:opacity-90 transition">
-                                </a>
-                                <div class="p-4 flex-1 flex flex-col">
-                                    <a href="{{ route('user_profil', $u->id) }}" class="font-semibold text-gray-900 hover:underline leading-tight">{{ $u->name }}</a>
-                                    <p class="text-xs text-gray-500 mt-1 line-clamp-2 flex-1">{{ $u->headline ?? 'Membre du réseau' }}</p>
-
-                                    <div class="mt-4">
-                                        @php $status = auth()->user()->connectionStatus($u->id); @endphp
-                                        @if(!$status)
-                                            <form action="{{ route('connections.store') }}" method="POST">
-                                                @csrf
-                                                <input type="hidden" name="connected_user_id" value="{{ $u->id }}">
-                                                <button type="submit" class="w-full border border-[#0a66c2] text-[#0a66c2] hover:bg-blue-50 font-semibold py-1.5 rounded-full transition text-sm flex items-center justify-center gap-1">
-                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"></path></svg>
-                                                    Se connecter
-                                                </button>
-                                            </form>
-                                        @elseif($status['status'] === 'pending')
-                                            <button class="w-full border border-gray-300 text-gray-500 bg-gray-50 font-semibold py-1.5 rounded-full text-sm cursor-default">
-                                                En attente
-                                            </button>
-                                        @elseif($status['status'] === 'accepted')
-                                            <button class="w-full border border-green-500 text-green-600 bg-green-50 font-semibold py-1.5 rounded-full text-sm cursor-default flex items-center justify-center gap-1">
-                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
-                                                Connecté
-                                            </button>
-                                        @endif
-                                    </div>
-                                </div>
-                            </div>
-                        @empty
-                            <p class="text-sm text-gray-500 col-span-full py-8 text-center">Aucun utilisateur trouvé.</p>
-                        @endforelse
-                    </div>
-                </div>
-            </div>
-
-        </div>
-    </div>
-</x-app-layout>
-</file>
 
 <file path=".editorconfig">
 root = true
@@ -795,6 +575,103 @@ class PasswordResetLinkController extends Controller
 }
 </file>
 
+<file path="app/Http/Controllers/ConnectionController.php">
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Http\Controllers\Controller;
+use Illuminate\Http\Request;
+use App\Models\Connection;
+
+use Illuminate\Database\Connection as DatabaseConnection;
+use Illuminate\Database\Connectors\ConnectionFactory;
+
+class ConnectionController extends Controller
+{
+ public function store(Request $request)
+    {
+        $request->validate([
+            'connected_user_id' => 'required|exists:users,id',
+        ]);
+
+        $userId = auth()->id();
+        $connectedUserId = $request->connected_user_id;
+
+        if ($userId == $connectedUserId) {
+            return back()->with('error', 'Vous ne pouvez pas vous ajouter vous-même.');
+        }
+
+         $exists = Connection::where(function($query) use ($userId, $connectedUserId) {
+            $query->where('user_id', $userId)->where('connected_user_id', $connectedUserId);
+        })->orWhere(function($query) use ($userId, $connectedUserId) {
+            $query->where('user_id', $connectedUserId)->where('connected_user_id', $userId);
+        })->exists();
+
+        if ($exists) {
+            return back()->with('error', 'Une demande ou connexion existe déjà.');
+        }
+
+        Connection::create([
+            'user_id' => $userId,
+            'connected_user_id' => $connectedUserId,
+            'status' => 'pending',
+        ]);
+
+        return back()->with('success', 'Demande de connexion envoyée.');
+    }
+     public function accept(string $id)
+    {
+        $connection = Connection::findOrFail($id);
+
+        if ($connection->connected_user_id !== auth()->id()) {
+            abort(403, 'Action non autorisée.');
+        }
+
+        $connection->update([
+            'status' => 'accepted',
+        ]);
+
+        return back()->with('success', 'Vous êtes maintenant connectés !');
+    }
+     public function destroy(string $id)
+    {
+        $connection = Connection::findOrFail($id);
+
+        if ($connection->user_id !== auth()->id() && $connection->connected_user_id !== auth()->id()) {
+            abort(403, 'Action non autorisée.');
+        }
+
+        $connection->delete();
+
+        return back()->with('success', 'Connexion ou demande retirée.');
+    }
+}
+</file>
+
+<file path="app/Http/Middleware/is_auth.php">
+<?php
+
+namespace App\Http\Middleware;
+
+use Closure;
+use Illuminate\Http\Request;
+use Symfony\Component\HttpFoundation\Response;
+
+class is_auth
+{
+    /**
+     * Handle an incoming request.
+     *
+     * @param  Closure(Request): (Response)  $next
+     */
+    public function handle(Request $request, Closure $next): Response
+    {
+        return $next($request);
+    }
+}
+</file>
+
 <file path="app/Http/Requests/Auth/LoginRequest.php">
 <?php
 
@@ -914,32 +791,6 @@ class ProfileUpdateRequest extends FormRequest
                 Rule::unique(User::class)->ignore($this->user()->id),
             ],
         ];
-    }
-}
-</file>
-
-<file path="app/Models/Connection.php">
-<?php
-
-namespace App\Models;
-
-use Illuminate\Database\Eloquent\Model;
-
-class Connection extends Model
-{
-     protected $fillable = [
-        'user_id',
-        'connected_user_id',
-        'status',
-    ];
-     public function sender()
-    {
-        return $this->belongsTo(User::class, 'user_id');
-    }
-
-    public function receiver()
-    {
-        return $this->belongsTo(User::class, 'connected_user_id');
     }
 }
 </file>
@@ -2331,10 +2182,6 @@ return [
 ];
 </file>
 
-<file path="database/.gitignore">
-*.sqlite*
-</file>
-
 <file path="database/factories/PostFactory.php">
 <?php
 
@@ -3122,6 +2969,93 @@ $classes = ($active ?? false)
 </x-app-layout>
 </file>
 
+<file path="resources/views/network.blade.php">
+<x-app-layout>
+    <div class="py-8 bg-[#f3f2ef] min-h-screen font-sans">
+        <div class="max-w-[1128px] mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 md:grid-cols-12 gap-6">
+
+            <!-- Left Sidebar: Pending requests -->
+            <div class="col-span-1 md:col-span-4 space-y-4">
+                <div class="bg-white rounded-xl shadow-[0_0_0_1px_rgba(0,0,0,0.08)] p-4">
+                    <h2 class="font-semibold text-gray-900 text-base mb-4">Invitations en attente</h2>
+                    @forelse($pendingRequests as $request)
+                        <div class="flex items-start gap-3 mb-4 pb-4 border-b border-gray-100 last:mb-0 last:pb-0 last:border-0">
+                            <img src="{{ $request->sender->avatar_url }}" class="w-12 h-12 rounded-full object-cover">
+                            <div class="flex-1">
+                                <a href="{{ route('user_profil', $request->sender->id) }}" class="font-semibold text-sm text-gray-900 hover:underline">{{ $request->sender->name }}</a>
+                                <p class="text-xs text-gray-500 mb-2">{{ $request->sender->headline ?? 'Membre' }}</p>
+                                <div class="flex gap-2">
+                                    <form action="{{ route('connections.accept', $request->id) }}" method="POST" class="flex-1">
+                                        @csrf @method('PATCH')
+                                        <button class="w-full bg-[#0a66c2] hover:bg-[#004182] text-white text-xs font-semibold py-1.5 rounded-full transition shadow-sm">Accepter</button>
+                                    </form>
+                                    <form action="{{ route('connections.destroy', $request->id) }}" method="POST" class="flex-1">
+                                        @csrf @method('DELETE')
+                                        <button class="w-full border border-gray-500 text-gray-600 hover:bg-gray-50 text-xs font-semibold py-1.5 rounded-full transition">Ignorer</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    @empty
+                        <p class="text-sm text-gray-500 text-center py-4">Aucune invitation en attente.</p>
+                    @endforelse
+                </div>
+            </div>
+
+            <!-- Main Content: Search Results / Suggestions -->
+            <div class="col-span-1 md:col-span-8 space-y-4">
+                <div class="bg-white rounded-xl shadow-[0_0_0_1px_rgba(0,0,0,0.08)] p-4">
+                    <h2 class="font-semibold text-gray-900 text-base mb-4">
+                        @if($query) Résultats de recherche pour "{{ $query }}" @else Connaissez-vous ces personnes ? @endif
+                    </h2>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                        @forelse($users as $u)
+                            <div class="border border-gray-200 rounded-xl overflow-hidden text-center relative flex flex-col hover:shadow-md transition">
+                                <div class="h-16 bg-gradient-to-r from-gray-200 to-gray-300 w-full"></div>
+                                <a href="{{ route('user_profil', $u->id) }}">
+                                    <img src="{{ $u->avatar_url }}" class="w-16 h-16 rounded-full object-cover border-2 border-white mx-auto -mt-8 bg-white hover:opacity-90 transition">
+                                </a>
+                                <div class="p-4 flex-1 flex flex-col">
+                                    <a href="{{ route('user_profil', $u->id) }}" class="font-semibold text-gray-900 hover:underline leading-tight">{{ $u->name }}</a>
+                                    <p class="text-xs text-gray-500 mt-1 line-clamp-2 flex-1">{{ $u->headline ?? 'Membre du réseau' }}</p>
+
+                                    <div class="mt-4">
+                                        @php $status = auth()->user()->connectionStatus($u->id); @endphp
+                                        @if(!$status)
+                                            <form action="{{ route('connections.store') }}" method="POST">
+                                                @csrf
+                                                <input type="hidden" name="connected_user_id" value="{{ $u->id }}">
+                                                <button type="submit" class="w-full border border-[#0a66c2] text-[#0a66c2] hover:bg-blue-50 font-semibold py-1.5 rounded-full transition text-sm flex items-center justify-center gap-1">
+                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"></path></svg>
+                                                    Se connecter
+                                                </button>
+                                            </form>
+                                        @elseif($status['status'] === 'pending')
+                                            <button class="w-full border border-gray-300 text-gray-500 bg-gray-50 font-semibold py-1.5 rounded-full text-sm cursor-default">
+                                                En attente
+                                            </button>
+                                        @elseif($status['status'] === 'accepted')
+                                            <button class="w-full border border-green-500 text-green-600 bg-green-50 font-semibold py-1.5 rounded-full text-sm cursor-default flex items-center justify-center gap-1">
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                                                Connecté
+                                            </button>
+                                        @endif
+                                    </div>
+                                </div>
+                            </div>
+                        @empty
+                            <p class="text-sm text-gray-500 col-span-full py-8 text-center">Aucun utilisateur trouvé.</p>
+                        @endforelse
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</x-app-layout>
+</file>
+
 <file path="resources/views/profile/edit.blade.php">
 <x-app-layout>
     <x-slot name="header">
@@ -3261,72 +3195,6 @@ $classes = ($active ?? false)
         </div>
     </form>
 </section>
-</file>
-
-<file path="resources/views/user_profil.blade.php">
-<!-- ... existing code ... -->
-                        <!-- Actions -->
-                        <div class="flex gap-2">
-                            @if(Auth::id() !== $user->id)
-                                @php
-                                    $status = auth()->user()->connectionStatus($user->id);
-                                @endphp
-
-                                @if(!$status)
-                                    <!-- ما كاين حتى علاقة، نقدرو نصيفطو طلب -->
-                                    <form action="{{ route('connections.store') }}" method="POST">
-                                        @csrf
-                                        <input type="hidden" name="connected_user_id" value="{{ $user->id }}">
-                                        <button type="submit" class="bg-[#0a66c2] hover:bg-[#004182] text-white font-semibold py-2 px-6 rounded-full transition shadow-sm">
-                                            Ajouter au réseau
-                                        </button>
-                                    </form>
-                                @elseif($status['status'] === 'pending')
-                                    @if($status['sender_id'] === Auth::id())
-                                        <!-- أنا صيفطت الطلب -->
-                                        <div class="flex items-center gap-3">
-                                            <span class="bg-gray-100 text-gray-600 font-semibold py-2 px-6 rounded-full">Invitation envoyée</span>
-                                            <form action="{{ route('connections.destroy', $status['id']) }}" method="POST">
-                                                @csrf @method('DELETE')
-                                                <button type="submit" class="text-red-500 hover:underline text-sm font-semibold">Annuler</button>
-                                            </form>
-                                        </div>
-                                    @else
-                                        <!-- هو صيفط ليا الطلب -->
-                                        <div class="flex gap-2">
-                                            <form action="{{ route('connections.accept', $status['id']) }}" method="POST">
-                                                @csrf @method('PATCH')
-                                                <button type="submit" class="bg-[#0a66c2] hover:bg-[#004182] text-white font-semibold py-2 px-6 rounded-full transition shadow-sm">Accepter</button>
-                                            </form>
-                                            <form action="{{ route('connections.destroy', $status['id']) }}" method="POST">
-                                                @csrf @method('DELETE')
-                                                <button type="submit" class="border border-red-500 text-red-500 hover:bg-red-50 font-semibold py-2 px-6 rounded-full transition">Refuser</button>
-                                            </form>
-                                        </div>
-                                    @endif
-                                @elseif($status['status'] === 'accepted')
-                                    <!-- مكونيكطيين -->
-                                    <div class="flex items-center gap-3">
-                                        <span class="bg-green-50 text-green-600 border border-green-200 font-semibold py-2 px-6 rounded-full flex items-center gap-1.5 shadow-sm">
-                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path></svg>
-                                            Connecté
-                                        </span>
-                                        <form action="{{ route('connections.destroy', $status['id']) }}" method="POST">
-                                            @csrf @method('DELETE')
-                                            <button type="submit" onclick="return confirm('Retirer cette connexion ?')" class="text-gray-500 hover:text-red-500 hover:underline text-sm font-semibold transition">Retirer</button>
-                                        </form>
-                                    </div>
-                                @endif
-                            @else
-                                <a href="{{ route('profile.edit') }}" class="border border-[#0a66c2] text-[#0a66c2] hover:bg-blue-50 font-semibold py-2 px-6 rounded-full transition">
-                                    Modifier le profil
-                                </a>
-                            @endif
-                        </div>
-                    </div>
-                </div>
-            </div>
-<!-- ... existing code ... -->
 </file>
 
 <file path="resources/views/welcome.blade.php">
@@ -4425,6 +4293,68 @@ class VerifyEmailController extends Controller
 }
 </file>
 
+<file path="app/Http/Controllers/NetworkController.php">
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Models\User;
+use App\Models\Connection;
+use Illuminate\Http\Request;
+
+class NetworkController extends Controller
+{
+    public function index(Request $request)
+    {
+        $query = $request->input('q');
+
+        if ($query) {
+            $users = User::where('name', 'LIKE', "%{$query}%")
+                ->where('id', '!=', auth()->id())
+                ->get();
+        } else {
+            $users = User::where('id', '!=', auth()->id())
+                ->inRandomOrder()
+                ->take(12)
+                ->get();
+        }
+
+        $pendingRequests = Connection::with('sender')
+            ->where('connected_user_id', auth()->id())
+            ->where('status', 'pending')
+            ->get();
+
+        return view('network', compact('users', 'query', 'pendingRequests'));
+    }
+}
+</file>
+
+<file path="app/Models/Connection.php">
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Model;
+
+class Connection extends Model
+{
+     protected $fillable = [
+        'user_id',
+        'connected_user_id',
+        'status',
+    ];
+     public function sender()
+    {
+        return $this->belongsTo(User::class, 'user_id');
+    }
+
+    public function receiver()
+    {
+        return $this->belongsTo(User::class, 'connected_user_id');
+    }
+}
+</file>
+
 <file path="app/Models/Like.php">
 <?php
 
@@ -4722,6 +4652,11 @@ return [
     ],
 
 ];
+</file>
+
+<file path="database/.gitignore">
+*.sqlite*
+.env
 </file>
 
 <file path="database/factories/UserFactory.php">
@@ -5394,6 +5329,139 @@ return new class extends Migration
 </section>
 </file>
 
+<file path="resources/views/user_profil.blade.php">
+<x-app-layout>
+    <div class="min-h-screen bg-[#F3F2EF] pb-10">
+        <div class="max-w-[1128px] mx-auto">
+
+            <!-- Profile Header Card -->
+            <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                <!-- Cover Photo (Mock) -->
+                <div class="h-48 bg-gradient-to-r from-gray-300 to-gray-400"></div>
+
+                <div class="px-6 pb-6 relative">
+                    <!-- Avatar -->
+                    <img src="{{ $user->avatar_url }}"
+                         alt="{{ $user->name }}"
+                         class="w-36 h-36 rounded-full border-4 border-white -mt-16 bg-white object-cover shadow-sm">
+
+                    <div class="mt-4 flex flex-col md:flex-row md:justify-between md:items-start gap-4">
+                        <div>
+                            <h1 class="text-2xl font-bold text-gray-900">{{ $user->name }}</h1>
+                            <p class="text-gray-600 text-lg mt-0.5">{{ $user->headline }}</p>
+                            <p class="text-gray-500 text-sm mt-1">
+                                {{ $user->company ?? 'Entreprise non renseignée' }}
+                            </p>
+                            <p class="text-gray-400 text-sm mt-1">Beni Mellal, Maroc</p>
+                        </div>
+
+                        <!-- Actions & Connection Buttons -->
+                        <div class="flex gap-2">
+                            @if(Auth::id() !== $user->id)
+                                @php
+                                    $status = auth()->user()->connectionStatus($user->id);
+                                @endphp
+
+                                @if(!$status)
+                                    <!-- Ajouter -->
+                                    <form action="{{ route('connections.store') }}" method="POST">
+                                        @csrf
+                                        <input type="hidden" name="connected_user_id" value="{{ $user->id }}">
+                                        <button type="submit" class="bg-[#0a66c2] hover:bg-[#004182] text-white font-semibold py-2 px-6 rounded-full transition shadow-sm">
+                                            Ajouter au réseau
+                                        </button>
+                                    </form>
+                                @elseif($status['status'] === 'pending')
+                                    @if($status['sender_id'] === Auth::id())
+                                        <!-- Invitation envoyée -->
+                                        <div class="flex items-center gap-2 bg-gray-50 border border-gray-100 px-4 py-2 rounded-full">
+                                            <span class="text-gray-600 text-sm font-semibold">Invitation envoyée</span>
+                                            <form action="{{ route('connections.destroy', $status['id']) }}" method="POST">
+                                                @csrf @method('DELETE')
+                                                <button type="submit" class="text-red-500 hover:underline text-sm font-semibold">Annuler</button>
+                                            </form>
+                                        </div>
+                                    @else
+                                        <!-- Accepter / Refuser -->
+                                        <div class="flex gap-2">
+                                            <form action="{{ route('connections.accept', $status['id']) }}" method="POST">
+                                                @csrf @method('PATCH')
+                                                <button type="submit" class="bg-[#0a66c2] hover:bg-[#004182] text-white font-semibold py-2 px-6 rounded-full transition">Accepter</button>
+                                            </form>
+                                            <form action="{{ route('connections.destroy', $status['id']) }}" method="POST">
+                                                @csrf @method('DELETE')
+                                                <button type="submit" class="border border-red-500 text-red-500 hover:bg-red-50 font-semibold py-2 px-6 rounded-full transition">Refuser</button>
+                                            </form>
+                                        </div>
+                                    @endif
+                                @elseif($status['status'] === 'accepted')
+                                    <!-- Connecté -->
+                                    <div class="flex items-center gap-2 bg-green-50 border border-green-100 px-4 py-2 rounded-full">
+                                        <span class="text-green-600 text-sm font-semibold flex items-center gap-1.5">
+                                            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"></path></svg>
+                                            Connecté
+                                        </span>
+                                        <form action="{{ route('connections.destroy', $status['id']) }}" method="POST">
+                                            @csrf @method('DELETE')
+                                            <button type="submit" onclick="return confirm('Retirer cette connexion ?')" class="text-gray-500 hover:text-red-500 hover:underline text-sm font-semibold transition ml-2">Retirer</button>
+                                        </form>
+                                    </div>
+                                @endif
+                            @else
+                                <a href="{{ route('profile.edit') }}" class="border border-[#0a66c2] text-[#0a66c2] hover:bg-blue-50 font-semibold py-2 px-6 rounded-full transition">
+                                    Modifier le profil
+                                </a>
+                            @endif
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Content Grid -->
+            <div class="grid grid-cols-12 gap-6 mt-6 px-2">
+                <!-- Left Column: About/Infos -->
+                <div class="col-span-12 lg:col-span-4 space-y-6">
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                        <h2 class="font-bold text-gray-900 mb-3 text-lg">À propos</h2>
+                        <p class="text-gray-600 text-sm leading-relaxed">
+                            {{ $user->headline }} chez {{ $user->company }}.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Right Column: User Posts -->
+                <div class="col-span-12 lg:col-span-8 space-y-4">
+                    <h2 class="font-bold text-gray-900 text-lg">Activités</h2>
+
+                    @forelse($user->posts as $post)
+                        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-5 hover:shadow-md transition">
+                            <div class="flex items-center gap-3 mb-4">
+                                <img src="{{ $user->avatar_url }}" class="w-12 h-12 rounded-full object-cover">
+                                <div>
+                                    <h4 class="font-bold text-gray-900 text-sm hover:underline">{{ $user->name }}</h4>
+                                    <p class="text-[11px] text-gray-500">{{ $post->created_at->diffForHumans() }}</p>
+                                </div>
+                            </div>
+                            <p class="text-gray-800 text-[14px] leading-relaxed mb-4">{{ $post->content }}</p>
+
+                            @if($post->photo !== 'null' && !empty($post->photo))
+                                <div class="w-full h-auto bg-gray-100 rounded-lg overflow-hidden">
+                                    <img src="{{ asset('photos/' . $post->photo) }}" class="w-full object-cover">
+                                </div>
+                            @endif
+                        </div>
+                    @empty
+                        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-12 text-center text-gray-500 text-sm">
+                            Cet utilisateur n'a pas encore publié d'activités.
+                        </div>
+                    @endforelse
+                </div>
+            </div>
+        </div>
+    </div>
+</x-app-layout>
+</file>
+
 <file path="app/Http/Controllers/LikeController.php">
 <?php
 
@@ -5438,6 +5506,58 @@ class LikeController extends Controller
     }
 
 }
+</file>
+
+<file path="resources/views/edit.blade.php">
+<x-app-layout>
+<div class="max-w-2xl mx-auto">
+
+    <div class="mb-6">
+        <a href="/feed" class="text-blue-600 hover:underline text-sm font-semibold flex items-center mb-4">
+            &larr; Retour au fil d'actualité
+        </a>
+        <h2 class="text-2xl font-bold text-gray-800">Modifier votre post</h2>
+    </div>
+
+    <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+
+        <form action="{{ route('feed.update',$post->id) }}" method="POST" enctype="multipart/form-data">
+
+            @csrf
+ @method('PUT')
+            <div class="mb-4">
+                <label for="content" class="block text-gray-700 text-sm font-bold mb-2">De quoi souhaitez-vous discuter ?</label>
+
+                <textarea name="content"  id="content" rows="5"
+                          class="w-full bg-gray-50 border @error('content') border-red-500 @else border-gray-300 @enderror text-gray-900 rounded-lg focus:ring-blue-500 focus:border-blue-500 p-4 placeholder-gray-400 resize-none"
+                          required>{{  $post->content }}</textarea>
+
+                @error('content')
+                    <p class="text-red-500 text-xs italic mt-2">{{ $message }}</p>
+                @enderror
+            </div>
+          <div class="flex items-center justify-between mt-3 -mb-1 border-t border-gray-100 pt-2">
+    <!-- -->
+    <label for="photo-upload" class="flex-1 cursor-pointer flex items-center justify-center gap-2 text-gray-500 hover:bg-gray-100 px-3 py-2.5 rounded-lg transition text-sm font-semibold">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+        </svg>
+        <span class="hidden sm:inline text-gray-600">Photo</span>
+        <!-- -->
+        <input type="file" id="photo-upload" name="photo" accept="image/*" class="hidden">
+    </label>
+
+</div>
+            <div class="flex justify-end mt-4">
+                <button type="submit" class="bg-blue-700 hover:bg-blue-800 text-white font-bold py-2 px-6 rounded-full transition duration-200 ease-in-out shadow">
+                   Mettre à jour
+                </button>
+            </div>
+        </form>
+    </div>
+
+</div>
+</x-app-layout>
 </file>
 
 <file path="app/Http/Controllers/ProfileController.php">
@@ -5514,7 +5634,29 @@ class ProfileController extends Controller
 }
 </file>
 
-<file path="resources/views/edit.blade.php">
+<file path="database/seeders/DatabaseSeeder.php">
+<?php
+
+namespace Database\Seeders;
+
+use App\Models\User;
+use App\Models\Post;
+use Illuminate\Database\Seeder;
+
+class DatabaseSeeder extends Seeder
+{
+
+    /**
+     * Seed the application's database.
+     */
+    public function run(): void
+    {
+        User::factory(3)->has(Post::factory()->count(1))->create();
+    }
+}
+</file>
+
+<file path="resources/views/create.blade.php">
 <x-app-layout>
 <div class="max-w-2xl mx-auto">
 
@@ -5522,27 +5664,23 @@ class ProfileController extends Controller
         <a href="/feed" class="text-blue-600 hover:underline text-sm font-semibold flex items-center mb-4">
             &larr; Retour au fil d'actualité
         </a>
-        <h2 class="text-2xl font-bold text-gray-800">Modifier votre post</h2>
+        <h2 class="text-2xl font-bold text-gray-800">Créer un nouveau post</h2>
     </div>
 
     <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
 
-        <form action="{{ route('feed.update',$post->id) }}" method="POST" enctype="multipart/form-data">
+        <form action="{{ route('feed.store') }}" method="POST" enctype="multipart/form-data">
 
             @csrf
- @method('PUT')
+
             <div class="mb-4">
                 <label for="content" class="block text-gray-700 text-sm font-bold mb-2">De quoi souhaitez-vous discuter ?</label>
 
-                <textarea name="content"  id="content" rows="5"
+                <textarea name="content" id="content" rows="5"
                           class="w-full bg-gray-50 border @error('content') border-red-500 @else border-gray-300 @enderror text-gray-900 rounded-lg focus:ring-blue-500 focus:border-blue-500 p-4 placeholder-gray-400 resize-none"
-                          required>{{  $post->content }}</textarea>
+                          placeholder="Partagez vos idées avec votre réseau..."></textarea>
 
-                @error('content')
-                    <p class="text-red-500 text-xs italic mt-2">{{ $message }}</p>
-                @enderror
-            </div>
-          <div class="flex items-center justify-between mt-3 -mb-1 border-t border-gray-100 pt-2">
+              <div class="flex items-center justify-between mt-3 -mb-1 border-t border-gray-100 pt-2">
     <!-- -->
     <label for="photo-upload" class="flex-1 cursor-pointer flex items-center justify-center gap-2 text-gray-500 hover:bg-gray-100 px-3 py-2.5 rounded-lg transition text-sm font-semibold">
         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -5554,9 +5692,14 @@ class ProfileController extends Controller
     </label>
 
 </div>
+            </div>
+ {{-- <div class="form-group mt-3">
+        <label for="photo">Photo</label>
+        <input type="file" name="photo" class="form-control">
+    </div> --}}
             <div class="flex justify-end mt-4">
                 <button type="submit" class="bg-blue-700 hover:bg-blue-800 text-white font-bold py-2 px-6 rounded-full transition duration-200 ease-in-out shadow">
-                   Mettre à jour
+                    Publier
                 </button>
             </div>
         </form>
@@ -5564,6 +5707,34 @@ class ProfileController extends Controller
 
 </div>
 </x-app-layout>
+</file>
+
+<file path="app/Models/Post.php">
+<?php
+
+namespace App\Models;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+
+class Post extends Model
+{
+    use HasFactory;
+    protected $fillable = [
+        'user_id',
+        'content',
+        'photo',
+    ];
+
+    public function user(){
+        return $this->belongsTo(User::class);
+    }
+     public function likes(){
+        return $this->hasMany(like::class);
+    }
+     public function comments(){
+        return $this->hasMany(comment::class);
+    }
+}
 </file>
 
 <file path="app/Models/User.php">
@@ -5677,167 +5848,63 @@ protected function avatarUrl(): Attribute{
 }
 </file>
 
-<file path="database/seeders/DatabaseSeeder.php">
-<?php
-
-namespace Database\Seeders;
-
-use App\Models\User;
-use App\Models\Post;
-use Illuminate\Database\Seeder;
-
-class DatabaseSeeder extends Seeder
-{
-
-    /**
-     * Seed the application's database.
-     */
-    public function run(): void
-    {
-        User::factory(3)->has(Post::factory()->count(1))->create();
-    }
-}
-</file>
-
-<file path="resources/views/create.blade.php">
-<x-app-layout>
-<div class="max-w-2xl mx-auto">
-
-    <div class="mb-6">
-        <a href="/feed" class="text-blue-600 hover:underline text-sm font-semibold flex items-center mb-4">
-            &larr; Retour au fil d'actualité
-        </a>
-        <h2 class="text-2xl font-bold text-gray-800">Créer un nouveau post</h2>
-    </div>
-
-    <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
-
-        <form action="{{ route('feed.store') }}" method="POST" enctype="multipart/form-data">
-
-            @csrf
-
-            <div class="mb-4">
-                <label for="content" class="block text-gray-700 text-sm font-bold mb-2">De quoi souhaitez-vous discuter ?</label>
-
-                <textarea name="content" id="content" rows="5"
-                          class="w-full bg-gray-50 border @error('content') border-red-500 @else border-gray-300 @enderror text-gray-900 rounded-lg focus:ring-blue-500 focus:border-blue-500 p-4 placeholder-gray-400 resize-none"
-                          placeholder="Partagez vos idées avec votre réseau..."></textarea>
-
-              <div class="flex items-center justify-between mt-3 -mb-1 border-t border-gray-100 pt-2">
-    <!-- -->
-    <label for="photo-upload" class="flex-1 cursor-pointer flex items-center justify-center gap-2 text-gray-500 hover:bg-gray-100 px-3 py-2.5 rounded-lg transition text-sm font-semibold">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-        </svg>
-        <span class="hidden sm:inline text-gray-600">Photo</span>
-        <!-- -->
-        <input type="file" id="photo-upload" name="photo" accept="image/*" class="hidden">
-    </label>
-
-</div>
-            </div>
- {{-- <div class="form-group mt-3">
-        <label for="photo">Photo</label>
-        <input type="file" name="photo" class="form-control">
-    </div> --}}
-            <div class="flex justify-end mt-4">
-                <button type="submit" class="bg-blue-700 hover:bg-blue-800 text-white font-bold py-2 px-6 rounded-full transition duration-200 ease-in-out shadow">
-                    Publier
-                </button>
-            </div>
-        </form>
-    </div>
-
-</div>
-</x-app-layout>
-</file>
-
 <file path="resources/views/layouts/navigation.blade.php">
-<!-- ... existing code ... -->
-                <!-- Search Bar (Hidden on very small screens) -->
+<nav x-data="{ open: false }" class="bg-white border-b border-gray-200 sticky top-0 z-50">
+    <div class="max-w-[1128px] mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex justify-between h-[52px]">
+            <!-- Left Side: Logo & Search -->
+            <div class="flex items-center gap-2">
+                <div class="shrink-0 flex items-center">
+                    <a href="{{ route('feed.index') }}" class="transition transform hover:scale-105">
+                        <svg viewBox="0 0 24 24" class="w-10 h-10 text-[#0a66c2] fill-current" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M20.5 2h-17A1.5 1.5 0 002 3.5v17A1.5 1.5 0 003.5 22h17a1.5 1.5 0 001.5-1.5v-17A1.5 1.5 0 0020.5 2zM8 19H5v-9h3zM6.5 8.25A1.75 1.75 0 118.3 6.5a1.78 1.78 0 01-1.8 1.75zM19 19h-3v-4.74c0-1.42-.6-1.93-1.38-1.93A1.74 1.74 0 0013 14.19a.66.66 0 000 .14V19h-3v-9h2.9v1.3a3.11 3.11 0 012.7-1.4c1.55 0 3.36.86 3.36 3.66z"></path>
+                        </svg>
+                    </a>
+                </div>
                 <div class="hidden sm:flex items-center ml-4">
                     <form action="{{ route('network.index') }}" method="GET" class="relative group">
                         <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                            <svg class="h-4 w-4 text-gray-500 group-focus-within:text-blue-500 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <svg class="h-4 w-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                             </svg>
                         </div>
                         <input type="text" name="q" value="{{ request('q') }}"
-                               class="block w-64 pl-10 pr-3 py-1.5 border border-transparent rounded-md leading-5 bg-[#EEF3F8] text-gray-900 placeholder-gray-500 focus:outline-none focus:bg-white focus:border-gray-300 focus:ring-0 sm:text-sm transition-all duration-300 ease-in-out focus:w-80"
+                               class="block w-64 pl-10 pr-3 py-1.5 border border-transparent rounded-md bg-[#EEF3F8] text-sm text-gray-900 focus:outline-none focus:bg-white focus:border-gray-300 transition-all duration-300 focus:w-80"
                                placeholder="Recherche...">
                     </form>
                 </div>
             </div>
 
-            <!-- Right Side: Navigation Icons & Profile Dropdown -->
-            <div class="hidden sm:flex sm:items-center sm:ms-6 h-full space-x-1 md:space-x-4">
-
-                <!-- Icon: Accueil -->
-<!-- ... existing code ... -->
+            <!-- Right Side: Icons -->
+            <div class="hidden sm:flex sm:items-center h-full">
+                <a href="{{ route('feed.index') }}" class="flex flex-col items-center justify-center w-16 h-full text-gray-500 hover:text-black {{ request()->routeIs('feed.index') ? 'border-b-2 border-black text-black' : '' }}">
+                    <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>
+                    <span class="text-[10px] mt-0.5">Accueil</span>
                 </a>
 
-                <!-- Icon: Réseau -->
-                <a href="{{ route('network.index') }}" class="flex flex-col items-center justify-center w-16 h-full border-b-2 {{ request()->routeIs('network.index') ? 'border-black text-black' : 'border-transparent text-gray-500 hover:text-black' }} transition duration-150 ease-in-out">
-                    <svg class="w-6 h-6" fill="{{ request()->routeIs('network.index') ? 'currentColor' : 'none' }}" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path>
-                    </svg>
-                    <span class="text-[10px] hidden md:block mt-0.5 font-medium">Réseau</span>
+                <a href="{{ route('network.index') }}" class="flex flex-col items-center justify-center w-16 h-full text-gray-500 hover:text-black {{ request()->routeIs('network.index') ? 'border-b-2 border-black text-black' : '' }}">
+                    <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+                    <span class="text-[10px] mt-0.5">Réseau</span>
                 </a>
 
-                <!-- Icon: Emplois (Placeholder) -->
-<!-- ... existing code ... -->
-    <!-- Responsive Navigation Menu (Mobile) -->
-    <div :class="{'block': open, 'hidden': ! open}" class="hidden sm:hidden border-t border-gray-200">
-
-        <!-- Mobile Search (Visible only on mobile when menu opens) -->
-        <div class="p-4 border-b border-gray-200">
-            <form action="{{ route('network.index') }}" method="GET" class="relative">
-                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <svg class="h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                    </svg>
+                <!-- Profile Dropdown -->
+                <div class="ml-4 relative" x-data="{ open: false }">
+                    <button @click="open = !open" class="flex flex-col items-center text-gray-500 hover:text-black">
+                        <img class="h-6 w-6 rounded-full border border-gray-300" src="{{ auth()->user()->avatar_url }}" alt="Me">
+                        <span class="text-[10px] mt-0.5">Vous</span>
+                    </button>
+                    <div x-show="open" @click.away="open = false" class="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-xl border border-gray-100 py-2 z-50">
+                        <a href="{{ route('profile.edit') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Voir le profil</a>
+                        <form method="POST" action="{{ route('logout') }}">
+                            @csrf
+                            <button type="submit" class="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100">Déconnexion</button>
+                        </form>
+                    </div>
                 </div>
-                <input type="text" name="q" value="{{ request('q') }}" class="block w-full pl-10 pr-3 py-2 border border-transparent rounded-md leading-5 bg-[#EEF3F8] text-gray-900 placeholder-gray-500 focus:outline-none focus:bg-white focus:border-blue-500 sm:text-sm" placeholder="Recherche...">
-            </form>
+            </div>
         </div>
-
-        <div class="pt-2 pb-3 space-y-1">
-            <x-responsive-nav-link :href="route('feed.index')" :active="request()->routeIs('feed.index')">
-                {{ __('Accueil') }}
-            </x-responsive-nav-link>
-            <x-responsive-nav-link :href="route('network.index')" :active="request()->routeIs('network.index')">
-                {{ __('Réseau') }}
-            </x-responsive-nav-link>
-            <x-responsive-nav-link href="#">
-<!-- ... existing code ... -->
-</file>
-
-<file path="app/Models/Post.php">
-<?php
-
-namespace App\Models;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
-
-class Post extends Model
-{
-    use HasFactory;
-    protected $fillable = [
-        'user_id',
-        'content',
-        'photo',
-    ];
-
-    public function user(){
-        return $this->belongsTo(User::class);
-    }
-     public function likes(){
-        return $this->hasMany(like::class);
-    }
-     public function comments(){
-        return $this->hasMany(comment::class);
-    }
-}
+    </div>
+</nav>
 </file>
 
 <file path="app/Http/Controllers/PostController.php">
@@ -5925,29 +5992,32 @@ public function destroy(string $id){
 <file path="routes/web.php">
 <?php
 
+use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\CommentController;
 use App\Http\Controllers\ConnectionController;
 use App\Http\Controllers\LikeController;
-use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\NetworkController;
 use App\Http\Controllers\PostController;
+use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 
-Route::resource('/feed', PostController::class)->middleware(['auth', 'verified']);
-Route::resource('/feed_comment', CommentController::class)->middleware(['auth', 'verified']);
-Route::resource('/feed_like', LikeController::class)->middleware(['auth', 'verified']);
-
 Route::middleware('auth')->group(function () {
-    // Route::resource('/feed', PostController::class)->name('feed');
+    // Feed & Posts
+    Route::resource('/feed', PostController::class);
+    Route::resource('/feed_comment', CommentController::class);
+    Route::resource('/feed_like', LikeController::class);
+
+    // Profile
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
-    Route::get('/profileuser/{id}', [ProfileController::class, 'user_profil'])->name('user_profil');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+    Route::get('/profileuser/{id}', [ProfileController::class, 'user_profil'])->name('user_profil');
 
+    // Network & Connections
+    Route::get('/network', [NetworkController::class, 'index'])->name('network.index');
     Route::post('/connections', [ConnectionController::class, 'store'])->name('connections.store');
     Route::patch('/connections/{id}/accept', [ConnectionController::class, 'accept'])->name('connections.accept');
     Route::delete('/connections/{id}', [ConnectionController::class, 'destroy'])->name('connections.destroy');
-
-    Route::get('/network', [App\Http\Controllers\NetworkController::class, 'index'])->name('network.index');
 });
 
 require __DIR__.'/auth.php';
@@ -6023,9 +6093,9 @@ require __DIR__.'/auth.php';
                                     <img src="{{ $post->user->avatar_url ?? 'https://ui-avatars.com/api/?name=' . urlencode($post->user->name) . '&background=random' }}"
                                         alt="Avatar" class="w-12 h-12 rounded-full object-cover border border-gray-100">
                                     <div class="leading-tight">
-                                        <h4 class="font-semibold text-gray-900 text-sm hover:text-[#0a66c2] hover:underline cursor-pointer leading-none">
+                                        <a href="{{route('user_profil' ,$post->user_id )}}" class="font-semibold text-gray-900 text-sm hover:text-[#0a66c2] hover:underline cursor-pointer leading-none">
                                             {{ $post->user->name }}
-                                        </h4>
+                                        </a>
                                         <p class="text-xs text-gray-500 mt-0.5 line-clamp-1">{{ $post->user->headline ?? 'Membre' }} @if($post->user->company) chez {{ $post->user->company }} @endif</p>
                                         <p class="text-[11px] text-gray-500 flex items-center gap-1 mt-0.5">
                                             {{ $post->created_at->diffForHumans() }}
@@ -6064,10 +6134,12 @@ require __DIR__.'/auth.php';
                             </div>
 
                             <!-- Content Image -->
-                            @if($post->photo)
+                            @if($post->photo !== "null")
                             <div class="w-full bg-gray-50">
                                 <img src="{{ asset('photos/' . $post->photo) }}" alt="Post image" class="w-full max-h-[500px] object-contain">
                             </div>
+                            @else
+                            <div></div>
                             @endif
 
                             <!-- Interactions Meta (Like/Comment Counts) -->
@@ -6095,15 +6167,17 @@ require __DIR__.'/auth.php';
                                 <form action="{{ route('feed_like.store') }}" method="POST" class="flex-1 m-0">
                                     @csrf
                                     <input type="hidden" name="post_id" value="{{ $post->id }}">
-                                    <button type="submit" class="w-full flex items-center justify-center gap-2 py-3 rounded-md transition-colors text-sm font-semibold {{ $hasLiked ? 'text-[#0a66c2] hover:bg-blue-50' : 'text-gray-500 hover:bg-gray-100' }}">
+                                    <button type="submit" class="w-full flex items-center justify-center gap-2 py-3 rounded-md transition-colors text-sm font-semibold {{ $hasLiked ? 'text-[#0a66c2] bg-blue-300 hover:bg-blue-50' : 'text-gray-500 hover:bg-gray-100' }}">
                                         @if($hasLiked)
                                             <!-- Liked Icon (Filled) -->
-                                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-6 h-6"><path d="M1 19V9h4v10H1zm22-4.5c0 1.25-.8 2.34-1.97 2.47l-6.19.74c-.58.07-1.12.35-1.53.8l-1.8 1.93c-.23.25-.56.36-.9.36-.6 0-1.1-.47-1.17-1.07l-.3-2.61c-.08-.75-.43-1.44-.98-1.95L4.5 12V9.5l6.45-6.2c.42-.4.99-.61 1.58-.58L16 3c1.1 0 2 .9 2 2v2.5h2.5c1.1 0 2 .9 2 2v5z"></path></svg>
-                                            <span>J'aime</span>
+                                           <svg width="800px" height="800px" class="w-6 h-6" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M20.9752 12.1852L20.2361 12.0574L20.9752 12.1852ZM20.2696 16.265L19.5306 16.1371L20.2696 16.265ZM6.93777 20.4771L6.19056 20.5417L6.93777 20.4771ZM6.12561 11.0844L6.87282 11.0198L6.12561 11.0844ZM13.995 5.22142L14.7351 5.34269V5.34269L13.995 5.22142ZM13.3323 9.26598L14.0724 9.38725V9.38725L13.3323 9.26598ZM6.69814 9.67749L6.20855 9.10933H6.20855L6.69814 9.67749ZM8.13688 8.43769L8.62647 9.00585H8.62647L8.13688 8.43769ZM10.5181 4.78374L9.79208 4.59542L10.5181 4.78374ZM10.9938 2.94989L11.7197 3.13821V3.13821L10.9938 2.94989ZM12.6676 2.06435L12.4382 2.77841L12.4382 2.77841L12.6676 2.06435ZM12.8126 2.11093L13.042 1.39687L13.042 1.39687L12.8126 2.11093ZM9.86195 6.46262L10.5235 6.81599V6.81599L9.86195 6.46262ZM13.9047 3.24752L13.1787 3.43584V3.43584L13.9047 3.24752ZM11.6742 2.13239L11.3486 1.45675V1.45675L11.6742 2.13239ZM3.9716 21.4707L3.22439 21.5353L3.9716 21.4707ZM3 10.2342L3.74721 10.1696C3.71261 9.76945 3.36893 9.46758 2.96767 9.4849C2.5664 9.50221 2.25 9.83256 2.25 10.2342H3ZM20.2361 12.0574L19.5306 16.1371L21.0087 16.3928L21.7142 12.313L20.2361 12.0574ZM13.245 21.25H8.59635V22.75H13.245V21.25ZM7.68498 20.4125L6.87282 11.0198L5.3784 11.149L6.19056 20.5417L7.68498 20.4125ZM19.5306 16.1371C19.0238 19.0677 16.3813 21.25 13.245 21.25V22.75C17.0712 22.75 20.3708 20.081 21.0087 16.3928L19.5306 16.1371ZM13.2548 5.10015L12.5921 9.14472L14.0724 9.38725L14.7351 5.34269L13.2548 5.10015ZM7.18773 10.2456L8.62647 9.00585L7.64729 7.86954L6.20855 9.10933L7.18773 10.2456ZM11.244 4.97206L11.7197 3.13821L10.2678 2.76157L9.79208 4.59542L11.244 4.97206ZM12.4382 2.77841L12.5832 2.82498L13.042 1.39687L12.897 1.3503L12.4382 2.77841ZM10.5235 6.81599C10.8354 6.23198 11.0777 5.61339 11.244 4.97206L9.79208 4.59542C9.65573 5.12107 9.45699 5.62893 9.20042 6.10924L10.5235 6.81599ZM12.5832 2.82498C12.8896 2.92342 13.1072 3.16009 13.1787 3.43584L14.6307 3.05921C14.4252 2.26719 13.819 1.64648 13.042 1.39687L12.5832 2.82498ZM11.7197 3.13821C11.7548 3.0032 11.8523 2.87913 11.9998 2.80804L11.3486 1.45675C10.8166 1.71309 10.417 2.18627 10.2678 2.76157L11.7197 3.13821ZM11.9998 2.80804C12.1345 2.74311 12.2931 2.73181 12.4382 2.77841L12.897 1.3503C12.3873 1.18655 11.8312 1.2242 11.3486 1.45675L11.9998 2.80804ZM14.1537 10.9842H19.3348V9.4842H14.1537V10.9842ZM4.71881 21.4061L3.74721 10.1696L2.25279 10.2988L3.22439 21.5353L4.71881 21.4061ZM3.75 21.5127V10.2342H2.25V21.5127H3.75ZM3.22439 21.5353C3.2112 21.3828 3.33146 21.25 3.48671 21.25V22.75C4.21268 22.75 4.78122 22.1279 4.71881 21.4061L3.22439 21.5353ZM14.7351 5.34269C14.8596 4.58256 14.8241 3.80477 14.6307 3.0592L13.1787 3.43584C13.3197 3.97923 13.3456 4.54613 13.2548 5.10016L14.7351 5.34269ZM8.59635 21.25C8.12244 21.25 7.72601 20.887 7.68498 20.4125L6.19056 20.5417C6.29852 21.7902 7.3427 22.75 8.59635 22.75V21.25ZM8.62647 9.00585C9.30632 8.42 10.0392 7.72267 10.5235 6.81599L9.20042 6.10924C8.85404 6.75767 8.3025 7.30493 7.64729 7.86954L8.62647 9.00585ZM21.7142 12.313C21.9695 10.8365 20.8341 9.4842 19.3348 9.4842V10.9842C19.9014 10.9842 20.3332 11.4959 20.2361 12.0574L21.7142 12.313ZM3.48671 21.25C3.63292 21.25 3.75 21.3684 3.75 21.5127H2.25C2.25 22.1953 2.80289 22.75 3.48671 22.75V21.25ZM12.5921 9.14471C12.4344 10.1076 13.1766 10.9842 14.1537 10.9842V9.4842C14.1038 9.4842 14.0639 9.43901 14.0724 9.38725L12.5921 9.14471ZM6.87282 11.0198C6.8474 10.7258 6.96475 10.4378 7.18773 10.2456L6.20855 9.10933C5.62022 9.61631 5.31149 10.3753 5.3784 11.149L6.87282 11.0198Z" fill="#1C274C"/>
+</svg> <span>J'aime</span>
                                         @else
                                             <!-- Unliked Icon (Outline) -->
-                                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-6 h-6"><path d="M19.46 11l-3.91-3.91a1.54 1.54 0 01-.46-1V4a2 2 0 00-2-2h-1.47a2.5 2.5 0 00-1.56.54l-7.13 5.46a1.5 1.5 0 00-.53 1.2v7.1a1.5 1.5 0 00.53 1.2l7.13 5.46a2.5 2.5 0 001.56.54h1.47a2 2 0 002-2v-2.09a1.54 1.54 0 01.46-1l3.91-3.91a2 2 0 000-2.82zM15 18a1 1 0 01-1 1h-1.47a1.5 1.5 0 01-.94-.32l-7-5.36v-6.64l7-5.36a1.5 1.5 0 01.94-.32H14a1 1 0 011 1v2.09c0 .79.31 1.55.88 2.11l3.54 3.54a1 1 0 010 1.42l-3.54 3.54a2.98 2.98 0 00-.88 2.11V18z"></path><path d="M3 8H1v12h2V8z"></path></svg>
-                                            <span>J'aime</span>
+                                                 <svg width="800px" height="800px" class="w-6 h-6 " viewBox="0 0 24 24" fill="" xmlns="http://www.w3.org/2000/svg">
+<path d="M20.9752 12.1852L20.2361 12.0574L20.9752 12.1852ZM20.2696 16.265L19.5306 16.1371L20.2696 16.265ZM6.93777 20.4771L6.19056 20.5417L6.93777 20.4771ZM6.12561 11.0844L6.87282 11.0198L6.12561 11.0844ZM13.995 5.22142L14.7351 5.34269V5.34269L13.995 5.22142ZM13.3323 9.26598L14.0724 9.38725V9.38725L13.3323 9.26598ZM6.69814 9.67749L6.20855 9.10933H6.20855L6.69814 9.67749ZM8.13688 8.43769L8.62647 9.00585H8.62647L8.13688 8.43769ZM10.5181 4.78374L9.79208 4.59542L10.5181 4.78374ZM10.9938 2.94989L11.7197 3.13821V3.13821L10.9938 2.94989ZM12.6676 2.06435L12.4382 2.77841L12.4382 2.77841L12.6676 2.06435ZM12.8126 2.11093L13.042 1.39687L13.042 1.39687L12.8126 2.11093ZM9.86195 6.46262L10.5235 6.81599V6.81599L9.86195 6.46262ZM13.9047 3.24752L13.1787 3.43584V3.43584L13.9047 3.24752ZM11.6742 2.13239L11.3486 1.45675V1.45675L11.6742 2.13239ZM3.9716 21.4707L3.22439 21.5353L3.9716 21.4707ZM3 10.2342L3.74721 10.1696C3.71261 9.76945 3.36893 9.46758 2.96767 9.4849C2.5664 9.50221 2.25 9.83256 2.25 10.2342H3ZM20.2361 12.0574L19.5306 16.1371L21.0087 16.3928L21.7142 12.313L20.2361 12.0574ZM13.245 21.25H8.59635V22.75H13.245V21.25ZM7.68498 20.4125L6.87282 11.0198L5.3784 11.149L6.19056 20.5417L7.68498 20.4125ZM19.5306 16.1371C19.0238 19.0677 16.3813 21.25 13.245 21.25V22.75C17.0712 22.75 20.3708 20.081 21.0087 16.3928L19.5306 16.1371ZM13.2548 5.10015L12.5921 9.14472L14.0724 9.38725L14.7351 5.34269L13.2548 5.10015ZM7.18773 10.2456L8.62647 9.00585L7.64729 7.86954L6.20855 9.10933L7.18773 10.2456ZM11.244 4.97206L11.7197 3.13821L10.2678 2.76157L9.79208 4.59542L11.244 4.97206ZM12.4382 2.77841L12.5832 2.82498L13.042 1.39687L12.897 1.3503L12.4382 2.77841ZM10.5235 6.81599C10.8354 6.23198 11.0777 5.61339 11.244 4.97206L9.79208 4.59542C9.65573 5.12107 9.45699 5.62893 9.20042 6.10924L10.5235 6.81599ZM12.5832 2.82498C12.8896 2.92342 13.1072 3.16009 13.1787 3.43584L14.6307 3.05921C14.4252 2.26719 13.819 1.64648 13.042 1.39687L12.5832 2.82498ZM11.7197 3.13821C11.7548 3.0032 11.8523 2.87913 11.9998 2.80804L11.3486 1.45675C10.8166 1.71309 10.417 2.18627 10.2678 2.76157L11.7197 3.13821ZM11.9998 2.80804C12.1345 2.74311 12.2931 2.73181 12.4382 2.77841L12.897 1.3503C12.3873 1.18655 11.8312 1.2242 11.3486 1.45675L11.9998 2.80804ZM14.1537 10.9842H19.3348V9.4842H14.1537V10.9842ZM4.71881 21.4061L3.74721 10.1696L2.25279 10.2988L3.22439 21.5353L4.71881 21.4061ZM3.75 21.5127V10.2342H2.25V21.5127H3.75ZM3.22439 21.5353C3.2112 21.3828 3.33146 21.25 3.48671 21.25V22.75C4.21268 22.75 4.78122 22.1279 4.71881 21.4061L3.22439 21.5353ZM14.7351 5.34269C14.8596 4.58256 14.8241 3.80477 14.6307 3.0592L13.1787 3.43584C13.3197 3.97923 13.3456 4.54613 13.2548 5.10016L14.7351 5.34269ZM8.59635 21.25C8.12244 21.25 7.72601 20.887 7.68498 20.4125L6.19056 20.5417C6.29852 21.7902 7.3427 22.75 8.59635 22.75V21.25ZM8.62647 9.00585C9.30632 8.42 10.0392 7.72267 10.5235 6.81599L9.20042 6.10924C8.85404 6.75767 8.3025 7.30493 7.64729 7.86954L8.62647 9.00585ZM21.7142 12.313C21.9695 10.8365 20.8341 9.4842 19.3348 9.4842V10.9842C19.9014 10.9842 20.3332 11.4959 20.2361 12.0574L21.7142 12.313ZM3.48671 21.25C3.63292 21.25 3.75 21.3684 3.75 21.5127H2.25C2.25 22.1953 2.80289 22.75 3.48671 22.75V21.25ZM12.5921 9.14471C12.4344 10.1076 13.1766 10.9842 14.1537 10.9842V9.4842C14.1038 9.4842 14.0639 9.43901 14.0724 9.38725L12.5921 9.14471ZM6.87282 11.0198C6.8474 10.7258 6.96475 10.4378 7.18773 10.2456L6.20855 9.10933C5.62022 9.61631 5.31149 10.3753 5.3784 11.149L6.87282 11.0198Z" fill="#1C274C"/>
+</svg>  <span>J'aime</span>
                                         @endif
                                     </button>
                                 </form>
@@ -6150,7 +6224,7 @@ require __DIR__.'/auth.php';
                                                 <div class="bg-[#f2f2f2] px-3.5 py-2.5 rounded-br-xl rounded-bl-xl rounded-tr-xl inline-block w-full">
                                                     <div class="flex justify-between items-start">
                                                         <div>
-                                                            <h4 class="font-bold text-gray-900 text-sm hover:text-blue-700 hover:underline cursor-pointer leading-tight">
+                                                            <h4  class="font-bold text-gray-900 text-sm hover:text-blue-700 hover:underline cursor-pointer leading-tight">
                                                                 {{ $comment->user->name }}
                                                             </h4>
                                                             <p class="text-xs text-gray-500 mb-1 leading-tight line-clamp-1">{{ $comment->user->headline ?? 'Membre' }}</p>

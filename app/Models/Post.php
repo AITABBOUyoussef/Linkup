@@ -22,4 +22,7 @@ class Post extends Model
      public function comments(){
         return $this->hasMany(comment::class);
     }
+    public function saves(){
+        return $this->hasMany(save::class);
+    }
 }

@@ -65,6 +65,11 @@ public function connections(){
  public function comments(){
         return $this->hasMany(comment::class);
     }
+ public function saves(){
+        return $this->hasMany(save::class);
+    }
+
+
 protected function avatarUrl(): Attribute{
     return Attribute::make(
         get: function(){

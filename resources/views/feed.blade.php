@@ -160,10 +160,14 @@
                                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-6 h-6"><path d="M7 9h10v1H7zm0 4h7v-1H7zm16-2a6.78 6.78 0 01-2.84 5.61L12 22v-4H8A7 7 0 018 4h8a7 7 0 017 7zm-2 0a5 5 0 00-5-5H8a5 5 0 000 10h6v2.28L19 15a4.79 4.79 0 002-4z"></path></svg>
                                     <span>Commenter</span>
                                 </button>
+                                <form action="{{ route('feed_save.store') }}"  method="POST">
+                                     @csrf
+                                       <input type="hidden" name="post_id" value="{{ $post->id }}">
                                 <button class="flex-1 flex items-center justify-center gap-2 py-3 text-gray-500 hover:bg-gray-100 font-semibold rounded-md transition-colors text-sm">
                                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-6 h-6"><path d="M21 3L0 10l7.66 4.26L16 8l-6.26 8.34L14 24l7-21z"></path></svg>
-                                    <span>Partager</span>
+                                    <span>Save</span>
                                 </button>
+                                </form>
                             </div>
 
                             <!-- Comment Area (Hidden initially) -->

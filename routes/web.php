@@ -7,6 +7,7 @@ use App\Http\Controllers\LikeController;
 use App\Http\Controllers\NetworkController;
 use App\Http\Controllers\PostController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\SaveController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware('auth')->group(function () {
@@ -14,6 +15,7 @@ Route::middleware('auth')->group(function () {
     Route::resource('/feed', PostController::class);
     Route::resource('/feed_comment', CommentController::class);
     Route::resource('/feed_like', LikeController::class);
+    Route::resource('/feed_save', SaveController::class);
 
     // Profile
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
