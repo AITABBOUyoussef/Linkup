@@ -13,8 +13,26 @@ class PostController extends Controller
 
     public function index()
 {
-    $posts = Post::with('comments' , 'likes')-> latest()->get();
-    //  dd($posts);
+    // $posts = Post::with('comments' , 'likes')-> latest()->get();
+
+// $posts = DB::table('posts')
+// ->leftJoin('users as creator', 'posts.user_id', '=', 'creator.id')
+// ->leftJoin('republiers' , 'republiers.post_id' , '='  ,'posts.id')
+// ->leftJoin( 'users as reposted' ,  'republiers.reposted_by' , '=' , 'reposted.id')
+// ->leftJoin( 'comments' ,  'comments.post_id' , '=' , 'posts.id')
+// ->leftJoin( 'likes' ,  'likes.post_id' , '=' , 'posts.id')
+// ->get();
+
+// $posts = DB::select('SELECT * FROM users
+// right JOIN republiers on republiers.reposted_by = users.id
+// right JOIN posts on republiers.post_id = posts.id
+// right join likes on likes.post_id = posts.id
+// right join comments on comments.post_id = posts.id
+// ');
+$posts = Post::with(['republiers.user', 'comments', 'likes'])->get();
+
+
+      dd($posts);
 
     return view('feed', compact('posts'));
 }
@@ -89,6 +107,17 @@ public function savedPosts()
                  ->get();
 
     return view('feed', compact('posts'));
+}
+public function rep_post()
+{
+     $savedPostIds = DB::table('republiers')
+                      ->pluck('post_id');
+
+   $rep_post = Post::whereIn('id', $savedPostIds)
+                 ->latest()
+                 ->get();
+
+    return view('feed', compact('rep_post'));
 }
 
 }

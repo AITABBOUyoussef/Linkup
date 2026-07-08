@@ -25,4 +25,7 @@ class Post extends Model
     public function saves(){
         return $this->hasMany(save::class);
     }
+     public function republiers(){
+        return $this->hasMany(Republier::class);
+    }
 }

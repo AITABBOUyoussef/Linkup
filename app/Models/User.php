@@ -69,6 +69,9 @@ public function connections(){
         return $this->hasMany(save::class);
     }
 
+ public function republiers(){
+        return $this->hasMany(Republier::class);
+    }
 
 protected function avatarUrl(): Attribute{
     return Attribute::make(

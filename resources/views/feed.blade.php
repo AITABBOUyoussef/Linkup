@@ -21,7 +21,7 @@
                          <p class="text-xs font-bold text-gray-900 ml-1 mt-1">Développez votre réseau</p>
                           <a href="{{ route('feed.savedPosts') }}" class="flex justify-between items-center text-xs font-semibold text-gray-500 hover:bg-gray-50 cursor-pointer p-1 rounded transition">
                              <span>Save</span>
-                             {{-- <span class="text-[#0a66c2]">{{ auth()->user()->connections_count }}</span> --}}
+                             <span class="text-[#0a66c2]">{{ auth()->user()->connections_count }}</span>
                          </a>
                     </div>
                 </div>
@@ -70,6 +70,16 @@
                                 <div class="flex items-start gap-3">
                                     <img src="{{ $post->user->avatar_url ?? 'https://ui-avatars.com/api/?name=' . urlencode($post->user->name) . '&background=random' }}"
                                         alt="Avatar" class="w-12 h-12 rounded-full object-cover border border-gray-100">
+                                        {{-- @if ($post->user->is_open_to_work == false)
+                               <div class="w-full flex items-center justify-center gap-2 py-3 rounded-md bg-red-600 text-sm font-semibold"></div>
+                                <button type="submit" class="w-full flex items-center justify-center gap-2 py-3 rounded-md transition-colors text-sm font-semibold {{ $hasLiked ? 'text-[#0a66c2] bg-blue-300 hover:bg-blue-50' : 'text-gray-500 hover:bg-gray-100' }}"> --}}
+{{-- @else
+ <div class="w-full flex items-center justify-center gap-2 py-3 rounded-md bg-green-600 text-sm font-semibold"></div>
+
+@endif --}}
+
+
+
                                     <div class="leading-tight">
                                         <a href="{{route('user_profil' ,$post->user_id )}}" class="font-semibold text-gray-900 text-sm hover:text-[#0a66c2] hover:underline cursor-pointer leading-none">
                                             {{ $post->user->name }}
@@ -119,7 +129,7 @@
                             @else
                             <div></div>
                             @endif
-
+{{-- ////////////////////////////// --}}
                             <!-- Interactions Meta (Like/Comment Counts) -->
                             <div class="px-4 py-2 flex items-center justify-between text-xs text-gray-500 border-b border-gray-100 mt-1">
                                 <div class="flex items-center gap-1">
@@ -173,6 +183,19 @@
                                    <svg width="800px" height="800px" class="w-6 h-6 " viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
 <path fill-rule="evenodd" clip-rule="evenodd" d="M6.75 6L7.5 5.25H16.5L17.25 6V19.3162L12 16.2051L6.75 19.3162V6ZM8.25 6.75V16.6838L12 14.4615L15.75 16.6838V6.75H8.25Z" fill="#080341"/>
 </svg>                          <span>Save</span>
+                                </button>
+                                </form>
+                            </div>
+
+                                 <div>
+
+                                    <form action="{{ route('republier.store') }}"  method="POST">
+                                     @csrf
+                                       <input type="hidden" name="post_id" value="{{ $post->id }}">
+                                <button  type="submit" class="w-full flex items-center justify-center gap-2 py-3 rounded-md transition-colors text-sm font-semibold {{ $hassave ? 'text-grey-700 bg-gray-300 hover:bg-gray-100' : 'text-gray-500 hover:bg-gray-100' }}">
+                                   <svg width="800px" height="800px" class="w-6 h-6 " viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path fill-rule="evenodd" clip-rule="evenodd" d="M6.75 6L7.5 5.25H16.5L17.25 6V19.3162L12 16.2051L6.75 19.3162V6ZM8.25 6.75V16.6838L12 14.4615L15.75 16.6838V6.75H8.25Z" fill="#080341"/>
+</svg>                          <span>republier</span>
                                 </button>
                                 </form>
                             </div>
