@@ -9,6 +9,7 @@ use App\Models\Connection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\DB;
 
 class User extends Authenticatable
 {
@@ -113,4 +114,11 @@ protected function avatarUrl(): Attribute{
                   ->orWhere('connected_user_id', $this->id);
             })->count();
     }
+public function getSavesCountAttribute()
+{
+  return    DB::table('republiers')
+            ->where('reposted_by', $this->id)
+            ->count();
+}
+
 }
