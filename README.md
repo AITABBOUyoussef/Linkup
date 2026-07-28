@@ -1,59 +1,88 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# ProfessionalConnect
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+## 1. Présentation du projet
+ProfessionalConnect est une plateforme de réseau social professionnel conçue pour aider les utilisateurs à développer leur carrière et leur réseau. Cette application web permet aux professionnels de se connecter entre eux, de partager des actualités de leur secteur et de mettre en valeur leur profil au sein d'un environnement centralisé.
 
-## About Laravel
+## 2. Problématique
+Les professionnels et les chercheurs d'emploi ont souvent du mal à maintenir un réseau actif et à découvrir de nouvelles opportunités dans un espace ciblé. ProfessionalConnect résout ce problème en offrant un espace dédié spécifiquement aux échanges professionnels, facilitant ainsi la mise en relation et la visibilité professionnelle.
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## 3. Fonctionnalités principales
+*   **Créer et gérer un profil :** S'inscrire, se connecter de manière sécurisée, et mettre à jour ses informations (titre professionnel, entreprise, photo).
+*   **Publier et interagir :** Créer des posts (texte et images), aimer, commenter, sauvegarder (save) et republier les contenus du réseau.
+*   **Développer son réseau :** Rechercher des utilisateurs, envoyer des invitations de connexion, et gérer les demandes (accepter/refuser/ignorer).
+*   **Consulter un fil d'actualité :** Visualiser un flux dynamique affichant les publications et les republications de la communauté par ordre chronologique.
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## 4. Technologies utilisées
+*   **Laravel 11 (PHP 8.2) :** Développer l'architecture backend (MVC), gérer les routes, et sécuriser l'authentification.
+*   **Blade & Tailwind CSS :** Construire l'interface utilisateur de manière modulaire, responsive et moderne.
+*   **MySQL :** Stocker, structurer et lier les données relationnelles (utilisateurs, posts, commentaires, connexions).
+*   **Eloquent ORM :** Interagir avec la base de données de manière fluide et sécurisée.
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+## 5. Installation et lancement
 
-## Learning Laravel
+**Prérequis :**
+*   PHP 8.2+
+*   Composer
+*   Node.js et npm
+*   Serveur local (ex: XAMPP, Laragon) avec MySQL
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+**Commandes testées (Windows / Linux / macOS) :**
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+1. Cloner le dépôt :
+```bash
+git clone [https://github.com/votre-nom/professional-connect.git](https://github.com/votre-nom/professional-connect.git)
+cd professional-connect
 
-## Laravel Sponsors
+Installer les dépendances backend :
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+Bash
+composer install
+Configurer l'environnement :
 
-### Premium Partners
+Bash
+cp .env.example .env
+(Configurez vos identifiants de base de données DB_DATABASE, DB_USERNAME, DB_PASSWORD dans ce fichier .env).
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+Générer la clé de sécurité et migrer la base de données :
 
-## Contributing
+Bash
+php artisan key:generate
+php artisan migrate
+Installer et compiler les dépendances frontend :
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+Bash
+npm install
+npm run build
+Lancer le serveur local :
 
-## Code of Conduct
+Bash
+php artisan serve
+L'application est maintenant accessible sur http://localhost:8000.
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+6. Captures d'écran
+(Note : Ajoutez ici des captures claires, avec des titres, en veillant à flouter toute information personnelle ou sensible).
 
-## Security Vulnerabilities
+Fil d'actualité (Feed) :
+![Aperçu du fil d'actualité avec options de publication et interactions](./docs/feed_screenshot.png)
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+Gestion du réseau :
+![Page de gestion des invitations et suggestions de contacts](./docs/network_screenshot.png)
 
-## License
+7. Contribution personnelle
+En tant que développeur Full-Stack sur ce projet, j'ai conçu le diagramme entité-association (ERD) et implémenté l'ensemble de la base de données relationnelle. J'ai développé les contrôleurs avec un code modulaire et structuré en orienté objet, gérant la logique des relations complexes (comme le système de connexion mutuelle entre utilisateurs). J'ai également intégré l'interface frontend interactive avec Blade et Tailwind CSS.
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+8. Difficultés rencontrées
+Problème : Afficher un fil d'actualité (Feed) cohérent qui mélange à la fois les publications originales et les "reposts" provenant de deux tables distinctes, tout en les triant par date exacte.
+
+Recherche : J'ai exploré la possibilité d'utiliser des requêtes SQL brutes (UNION / JOIN), mais cela rendait le code difficile à maintenir et cassait la logique de l'ORM.
+
+Solution : J'ai utilisé les Collections d'Eloquent. J'ai récupéré séparément les posts et les reposts en chargeant leurs relations (with()). J'ai formaté chaque élément avec une propriété commune (feed_type et feed_date), puis j'ai concaténé les deux collections et je les ai triées par cette date unifiée (sortByDesc()).
+
+Apprentissage : J'ai approfondi ma maîtrise des Collections Laravel et j'ai appris à résoudre efficacement le problème du "N+1 queries" pour optimiser les performances de l'application.
+
+9. Améliorations possibles
+Sécurité et Validation : Renforcer la validation des formulaires côté client avec des expressions régulières (Regex) en temps réel.
+
+Notifications : Implémenter un système d'alertes en temps réel (via les Events/Websockets Laravel) lors de la réception d'une invitation ou d'un commentaire.
+
+Fonctionnalité de messagerie : Ajouter une messagerie instantanée (Peer-to-Peer) permettant aux professionnels connectés d'échanger directement sur la plateforme.
