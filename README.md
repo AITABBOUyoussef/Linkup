@@ -1,10 +1,10 @@
-# LinkUp
+# Linkup
 
 ## 1. Présentation du projet
-ProfessionalConnect est une plateforme de réseau social professionnel conçue pour aider les utilisateurs à développer leur carrière et leur réseau. Cette application web permet aux professionnels de se connecter entre eux, de partager des actualités de leur secteur et de mettre en valeur leur profil au sein d'un environnement centralisé.
+Linkup est une plateforme de réseau social professionnel conçue pour aider les utilisateurs à développer leur carrière et leur réseau. Cette application web permet aux professionnels de se connecter entre eux, de partager des actualités de leur secteur et de mettre en valeur leur profil au sein d'un environnement centralisé.
 
 ## 2. Problématique
-Les professionnels et les chercheurs d'emploi ont souvent du mal à maintenir un réseau actif et à découvrir de nouvelles opportunités dans un espace ciblé. ProfessionalConnect résout ce problème en offrant un espace dédié spécifiquement aux échanges professionnels, facilitant ainsi la mise en relation et la visibilité professionnelle.
+Les professionnels et les chercheurs d'emploi ont souvent du mal à maintenir un réseau actif et à découvrir de nouvelles opportunités dans un espace ciblé. Linkup résout ce problème en offrant un espace dédié spécifiquement aux échanges professionnels, facilitant ainsi la mise en relation et la visibilité professionnelle.
 
 ## 3. Fonctionnalités principales
 *   **Créer et gérer un profil :** S'inscrire, se connecter de manière sécurisée, et mettre à jour ses informations (titre professionnel, entreprise, photo).
@@ -30,8 +30,8 @@ Les professionnels et les chercheurs d'emploi ont souvent du mal à maintenir un
 
 1. Cloner le dépôt :
 ```bash
-git clone [https://github.com/votre-nom/professional-connect.git](https://github.com/votre-nom/professional-connect.git)
-cd professional-connect
+git clone [https://github.com/votre-nom/linkup.git](https://github.com/votre-nom/linkup.git)
+cd linkup
 ```
 
 2. Installer les dépendances backend :
