@@ -48,7 +48,8 @@ $reposts = Republier::with(['user','post.user','post.comments.user','post.likes'
 
 $feed = $normalPosts->concat($reposts)->sortByDesc('feed_date');
 
-    //   dd($posts);
+
+    //   dd($feed);
 
     return view('feed', compact('feed'));
 }

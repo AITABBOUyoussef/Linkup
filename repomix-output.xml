@@ -40,258 +40,253 @@ The content is organized as follows:
 </file_summary>
 
 <directory_structure>
+.github/
+  workflows/
+    issues.yml
+    pull-requests.yml
+    tests.yml
+    update-changelog.yml
+app/
+  Http/
+    Controllers/
+      Auth/
+        AuthenticatedSessionController.php
+        ConfirmablePasswordController.php
+        EmailVerificationNotificationController.php
+        EmailVerificationPromptController.php
+        NewPasswordController.php
+        PasswordController.php
+        PasswordResetLinkController.php
+        RegisteredUserController.php
+        VerifyEmailController.php
+      CommentController.php
+      ConnectionController.php
+      Controller.php
+      LikeController.php
+      NetworkController.php
+      PostController.php
+      ProfileController.php
+      RepublierController.php
+      SaveController.php
+    Middleware/
+      is_auth.php
+    Requests/
+      Auth/
+        LoginRequest.php
+      ProfileUpdateRequest.php
+      StoreRepublierRequest.php
+      UpdateRepublierRequest.php
+  Models/
+    Comment.php
+    Connection.php
+    Like.php
+    Post.php
+    Republier.php
+    save.php
+    User.php
+  Policies/
+    RepublierPolicy.php
+  Providers/
+    AppServiceProvider.php
+  View/
+    Components/
+      AppLayout.php
+      GuestLayout.php
+bootstrap/
+  cache/
+    .gitignore
+  app.php
+  providers.php
+config/
+  app.php
+  auth.php
+  cache.php
+  database.php
+  filesystems.php
+  logging.php
+  mail.php
+  queue.php
+  services.php
+  session.php
+database/
+  factories/
+    PostFactory.php
+    RepublierFactory.php
+    UserFactory.php
+  migrations/
+    0001_01_01_000000_create_users_table.php
+    0001_01_01_000001_create_cache_table.php
+    0001_01_01_000002_create_jobs_table.php
+    2026_06_22_150443_create_posts_table.php
+    2026_06_30_142352_create_likes_table.php
+    2026_06_30_142410_create_comments_table.php
+    2026_07_03_163300_create_connections_table.php
+    2026_07_06_142436_create_saves_table.php
+    2026_07_07_113943_add_is_open_to_work_to_users_table.php
+    2026_07_07_145128_create_republiers_table.php
+    2026_07_07_161207_rename_user_id_to_reposted_by_in_republiers_table.php
+    2026_07_08_160042_add_is_pinned_to_posts_table.php
+  seeders/
+    DatabaseSeeder.php
+    RepublierSeeder.php
+  .gitignore
+public/
+  photos/
+    1783003819.png
+    1783004764.png
+    1783005160.png
+    1783008205.png
+    1783074190.png
+    1783078562.png
+    1783091906.png
+    1783095836.png
+    1783098621.png
+    1783099126.png
+    1783099293.png
+    1783173342.png
+    1783798829.png
+    1784109446.png
+    1784113566.png
+  .htaccess
+  favicon.ico
+  index.php
+  robots.txt
+resources/
+  css/
+    app.css
+  js/
+    app.js
+    bootstrap.js
+    interface.js
+  views/
+    auth/
+      confirm-password.blade.php
+      forgot-password.blade.php
+      login.blade.php
+      register.blade.php
+      reset-password.blade.php
+      verify-email.blade.php
+    components/
+      application-logo.blade.php
+      auth-session-status.blade.php
+      danger-button.blade.php
+      dropdown-link.blade.php
+      dropdown.blade.php
+      input-error.blade.php
+      input-label.blade.php
+      modal.blade.php
+      nav-link.blade.php
+      primary-button.blade.php
+      responsive-nav-link.blade.php
+      secondary-button.blade.php
+      text-input.blade.php
+    layouts/
+      app.blade.php
+      guest.blade.php
+      navigation.blade.php
+    profile/
+      partials/
+        delete-user-form.blade.php
+        update-password-form.blade.php
+        update-profile-information-form.blade.php
+      edit.blade.php
+    create.blade.php
+    dashboard.blade.php
+    edit_comment.blade.php
+    edit.blade.php
+    feed.blade.php
+    network.blade.php
+    save_post.blade.php
+    user_profil.blade.php
+    welcome.blade.php
+routes/
+  auth.php
+  console.php
+  web.php
+storage/
+  app/
+    private/
+      .gitignore
+    public/
+      .gitignore
+    .gitignore
+  framework/
+    cache/
+      data/
+        .gitignore
+      .gitignore
+    sessions/
+      .gitignore
+    testing/
+      .gitignore
+    views/
+      .gitignore
+    .gitignore
+  logs/
+    .gitignore
+tests/
+  Feature/
+    Auth/
+      AuthenticationTest.php
+      EmailVerificationTest.php
+      PasswordConfirmationTest.php
+      PasswordResetTest.php
+      PasswordUpdateTest.php
+      RegistrationTest.php
+    ExampleTest.php
+    ProfileTest.php
+    registerTest.php
+  Unit/
+    ExampleTest.php
+  TestCase.php
 .editorconfig
 .env.example
 .gitattributes
-.github/workflows/issues.yml
-.github/workflows/pull-requests.yml
-.github/workflows/tests.yml
-.github/workflows/update-changelog.yml
 .gitignore
 .styleci.yml
-app/Http/Controllers/Auth/AuthenticatedSessionController.php
-app/Http/Controllers/Auth/ConfirmablePasswordController.php
-app/Http/Controllers/Auth/EmailVerificationNotificationController.php
-app/Http/Controllers/Auth/EmailVerificationPromptController.php
-app/Http/Controllers/Auth/NewPasswordController.php
-app/Http/Controllers/Auth/PasswordController.php
-app/Http/Controllers/Auth/PasswordResetLinkController.php
-app/Http/Controllers/Auth/RegisteredUserController.php
-app/Http/Controllers/Auth/VerifyEmailController.php
-app/Http/Controllers/CommentController.php
-app/Http/Controllers/ConnectionController.php
-app/Http/Controllers/Controller.php
-app/Http/Controllers/LikeController.php
-app/Http/Controllers/NetworkController.php
-app/Http/Controllers/PostController.php
-app/Http/Controllers/ProfileController.php
-app/Http/Middleware/is_auth.php
-app/Http/Requests/Auth/LoginRequest.php
-app/Http/Requests/ProfileUpdateRequest.php
-app/Models/Comment.php
-app/Models/Connection.php
-app/Models/Like.php
-app/Models/Post.php
-app/Models/User.php
-app/Providers/AppServiceProvider.php
-app/View/Components/AppLayout.php
-app/View/Components/GuestLayout.php
 artisan
-bootstrap/app.php
-bootstrap/cache/.gitignore
-bootstrap/providers.php
 CHANGELOG.md
 composer.json
-config/app.php
-config/auth.php
-config/cache.php
-config/database.php
-config/filesystems.php
-config/logging.php
-config/mail.php
-config/queue.php
-config/services.php
-config/session.php
-database/.gitignore
-database/factories/PostFactory.php
-database/factories/UserFactory.php
-database/migrations/0001_01_01_000000_create_users_table.php
-database/migrations/0001_01_01_000001_create_cache_table.php
-database/migrations/0001_01_01_000002_create_jobs_table.php
-database/migrations/2026_06_22_150443_create_posts_table.php
-database/migrations/2026_06_30_142352_create_likes_table.php
-database/migrations/2026_06_30_142410_create_comments_table.php
-database/migrations/2026_07_03_163300_create_connections_table.php
-database/seeders/DatabaseSeeder.php
 package.json
 phpunit.xml
 postcss.config.js
-public/.htaccess
-public/favicon.ico
-public/index.php
-public/photos/1783003819.png
-public/photos/1783004764.png
-public/photos/1783005160.png
-public/photos/1783008205.png
-public/photos/1783074190.png
-public/photos/1783078562.png
-public/photos/1783091906.png
-public/photos/1783095836.png
-public/photos/1783098621.png
-public/photos/1783099126.png
-public/photos/1783099293.png
-public/photos/1783173342.png
-public/robots.txt
 README.md
-resources/css/app.css
-resources/js/app.js
-resources/js/bootstrap.js
-resources/js/interface.js
-resources/views/auth/confirm-password.blade.php
-resources/views/auth/forgot-password.blade.php
-resources/views/auth/login.blade.php
-resources/views/auth/register.blade.php
-resources/views/auth/reset-password.blade.php
-resources/views/auth/verify-email.blade.php
-resources/views/components/application-logo.blade.php
-resources/views/components/auth-session-status.blade.php
-resources/views/components/danger-button.blade.php
-resources/views/components/dropdown-link.blade.php
-resources/views/components/dropdown.blade.php
-resources/views/components/input-error.blade.php
-resources/views/components/input-label.blade.php
-resources/views/components/modal.blade.php
-resources/views/components/nav-link.blade.php
-resources/views/components/primary-button.blade.php
-resources/views/components/responsive-nav-link.blade.php
-resources/views/components/secondary-button.blade.php
-resources/views/components/text-input.blade.php
-resources/views/create.blade.php
-resources/views/dashboard.blade.php
-resources/views/edit_comment.blade.php
-resources/views/edit.blade.php
-resources/views/feed.blade.php
-resources/views/layouts/app.blade.php
-resources/views/layouts/guest.blade.php
-resources/views/layouts/navigation.blade.php
-resources/views/network.blade.php
-resources/views/profile/edit.blade.php
-resources/views/profile/partials/delete-user-form.blade.php
-resources/views/profile/partials/update-password-form.blade.php
-resources/views/profile/partials/update-profile-information-form.blade.php
-resources/views/user_profil.blade.php
-resources/views/welcome.blade.php
-routes/auth.php
-routes/console.php
-routes/web.php
-storage/app/.gitignore
-storage/app/private/.gitignore
-storage/app/public/.gitignore
-storage/framework/.gitignore
-storage/framework/cache/.gitignore
-storage/framework/cache/data/.gitignore
-storage/framework/sessions/.gitignore
-storage/framework/testing/.gitignore
-storage/framework/views/.gitignore
-storage/logs/.gitignore
 tailwind.config.js
-tests/Feature/Auth/AuthenticationTest.php
-tests/Feature/Auth/EmailVerificationTest.php
-tests/Feature/Auth/PasswordConfirmationTest.php
-tests/Feature/Auth/PasswordResetTest.php
-tests/Feature/Auth/PasswordUpdateTest.php
-tests/Feature/Auth/RegistrationTest.php
-tests/Feature/ExampleTest.php
-tests/Feature/ProfileTest.php
-tests/TestCase.php
-tests/Unit/ExampleTest.php
 vite.config.js
 </directory_structure>
 
 <files>
 This section contains the contents of the repository's files.
 
-<file path=".editorconfig">
-root = true
+<file path="database/migrations/2026_07_08_160042_add_is_pinned_to_posts_table.php">
+<?php
 
-[*]
-charset = utf-8
-end_of_line = lf
-indent_size = 4
-indent_style = space
-insert_final_newline = true
-trim_trailing_whitespace = true
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
 
-[*.md]
-trim_trailing_whitespace = false
+return new class extends Migration
+{
+    /**
+     * Run the migrations.
+     */
+    public function up(): void
+    {
+        Schema::table('posts', function (Blueprint $table) {
+            $table->boolean('is_pinned')->default(false);
+        });
+    }
 
-[*.{yml,yaml}]
-indent_size = 2
-
-[compose.yaml]
-indent_size = 4
-</file>
-
-<file path=".env.example">
-APP_NAME=Laravel
-APP_ENV=local
-APP_KEY=
-APP_DEBUG=true
-APP_URL=http://localhost
-
-APP_LOCALE=en
-APP_FALLBACK_LOCALE=en
-APP_FAKER_LOCALE=en_US
-
-APP_MAINTENANCE_DRIVER=file
-# APP_MAINTENANCE_STORE=database
-
-# PHP_CLI_SERVER_WORKERS=4
-
-BCRYPT_ROUNDS=12
-
-LOG_CHANNEL=stack
-LOG_STACK=single
-LOG_DEPRECATIONS_CHANNEL=null
-LOG_LEVEL=debug
-
-DB_CONNECTION=sqlite
-# DB_HOST=127.0.0.1
-# DB_PORT=3306
-# DB_DATABASE=laravel
-# DB_USERNAME=root
-# DB_PASSWORD=
-
-SESSION_DRIVER=database
-SESSION_LIFETIME=120
-SESSION_ENCRYPT=false
-SESSION_PATH=/
-SESSION_DOMAIN=null
-
-BROADCAST_CONNECTION=log
-FILESYSTEM_DISK=local
-QUEUE_CONNECTION=database
-
-CACHE_STORE=database
-# CACHE_PREFIX=
-
-MEMCACHED_HOST=127.0.0.1
-
-REDIS_CLIENT=phpredis
-REDIS_HOST=127.0.0.1
-REDIS_PASSWORD=null
-REDIS_PORT=6379
-
-MAIL_MAILER=log
-MAIL_SCHEME=null
-MAIL_HOST=127.0.0.1
-MAIL_PORT=2525
-MAIL_USERNAME=null
-MAIL_PASSWORD=null
-MAIL_FROM_ADDRESS="hello@example.com"
-MAIL_FROM_NAME="${APP_NAME}"
-
-AWS_ACCESS_KEY_ID=
-AWS_SECRET_ACCESS_KEY=
-AWS_DEFAULT_REGION=us-east-1
-AWS_BUCKET=
-AWS_USE_PATH_STYLE_ENDPOINT=false
-
-VITE_APP_NAME="${APP_NAME}"
-</file>
-
-<file path=".gitattributes">
-* text=auto eol=lf
-
-*.blade.php diff=html
-*.css diff=css
-*.html diff=html
-*.md diff=markdown
-*.php diff=php
-
-/.github export-ignore
-CHANGELOG.md export-ignore
-.styleci.yml export-ignore
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        Schema::table('posts', function (Blueprint $table) {
+            //
+        });
+    }
+};
 </file>
 
 <file path=".github/workflows/issues.yml">
@@ -388,45 +383,6 @@ jobs:
     permissions:
       contents: write
     uses: laravel/.github/.github/workflows/update-changelog.yml@main
-</file>
-
-<file path=".gitignore">
-*.log
-.DS_Store
-.env
-.env.backup
-.env.production
-.phpactor.json
-.phpunit.result.cache
-/.fleet
-/.idea
-/.nova
-/.phpunit.cache
-/.vscode
-/.zed
-/auth.json
-/node_modules
-/public/build
-/public/hot
-/public/storage
-/storage/*.key
-/storage/pail
-/vendor
-Homestead.json
-Homestead.yaml
-Thumbs.db
-</file>
-
-<file path=".styleci.yml">
-php:
-  preset: laravel
-  disabled:
-    - no_unused_imports
-  finder:
-    not-name:
-      - index.php
-js: true
-css: true
 </file>
 
 <file path="app/Http/Controllers/Auth/NewPasswordController.php">
@@ -649,6 +605,98 @@ class ConnectionController extends Controller
 }
 </file>
 
+<file path="app/Http/Controllers/RepublierController.php">
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Models\Republier;
+use App\Http\Controllers\Controller;
+use App\Http\Requests\StoreRepublierRequest;
+use App\Http\Requests\UpdateRepublierRequest;
+use Illuminate\Http\Request;
+
+class RepublierController extends Controller
+{
+    /**
+     * Display a listing of the resource.
+     */
+    public function index()
+    {
+        //
+    }
+
+    /**
+     * Show the form for creating a new resource.
+     */
+    public function create()
+    {
+        //
+    }
+
+    /**
+     * Store a newly created resource in storage.
+     */
+  public function store(Request $request)
+{
+$request->validate([
+    'post_id'=> 'required|exists:posts,id',
+]);
+
+$user_id=$request->user()->id;
+
+$republier=Republier::where('reposted_by', $user_id)
+   ->where('post_id', $request->post_id)
+    ->first();
+// dd($save)
+if($republier){
+    $republier->delete();
+         return redirect()->route('feed.index')
+                ->with('success', 'save removed successfully.');
+}
+
+$republier = new republier();
+$republier->reposted_by=$user_id;
+$republier->post_id=$request->post_id;
+$republier->save();
+      return redirect()->route('feed.index')
+            ->with('success', 'save added successfully.');
+}
+
+    /**
+     * Display the specified resource.
+     */
+    public function show(Republier $republier)
+    {
+        //
+    }
+
+    /**
+     * Show the form for editing the specified resource.
+     */
+    public function edit(Republier $republier)
+    {
+        //
+    }
+
+    /**
+     * Update the specified resource in storage.
+     */
+    public function update(UpdateRepublierRequest $request, Republier $republier)
+    {
+        //
+    }
+
+    /**
+     * Remove the specified resource from storage.
+     */
+    public function destroy(Republier $republier)
+    {
+        //
+    }
+}
+</file>
+
 <file path="app/Http/Middleware/is_auth.php">
 <?php
 
@@ -795,6 +843,188 @@ class ProfileUpdateRequest extends FormRequest
 }
 </file>
 
+<file path="app/Http/Requests/StoreRepublierRequest.php">
+<?php
+
+namespace App\Http\Requests;
+
+use Illuminate\Contracts\Validation\ValidationRule;
+use Illuminate\Foundation\Http\FormRequest;
+
+class StoreRepublierRequest extends FormRequest
+{
+    /**
+     * Determine if the user is authorized to make this request.
+     */
+    public function authorize(): bool
+    {
+        return false;
+    }
+
+    /**
+     * Get the validation rules that apply to the request.
+     *
+     * @return array<string, ValidationRule|array<mixed>|string>
+     */
+    public function rules(): array
+    {
+        return [
+            //
+        ];
+    }
+}
+</file>
+
+<file path="app/Http/Requests/UpdateRepublierRequest.php">
+<?php
+
+namespace App\Http\Requests;
+
+use Illuminate\Contracts\Validation\ValidationRule;
+use Illuminate\Foundation\Http\FormRequest;
+
+class UpdateRepublierRequest extends FormRequest
+{
+    /**
+     * Determine if the user is authorized to make this request.
+     */
+    public function authorize(): bool
+    {
+        return false;
+    }
+
+    /**
+     * Get the validation rules that apply to the request.
+     *
+     * @return array<string, ValidationRule|array<mixed>|string>
+     */
+    public function rules(): array
+    {
+        return [
+            //
+        ];
+    }
+}
+</file>
+
+<file path="app/Models/Republier.php">
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+
+class Republier extends Model
+{
+     protected $fillable = [
+        'reposted_by',
+        'post_id',
+    ];
+
+    public function post(){
+        return $this->belongsTo(Post::class);
+    }
+    public  function user(){
+        return $this->belongsTo(user::class, 'reposted_by');
+    }
+}
+</file>
+
+<file path="app/Models/save.php">
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Model;
+
+class save extends Model
+{
+
+ protected $fillable = [
+        'user_id',
+        'post_id',
+    ];
+
+ public function post(){
+    return $this->belongsTo(post::class);
+}
+public function user(){
+        return $this->belongsTo(User::class);
+    }
+
+}
+</file>
+
+<file path="app/Policies/RepublierPolicy.php">
+<?php
+
+namespace App\Policies;
+
+use Illuminate\Auth\Access\Response;
+use App\Models\Republier;
+use App\Models\User;
+
+class RepublierPolicy
+{
+    /**
+     * Determine whether the user can view any models.
+     */
+    public function viewAny(User $user): bool
+    {
+        return false;
+    }
+
+    /**
+     * Determine whether the user can view the model.
+     */
+    public function view(User $user, Republier $republier): bool
+    {
+        return false;
+    }
+
+    /**
+     * Determine whether the user can create models.
+     */
+    public function create(User $user): bool
+    {
+        return false;
+    }
+
+    /**
+     * Determine whether the user can update the model.
+     */
+    public function update(User $user, Republier $republier): bool
+    {
+        return false;
+    }
+
+    /**
+     * Determine whether the user can delete the model.
+     */
+    public function delete(User $user, Republier $republier): bool
+    {
+        return false;
+    }
+
+    /**
+     * Determine whether the user can restore the model.
+     */
+    public function restore(User $user, Republier $republier): bool
+    {
+        return false;
+    }
+
+    /**
+     * Determine whether the user can permanently delete the model.
+     */
+    public function forceDelete(User $user, Republier $republier): bool
+    {
+        return false;
+    }
+}
+</file>
+
 <file path="app/Providers/AppServiceProvider.php">
 <?php
 
@@ -862,25 +1092,9 @@ class GuestLayout extends Component
 }
 </file>
 
-<file path="artisan">
-#!/usr/bin/env php
-<?php
-
-use Illuminate\Foundation\Application;
-use Symfony\Component\Console\Input\ArgvInput;
-
-define('LARAVEL_START', microtime(true));
-
-// Register the Composer autoloader...
-require __DIR__.'/vendor/autoload.php';
-
-// Bootstrap Laravel and handle the command...
-/** @var Application $app */
-$app = require_once __DIR__.'/bootstrap/app.php';
-
-$status = $app->handleCommand(new ArgvInput);
-
-exit($status);
+<file path="bootstrap/cache/.gitignore">
+*
+!.gitignore
 </file>
 
 <file path="bootstrap/app.php">
@@ -904,11 +1118,6 @@ return Application::configure(basePath: dirname(__DIR__))
     })->create();
 </file>
 
-<file path="bootstrap/cache/.gitignore">
-*
-!.gitignore
-</file>
-
 <file path="bootstrap/providers.php">
 <?php
 
@@ -917,168 +1126,6 @@ use App\Providers\AppServiceProvider;
 return [
     AppServiceProvider::class,
 ];
-</file>
-
-<file path="CHANGELOG.md">
-# Release Notes
-
-## [Unreleased](https://github.com/laravel/laravel/compare/v12.12.1...12.x)
-
-## [v12.12.1](https://github.com/laravel/laravel/compare/v12.12.0...v12.12.1) - 2026-03-10
-
-* [12.x] Makes imports consistent by [@nunomaduro](https://github.com/nunomaduro) in https://github.com/laravel/laravel/pull/6760
-
-## [v12.12.0](https://github.com/laravel/laravel/compare/v12.11.2...v12.12.0) - 2026-03-09
-
-* Update phpunit version to ^11.5.50 to address CVE by [@PerryvanderMeer](https://github.com/PerryvanderMeer) in https://github.com/laravel/laravel/pull/6746
-* [12.x] Add `APP_NAME` fallback in mail config by [@apoorvdarshan](https://github.com/apoorvdarshan) in https://github.com/laravel/laravel/pull/6755
-* [12.x] Neutralize DB_URL in default phpunit.xml by [@Husseinadq](https://github.com/Husseinadq) in https://github.com/laravel/laravel/pull/6761
-
-## [v12.11.2](https://github.com/laravel/laravel/compare/v12.11.1...v12.11.2) - 2026-01-19
-
-* [12.x] Update composer dev script to ensure no timeout by [@jackbayliss](https://github.com/jackbayliss) in https://github.com/laravel/laravel/pull/6735
-* [12.x] Update jobs/cache migrations by [@jackbayliss](https://github.com/jackbayliss) in https://github.com/laravel/laravel/pull/6736
-* [12.x] Remove failed jobs indexes by [@jackbayliss](https://github.com/jackbayliss) in https://github.com/laravel/laravel/pull/6739
-* [12.x] Add `APP_URL` fallback in filesystems config by [@KentarouTakeda](https://github.com/KentarouTakeda) in https://github.com/laravel/laravel/pull/6742
-* chore: Update outdated GitHub Actions version by [@pgoslatara](https://github.com/pgoslatara) in https://github.com/laravel/laravel/pull/6743
-
-## [v12.11.1](https://github.com/laravel/laravel/compare/v12.11.0...v12.11.1) - 2025-12-23
-
-* Use environment variable for `DB_SSLMODE` - Postgres by [@robsontenorio](https://github.com/robsontenorio) in https://github.com/laravel/laravel/pull/6727
-* fix: ensure APP_URL does not have trailing slash in filesystem by [@msamgan](https://github.com/msamgan) in https://github.com/laravel/laravel/pull/6728
-
-## [v12.11.0](https://github.com/laravel/laravel/compare/v12.10.1...v12.11.0) - 2025-11-25
-
-* fix: cookies are not available for subdomains by default by [@joostdebruijn](https://github.com/joostdebruijn) in https://github.com/laravel/laravel/pull/6705
-* Fix PHP 8.5 PDO Driver Specific Constant Deprecation by [@RyanSchaefer](https://github.com/RyanSchaefer) in https://github.com/laravel/laravel/pull/6710
-* Ignore Laravel compiled views for Vite  by [@QistiAmal1212](https://github.com/QistiAmal1212) in https://github.com/laravel/laravel/pull/6714
-
-## [v12.10.1](https://github.com/laravel/laravel/compare/v12.10.0...v12.10.1) - 2025-11-06
-
-* Update schema URL in package.json by [@robinmiau](https://github.com/robinmiau) in https://github.com/laravel/laravel/pull/6701
-
-## [v12.10.0](https://github.com/laravel/laravel/compare/v12.9.1...v12.10.0) - 2025-11-04
-
-* Add background driver by [@barryvdh](https://github.com/barryvdh) in https://github.com/laravel/laravel/pull/6699
-
-## [v12.9.1](https://github.com/laravel/laravel/compare/v12.9.0...v12.9.1) - 2025-10-23
-
-* [12.x] Replace Bootcamp with Laravel Learn by [@AhmedAlaa4611](https://github.com/AhmedAlaa4611) in https://github.com/laravel/laravel/pull/6692
-* [12.x] Comment out CLI workers for fresh applications by [@timacdonald](https://github.com/timacdonald) in https://github.com/laravel/laravel/pull/6693
-
-## [v12.9.0](https://github.com/laravel/laravel/compare/v12.8.0...v12.9.0) - 2025-10-21
-
-**Full Changelog**: https://github.com/laravel/laravel/compare/v12.8.0...v12.9.0
-
-## [v12.8.0](https://github.com/laravel/laravel/compare/v12.7.1...v12.8.0) - 2025-10-20
-
-* [12.x] Makes test suite using broadcast's `null` driver by [@nunomaduro](https://github.com/nunomaduro) in https://github.com/laravel/laravel/pull/6691
-
-## [v12.7.1](https://github.com/laravel/laravel/compare/v12.7.0...v12.7.1) - 2025-10-15
-
-* Added `failover` driver to the `queue` config comment.  by [@sajjadhossainshohag](https://github.com/sajjadhossainshohag) in https://github.com/laravel/laravel/pull/6688
-
-## [v12.7.0](https://github.com/laravel/laravel/compare/v12.6.0...v12.7.0) - 2025-10-14
-
-**Full Changelog**: https://github.com/laravel/laravel/compare/v12.6.0...v12.7.0
-
-## [v12.6.0](https://github.com/laravel/laravel/compare/v12.5.0...v12.6.0) - 2025-10-02
-
-* Fix setup script by [@goldmont](https://github.com/goldmont) in https://github.com/laravel/laravel/pull/6682
-
-## [v12.5.0](https://github.com/laravel/laravel/compare/v12.4.0...v12.5.0) - 2025-09-30
-
-* [12.x] Fix type casting for environment variables in config files by [@AhmedAlaa4611](https://github.com/AhmedAlaa4611) in https://github.com/laravel/laravel/pull/6670
-* Fix CVEs affecting vite by [@faissaloux](https://github.com/faissaloux) in https://github.com/laravel/laravel/pull/6672
-* Update .editorconfig to target compose.yaml by [@fredikaputra](https://github.com/fredikaputra) in https://github.com/laravel/laravel/pull/6679
-* Add pre-package-uninstall script to composer.json by [@cosmastech](https://github.com/cosmastech) in https://github.com/laravel/laravel/pull/6681
-
-## [v12.4.0](https://github.com/laravel/laravel/compare/v12.3.1...v12.4.0) - 2025-08-29
-
-* [12.x] Add default Redis retry configuration by [@mateusjatenee](https://github.com/mateusjatenee) in https://github.com/laravel/laravel/pull/6666
-
-## [v12.3.1](https://github.com/laravel/laravel/compare/v12.3.0...v12.3.1) - 2025-08-21
-
-* [12.x] Bump Pint version by [@AhmedAlaa4611](https://github.com/AhmedAlaa4611) in https://github.com/laravel/laravel/pull/6653
-* [12.x] Making sure all related processed are closed when terminating the currently command by [@AhmedAlaa4611](https://github.com/AhmedAlaa4611) in https://github.com/laravel/laravel/pull/6654
-* [12.x] Use application name from configuration by [@AhmedAlaa4611](https://github.com/AhmedAlaa4611) in https://github.com/laravel/laravel/pull/6655
-* Bring back postAutoloadDump script by [@jasonvarga](https://github.com/jasonvarga) in https://github.com/laravel/laravel/pull/6662
-
-## [v12.3.0](https://github.com/laravel/laravel/compare/v12.2.0...v12.3.0) - 2025-08-03
-
-* Fix Critical Security Vulnerability in form-data Dependency by [@izzygld](https://github.com/izzygld) in https://github.com/laravel/laravel/pull/6645
-* Revert "fix" by [@RobertBoes](https://github.com/RobertBoes) in https://github.com/laravel/laravel/pull/6646
-* Change composer post-autoload-dump script to Artisan command by [@lmjhs](https://github.com/lmjhs) in https://github.com/laravel/laravel/pull/6647
-
-## [v12.2.0](https://github.com/laravel/laravel/compare/v12.1.0...v12.2.0) - 2025-07-11
-
-* Add Vite 7 support by [@timacdonald](https://github.com/timacdonald) in https://github.com/laravel/laravel/pull/6639
-
-## [v12.1.0](https://github.com/laravel/laravel/compare/v12.0.11...v12.1.0) - 2025-07-03
-
-* [12.x] Disable nightwatch in testing by [@laserhybiz](https://github.com/laserhybiz) in https://github.com/laravel/laravel/pull/6632
-* [12.x] Reorder environment variables in phpunit.xml for logical grouping by [@AhmedAlaa4611](https://github.com/AhmedAlaa4611) in https://github.com/laravel/laravel/pull/6634
-* Change to hyphenate prefixes and cookie names by [@u01jmg3](https://github.com/u01jmg3) in https://github.com/laravel/laravel/pull/6636
-* [12.x] Fix type casting for environment variables in config files by [@AhmedAlaa4611](https://github.com/AhmedAlaa4611) in https://github.com/laravel/laravel/pull/6637
-
-## [v12.0.11](https://github.com/laravel/laravel/compare/v12.0.10...v12.0.11) - 2025-06-10
-
-**Full Changelog**: https://github.com/laravel/laravel/compare/v12.0.10...v12.0.11
-
-## [v12.0.10](https://github.com/laravel/laravel/compare/v12.0.9...v12.0.10) - 2025-06-09
-
-* fix alphabetical order by [@Khuthaily](https://github.com/Khuthaily) in https://github.com/laravel/laravel/pull/6627
-* [12.x] Reduce redundancy and keeps the .gitignore file cleaner by [@AhmedAlaa4611](https://github.com/AhmedAlaa4611) in https://github.com/laravel/laravel/pull/6629
-* [12.x] Fix: Add void return type to satisfy Rector analysis by [@Aluisio-Pires](https://github.com/Aluisio-Pires) in https://github.com/laravel/laravel/pull/6628
-
-## [v12.0.9](https://github.com/laravel/laravel/compare/v12.0.8...v12.0.9) - 2025-05-26
-
-* [12.x] Remove apc by [@AhmedAlaa4611](https://github.com/AhmedAlaa4611) in https://github.com/laravel/laravel/pull/6611
-* [12.x] Add JSON Schema to package.json by [@martinbean](https://github.com/martinbean) in https://github.com/laravel/laravel/pull/6613
-* Minor language update by [@woganmay](https://github.com/woganmay) in https://github.com/laravel/laravel/pull/6615
-* Enhance .gitignore to exclude common OS and log files by [@mohammadRezaei1380](https://github.com/mohammadRezaei1380) in https://github.com/laravel/laravel/pull/6619
-
-## [v12.0.8](https://github.com/laravel/laravel/compare/v12.0.7...v12.0.8) - 2025-05-12
-
-* [12.x] Clean up URL formatting in README by [@AhmedAlaa4611](https://github.com/AhmedAlaa4611) in https://github.com/laravel/laravel/pull/6601
-
-## [v12.0.7](https://github.com/laravel/laravel/compare/v12.0.6...v12.0.7) - 2025-04-15
-
-* Add `composer run test` command by [@crynobone](https://github.com/crynobone) in https://github.com/laravel/laravel/pull/6598
-* Partner Directory Changes in ReadME by [@joshcirre](https://github.com/joshcirre) in https://github.com/laravel/laravel/pull/6599
-
-## [v12.0.6](https://github.com/laravel/laravel/compare/v12.0.5...v12.0.6) - 2025-04-08
-
-**Full Changelog**: https://github.com/laravel/laravel/compare/v12.0.5...v12.0.6
-
-## [v12.0.5](https://github.com/laravel/laravel/compare/v12.0.4...v12.0.5) - 2025-04-02
-
-* [12.x] Update `config/mail.php` to match the latest core configuration by [@AhmedAlaa4611](https://github.com/AhmedAlaa4611) in https://github.com/laravel/laravel/pull/6594
-
-## [v12.0.4](https://github.com/laravel/laravel/compare/v12.0.3...v12.0.4) - 2025-03-31
-
-* Bump vite from 6.0.11 to 6.2.3 - Vulnerability patch by [@abdel-aouby](https://github.com/abdel-aouby) in https://github.com/laravel/laravel/pull/6586
-* Bump vite from 6.2.3 to 6.2.4 by [@thinkverse](https://github.com/thinkverse) in https://github.com/laravel/laravel/pull/6590
-
-## [v12.0.3](https://github.com/laravel/laravel/compare/v12.0.2...v12.0.3) - 2025-03-17
-
-* Remove reverted change from CHANGELOG.md by [@AJenbo](https://github.com/AJenbo) in https://github.com/laravel/laravel/pull/6565
-* Improves clarity in app.css file by [@AhmedAlaa4611](https://github.com/AhmedAlaa4611) in https://github.com/laravel/laravel/pull/6569
-* [12.x] Refactor: Structural improvement for clarity by [@AhmedAlaa4611](https://github.com/AhmedAlaa4611) in https://github.com/laravel/laravel/pull/6574
-* Bump axios from 1.7.9 to 1.8.2 - Vulnerability patch by [@abdel-aouby](https://github.com/abdel-aouby) in https://github.com/laravel/laravel/pull/6572
-* [12.x] Remove Unnecessarily [@source](https://github.com/source) by [@AhmedAlaa4611](https://github.com/AhmedAlaa4611) in https://github.com/laravel/laravel/pull/6584
-
-## [v12.0.2](https://github.com/laravel/laravel/compare/v12.0.1...v12.0.2) - 2025-03-04
-
-* Make the github test action run out of the box independent of the choice of testing framework by [@ndeblauw](https://github.com/ndeblauw) in https://github.com/laravel/laravel/pull/6555
-
-## [v12.0.1](https://github.com/laravel/laravel/compare/v12.0.0...v12.0.1) - 2025-02-24
-
-* [12.x] prefer stable stability by [@pataar](https://github.com/pataar) in https://github.com/laravel/laravel/pull/6548
-
-## [v12.0.0 (2025-??-??)](https://github.com/laravel/laravel/compare/v11.0.2...v12.0.0)
-
-Laravel 12 includes a variety of changes to the application skeleton. Please consult the diff to see what's new.
 </file>
 
 <file path="config/app.php">
@@ -2209,6 +2256,33 @@ class PostFactory extends Factory
 }
 </file>
 
+<file path="database/factories/RepublierFactory.php">
+<?php
+
+namespace Database\Factories;
+
+use App\Models\Republier;
+use Illuminate\Database\Eloquent\Factories\Factory;
+
+/**
+ * @extends Factory<Republier>
+ */
+class RepublierFactory extends Factory
+{
+    /**
+     * Define the model's default state.
+     *
+     * @return array<string, mixed>
+     */
+    public function definition(): array
+    {
+        return [
+            //
+        ];
+    }
+}
+</file>
+
 <file path="database/migrations/0001_01_01_000001_create_cache_table.php">
 <?php
 
@@ -2406,52 +2480,150 @@ return new class extends Migration
 };
 </file>
 
-<file path="phpunit.xml">
-<?xml version="1.0" encoding="UTF-8"?>
-<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:noNamespaceSchemaLocation="vendor/phpunit/phpunit/phpunit.xsd"
-         bootstrap="vendor/autoload.php"
-         colors="true"
->
-    <testsuites>
-        <testsuite name="Unit">
-            <directory>tests/Unit</directory>
-        </testsuite>
-        <testsuite name="Feature">
-            <directory>tests/Feature</directory>
-        </testsuite>
-    </testsuites>
-    <source>
-        <include>
-            <directory>app</directory>
-        </include>
-    </source>
-    <php>
-        <env name="APP_ENV" value="testing"/>
-        <env name="APP_MAINTENANCE_DRIVER" value="file"/>
-        <env name="BCRYPT_ROUNDS" value="4"/>
-        <env name="BROADCAST_CONNECTION" value="null"/>
-        <env name="CACHE_STORE" value="array"/>
-        <env name="DB_CONNECTION" value="sqlite"/>
-        <env name="DB_DATABASE" value=":memory:"/>
-        <env name="DB_URL" value=""/>
-        <env name="MAIL_MAILER" value="array"/>
-        <env name="QUEUE_CONNECTION" value="sync"/>
-        <env name="SESSION_DRIVER" value="array"/>
-        <env name="PULSE_ENABLED" value="false"/>
-        <env name="TELESCOPE_ENABLED" value="false"/>
-        <env name="NIGHTWATCH_ENABLED" value="false"/>
-    </php>
-</phpunit>
+<file path="database/migrations/2026_07_06_142436_create_saves_table.php">
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    /**
+     * Run the migrations.
+     */
+    public function up(): void
+    {
+        Schema::create('saves', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('user_id')->constrained()->onDelete('cascade');
+            $table->foreignId('post_id')->constrained()->onDelete('cascade');
+            $table->timestamps();
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        Schema::dropIfExists('saves');
+    }
+};
 </file>
 
-<file path="postcss.config.js">
-export default {
-    plugins: {
-        tailwindcss: {},
-        autoprefixer: {},
-    },
+<file path="database/migrations/2026_07_07_113943_add_is_open_to_work_to_users_table.php">
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    /**
+     * Run the migrations.
+     */
+    public function up(): void
+    {
+        Schema::table('users', function (Blueprint $table) {
+            $table->boolean('is_open_to_work')->default(false);
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        Schema::table('users', function (Blueprint $table) {
+            //
+        });
+    }
 };
+</file>
+
+<file path="database/migrations/2026_07_07_145128_create_republiers_table.php">
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    /**
+     * Run the migrations.
+     */
+    public function up(): void
+    {
+        Schema::create('republiers', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
+            $table->foreignId('post_id')->constrained()->onDelete('cascade');
+            $table->timestamps();
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        Schema::dropIfExists('republiers');
+    }
+};
+</file>
+
+<file path="database/migrations/2026_07_07_161207_rename_user_id_to_reposted_by_in_republiers_table.php">
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    /**
+     * Run the migrations.
+     */
+    public function up(): void
+    {
+        Schema::table('republiers', function (Blueprint $table) {
+               $table->renameColumn('user_id', 'reposted_by');
+       
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        Schema::table('republiers', function (Blueprint $table) {
+         });
+    }
+};
+</file>
+
+<file path="database/seeders/RepublierSeeder.php">
+<?php
+
+namespace Database\Seeders;
+
+use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use Illuminate\Database\Seeder;
+
+class RepublierSeeder extends Seeder
+{
+    /**
+     * Run the database seeds.
+     */
+    public function run(): void
+    {
+        //
+    }
+}
 </file>
 
 <file path="public/.htaccess">
@@ -2508,68 +2680,6 @@ $app->handleRequest(Request::capture());
 <file path="public/robots.txt">
 User-agent: *
 Disallow:
-</file>
-
-<file path="README.md">
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
-
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
-
-## About Laravel
-
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
-
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
-
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
-
-## Learning Laravel
-
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
-
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
-
-## Laravel Sponsors
-
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
-
-### Premium Partners
-
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
-
-## Contributing
-
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
-
-## Code of Conduct
-
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
-
-## Security Vulnerabilities
-
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
-
-## License
-
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
 </file>
 
 <file path="resources/js/bootstrap.js">
@@ -2928,6 +3038,147 @@ $classes = ($active ?? false)
 <input @disabled($disabled) {{ $attributes->merge(['class' => 'border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm']) }}>
 </file>
 
+<file path="resources/views/profile/partials/delete-user-form.blade.php">
+<section class="space-y-6">
+    <header>
+        <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100">
+            {{ __('Delete Account') }}
+        </h2>
+
+        <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">
+            {{ __('Once your account is deleted, all of its resources and data will be permanently deleted. Before deleting your account, please download any data or information that you wish to retain.') }}
+        </p>
+    </header>
+
+    <x-danger-button
+        x-data=""
+        x-on:click.prevent="$dispatch('open-modal', 'confirm-user-deletion')"
+    >{{ __('Delete Account') }}</x-danger-button>
+
+    <x-modal name="confirm-user-deletion" :show="$errors->userDeletion->isNotEmpty()" focusable>
+        <form method="post" action="{{ route('profile.destroy') }}" class="p-6">
+            @csrf
+            @method('delete')
+
+            <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100">
+                {{ __('Are you sure you want to delete your account?') }}
+            </h2>
+
+            <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">
+                {{ __('Once your account is deleted, all of its resources and data will be permanently deleted. Please enter your password to confirm you would like to permanently delete your account.') }}
+            </p>
+
+            <div class="mt-6">
+                <x-input-label for="password" value="{{ __('Password') }}" class="sr-only" />
+
+                <x-text-input
+                    id="password"
+                    name="password"
+                    type="password"
+                    class="mt-1 block w-3/4"
+                    placeholder="{{ __('Password') }}"
+                />
+
+                <x-input-error :messages="$errors->userDeletion->get('password')" class="mt-2" />
+            </div>
+
+            <div class="mt-6 flex justify-end">
+                <x-secondary-button x-on:click="$dispatch('close')">
+                    {{ __('Cancel') }}
+                </x-secondary-button>
+
+                <x-danger-button class="ms-3">
+                    {{ __('Delete Account') }}
+                </x-danger-button>
+            </div>
+        </form>
+    </x-modal>
+</section>
+</file>
+
+<file path="resources/views/profile/partials/update-password-form.blade.php">
+<section>
+    <header>
+        <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100">
+            {{ __('Update Password') }}
+        </h2>
+
+        <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">
+            {{ __('Ensure your account is using a long, random password to stay secure.') }}
+        </p>
+    </header>
+
+    <form method="post" action="{{ route('password.update') }}" class="mt-6 space-y-6">
+        @csrf
+        @method('put')
+
+        <div>
+            <x-input-label for="update_password_current_password" :value="__('Current Password')" />
+            <x-text-input id="update_password_current_password" name="current_password" type="password" class="mt-1 block w-full" autocomplete="current-password" />
+            <x-input-error :messages="$errors->updatePassword->get('current_password')" class="mt-2" />
+        </div>
+
+        <div>
+            <x-input-label for="update_password_password" :value="__('New Password')" />
+            <x-text-input id="update_password_password" name="password" type="password" class="mt-1 block w-full" autocomplete="new-password" />
+            <x-input-error :messages="$errors->updatePassword->get('password')" class="mt-2" />
+        </div>
+
+        <div>
+            <x-input-label for="update_password_password_confirmation" :value="__('Confirm Password')" />
+            <x-text-input id="update_password_password_confirmation" name="password_confirmation" type="password" class="mt-1 block w-full" autocomplete="new-password" />
+            <x-input-error :messages="$errors->updatePassword->get('password_confirmation')" class="mt-2" />
+        </div>
+
+        <div class="flex items-center gap-4">
+            <x-primary-button>{{ __('Save') }}</x-primary-button>
+
+            @if (session('status') === 'password-updated')
+                <p
+                    x-data="{ show: true }"
+                    x-show="show"
+                    x-transition
+                    x-init="setTimeout(() => show = false, 2000)"
+                    class="text-sm text-gray-600 dark:text-gray-400"
+                >{{ __('Saved.') }}</p>
+            @endif
+        </div>
+    </form>
+</section>
+</file>
+
+<file path="resources/views/profile/edit.blade.php">
+<x-app-layout>
+    <x-slot name="header">
+        <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
+            {{ __('Profile') }}
+        </h2>
+    </x-slot>
+
+    <div class="py-12">
+        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
+            <div class="p-4 sm:p-8 bg-white dark:bg-gray-800 shadow sm:rounded-lg">
+                <div class="max-w-xl">
+                    @include('profile.partials.update-profile-information-form')
+                </div>
+            </div>
+
+            <div class="p-4 sm:p-8 bg-white dark:bg-gray-800 shadow sm:rounded-lg">
+                <div class="max-w-xl">
+                    @include('profile.partials.update-password-form')
+                </div>
+            </div>
+
+            <div class="p-4 sm:p-8 bg-white dark:bg-gray-800 shadow sm:rounded-lg">
+                <div class="max-w-xl">
+                    @include('profile.partials.delete-user-form')
+                </div>
+            </div>
+        </div>
+    </div>
+</x-app-layout>
+</file>
+
 <file path="resources/views/edit_comment.blade.php">
 <x-app-layout>
 <div class="max-w-2xl mx-auto py-10 px-4 sm:px-6 lg:px-8">
@@ -3056,145 +3307,210 @@ $classes = ($active ?? false)
 </x-app-layout>
 </file>
 
-<file path="resources/views/profile/edit.blade.php">
+<file path="resources/views/save_post.blade.php">
 <x-app-layout>
-    <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
-            {{ __('Profile') }}
-        </h2>
-    </x-slot>
 
-    <div class="py-12">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
-            <div class="p-4 sm:p-8 bg-white dark:bg-gray-800 shadow sm:rounded-lg">
-                <div class="max-w-xl">
-                    @include('profile.partials.update-profile-information-form')
-                </div>
-            </div>
+         <div class="space-y-4 pb-20 md:pb-0">
+            {{-- @if($post->saves->user_id == auth()->id() && $post->saves->post_id == $post->id)
 
-            <div class="p-4 sm:p-8 bg-white dark:bg-gray-800 shadow sm:rounded-lg">
-                <div class="max-w-xl">
-                    @include('profile.partials.update-password-form')
-                </div>
-            </div>
+            @endif --}}
 
-            <div class="p-4 sm:p-8 bg-white dark:bg-gray-800 shadow sm:rounded-lg">
-                <div class="max-w-xl">
-                    @include('profile.partials.delete-user-form')
+                    @forelse ($posts as $post)
+                    @php $hassave = $post->saves->contains('user_id', auth()->id()); @endphp
+                        <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+
+                            <!-- Post Header -->
+                            <div class="px-4 pt-3 pb-1 flex items-start justify-between">
+                                <div class="flex items-start gap-3">
+                                    <img src="{{ $post->user->avatar_url ?? 'https://ui-avatars.com/api/?name=' . urlencode($post->user->name) . '&background=random' }}"
+                                        alt="Avatar" class="w-12 h-12 rounded-full object-cover border border-gray-100">
+                                    <div class="leading-tight">
+                                        <a href="{{route('user_profil' ,$post->user_id )}}" class="font-semibold text-gray-900 text-sm hover:text-[#0a66c2] hover:underline cursor-pointer leading-none">
+                                            {{ $post->user->name }}
+                                        </a>
+                                        <p class="text-xs text-gray-500 mt-0.5 line-clamp-1">{{ $post->user->headline ?? 'Membre' }} @if($post->user->company) chez {{ $post->user->company }} @endif</p>
+                                        <p class="text-[11px] text-gray-500 flex items-center gap-1 mt-0.5">
+                                            {{ $post->created_at->diffForHumans() }}
+                                            <span class="w-1 h-1 bg-gray-400 rounded-full inline-block mx-0.5"></span>
+                                            <svg class="w-3 h-3 fill-current text-gray-400" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM4.332 8.027a6.012 6.012 0 011.912-2.706C6.512 5.73 6.974 6 7.5 6A1.5 1.5 0 019 7.5V8a2 2 0 004 0 2 2 0 011.523-1.943A5.977 5.977 0 0116 10c0 .34-.028.675-.083 1H15a2 2 0 00-2 2v2.197A5.973 5.973 0 0110 16v-2a2 2 0 00-2-2 2 2 0 01-2-2 2 2 0 00-1.668-1.973z" clip-rule="evenodd" /></svg>
+                                        </p>
+                                    </div>
+                                </div>
+
+                                <!-- Post Options Dropdown -->
+                                @if ($post->user_id == auth()->id())
+                                    <div class="relative inline-block text-left dropdown">
+                                        <button type="button" class="p-1.5 hover:bg-gray-100 rounded-full transition dropdown-btn text-gray-500 focus:outline-none">
+                                            <svg class="h-6 w-6" fill="currentColor" viewBox="0 0 24 24"><path d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"></path></svg>
+                                        </button>
+                                        <div class="dropdown-menu absolute right-0 mt-1 w-48 bg-white rounded-lg shadow-xl border border-gray-200 py-1 hidden z-30">
+                                            <a href="{{ route('feed.edit', $post->id) }}" class="flex items-center px-4 py-2.5 text-sm text-gray-700 font-medium hover:bg-gray-100">
+                                                <svg class="mr-3 h-5 w-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg>
+                                                Modifier le post
+                                            </a>
+                                            <form action="{{ route('feed.destroy', $post->id) }}" method="POST" class="w-full m-0">
+                                                @csrf @method('DELETE')
+                                                <button type="submit" onclick="return confirm('Êtes-vous sûr de vouloir supprimer ce post ?')" class="flex items-center w-full px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-100">
+                                                    <svg class="mr-3 h-5 w-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                                                    Supprimer le post
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                @endif
+                            </div>
+
+                            <!-- Content Text -->
+                            <div class="px-4 pb-2 pt-1">
+                                <p class="text-gray-900 text-[15px] leading-relaxed whitespace-pre-wrap break-words">{{ $post->content }}</p>
+                            </div>
+
+                            <!-- Content Image -->
+                            @if($post->photo !== "null")
+                            <div class="w-full bg-gray-50">
+                                <img src="{{ asset('photos/' . $post->photo) }}" alt="Post image" class="w-full max-h-[500px] object-contain">
+                            </div>
+                            @else
+                            <div></div>
+                            @endif
+
+                            <!-- Interactions Meta (Like/Comment Counts) -->
+                            <div class="px-4 py-2 flex items-center justify-between text-xs text-gray-500 border-b border-gray-100 mt-1">
+                                <div class="flex items-center gap-1">
+                                    @if ($post->likes->count() > 0)
+                                        <div class="relative flex items-center">
+                                            <img class="w-4 h-4 rounded-full border border-white z-10 relative" src="https://static.licdn.com/aero-v1/sc/h/8ekq8gho1ruaf8i7f86vd1ftt" alt="Like">
+                                        </div>
+                                        <span class="hover:text-blue-700 hover:underline cursor-pointer ml-1">{{ $post->likes->count() }}</span>
+                                    @endif
+                                </div>
+                                @if($post->comments->count() > 0)
+                                <div class="hover:text-blue-700 hover:underline cursor-pointer">
+                                    {{ $post->comments->count() }} commentaire{{ $post->comments->count() > 1 ? 's' : '' }}
+                                </div>
+                                @endif
+                            </div>
+
+                            <!-- Actions Bar (Like, Comment, Share) -->
+                            <div class="px-2 py-1 flex justify-around items-center">
+                                @php $hasLiked = $post->likes->contains('user_id', auth()->id()); @endphp
+
+                                <!-- Like Form -->
+                                <form action="{{ route('feed_like.store') }}" method="POST" class="flex-1 m-0">
+                                    @csrf
+                                    <input type="hidden" name="post_id" value="{{ $post->id }}">
+                                    <button type="submit" class="w-full flex items-center justify-center gap-2 py-3 rounded-md transition-colors text-sm font-semibold {{ $hasLiked ? 'text-[#0a66c2] bg-blue-300 hover:bg-blue-50' : 'text-gray-500 hover:bg-gray-100' }}">
+                                        @if($hasLiked)
+                                            <!-- Liked Icon (Filled) -->
+                                           <svg width="800px" height="800px" class="w-6 h-6" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M20.9752 12.1852L20.2361 12.0574L20.9752 12.1852ZM20.2696 16.265L19.5306 16.1371L20.2696 16.265ZM6.93777 20.4771L6.19056 20.5417L6.93777 20.4771ZM6.12561 11.0844L6.87282 11.0198L6.12561 11.0844ZM13.995 5.22142L14.7351 5.34269V5.34269L13.995 5.22142ZM13.3323 9.26598L14.0724 9.38725V9.38725L13.3323 9.26598ZM6.69814 9.67749L6.20855 9.10933H6.20855L6.69814 9.67749ZM8.13688 8.43769L8.62647 9.00585H8.62647L8.13688 8.43769ZM10.5181 4.78374L9.79208 4.59542L10.5181 4.78374ZM10.9938 2.94989L11.7197 3.13821V3.13821L10.9938 2.94989ZM12.6676 2.06435L12.4382 2.77841L12.4382 2.77841L12.6676 2.06435ZM12.8126 2.11093L13.042 1.39687L13.042 1.39687L12.8126 2.11093ZM9.86195 6.46262L10.5235 6.81599V6.81599L9.86195 6.46262ZM13.9047 3.24752L13.1787 3.43584V3.43584L13.9047 3.24752ZM11.6742 2.13239L11.3486 1.45675V1.45675L11.6742 2.13239ZM3.9716 21.4707L3.22439 21.5353L3.9716 21.4707ZM3 10.2342L3.74721 10.1696C3.71261 9.76945 3.36893 9.46758 2.96767 9.4849C2.5664 9.50221 2.25 9.83256 2.25 10.2342H3ZM20.2361 12.0574L19.5306 16.1371L21.0087 16.3928L21.7142 12.313L20.2361 12.0574ZM13.245 21.25H8.59635V22.75H13.245V21.25ZM7.68498 20.4125L6.87282 11.0198L5.3784 11.149L6.19056 20.5417L7.68498 20.4125ZM19.5306 16.1371C19.0238 19.0677 16.3813 21.25 13.245 21.25V22.75C17.0712 22.75 20.3708 20.081 21.0087 16.3928L19.5306 16.1371ZM13.2548 5.10015L12.5921 9.14472L14.0724 9.38725L14.7351 5.34269L13.2548 5.10015ZM7.18773 10.2456L8.62647 9.00585L7.64729 7.86954L6.20855 9.10933L7.18773 10.2456ZM11.244 4.97206L11.7197 3.13821L10.2678 2.76157L9.79208 4.59542L11.244 4.97206ZM12.4382 2.77841L12.5832 2.82498L13.042 1.39687L12.897 1.3503L12.4382 2.77841ZM10.5235 6.81599C10.8354 6.23198 11.0777 5.61339 11.244 4.97206L9.79208 4.59542C9.65573 5.12107 9.45699 5.62893 9.20042 6.10924L10.5235 6.81599ZM12.5832 2.82498C12.8896 2.92342 13.1072 3.16009 13.1787 3.43584L14.6307 3.05921C14.4252 2.26719 13.819 1.64648 13.042 1.39687L12.5832 2.82498ZM11.7197 3.13821C11.7548 3.0032 11.8523 2.87913 11.9998 2.80804L11.3486 1.45675C10.8166 1.71309 10.417 2.18627 10.2678 2.76157L11.7197 3.13821ZM11.9998 2.80804C12.1345 2.74311 12.2931 2.73181 12.4382 2.77841L12.897 1.3503C12.3873 1.18655 11.8312 1.2242 11.3486 1.45675L11.9998 2.80804ZM14.1537 10.9842H19.3348V9.4842H14.1537V10.9842ZM4.71881 21.4061L3.74721 10.1696L2.25279 10.2988L3.22439 21.5353L4.71881 21.4061ZM3.75 21.5127V10.2342H2.25V21.5127H3.75ZM3.22439 21.5353C3.2112 21.3828 3.33146 21.25 3.48671 21.25V22.75C4.21268 22.75 4.78122 22.1279 4.71881 21.4061L3.22439 21.5353ZM14.7351 5.34269C14.8596 4.58256 14.8241 3.80477 14.6307 3.0592L13.1787 3.43584C13.3197 3.97923 13.3456 4.54613 13.2548 5.10016L14.7351 5.34269ZM8.59635 21.25C8.12244 21.25 7.72601 20.887 7.68498 20.4125L6.19056 20.5417C6.29852 21.7902 7.3427 22.75 8.59635 22.75V21.25ZM8.62647 9.00585C9.30632 8.42 10.0392 7.72267 10.5235 6.81599L9.20042 6.10924C8.85404 6.75767 8.3025 7.30493 7.64729 7.86954L8.62647 9.00585ZM21.7142 12.313C21.9695 10.8365 20.8341 9.4842 19.3348 9.4842V10.9842C19.9014 10.9842 20.3332 11.4959 20.2361 12.0574L21.7142 12.313ZM3.48671 21.25C3.63292 21.25 3.75 21.3684 3.75 21.5127H2.25C2.25 22.1953 2.80289 22.75 3.48671 22.75V21.25ZM12.5921 9.14471C12.4344 10.1076 13.1766 10.9842 14.1537 10.9842V9.4842C14.1038 9.4842 14.0639 9.43901 14.0724 9.38725L12.5921 9.14471ZM6.87282 11.0198C6.8474 10.7258 6.96475 10.4378 7.18773 10.2456L6.20855 9.10933C5.62022 9.61631 5.31149 10.3753 5.3784 11.149L6.87282 11.0198Z" fill="#1C274C"/>
+</svg> <span>J'aime</span>
+                                        @else
+                                            <!-- Unliked Icon (Outline) -->
+                                                 <svg width="800px" height="800px" class="w-6 h-6 " viewBox="0 0 24 24" fill="" xmlns="http://www.w3.org/2000/svg">
+<path d="M20.9752 12.1852L20.2361 12.0574L20.9752 12.1852ZM20.2696 16.265L19.5306 16.1371L20.2696 16.265ZM6.93777 20.4771L6.19056 20.5417L6.93777 20.4771ZM6.12561 11.0844L6.87282 11.0198L6.12561 11.0844ZM13.995 5.22142L14.7351 5.34269V5.34269L13.995 5.22142ZM13.3323 9.26598L14.0724 9.38725V9.38725L13.3323 9.26598ZM6.69814 9.67749L6.20855 9.10933H6.20855L6.69814 9.67749ZM8.13688 8.43769L8.62647 9.00585H8.62647L8.13688 8.43769ZM10.5181 4.78374L9.79208 4.59542L10.5181 4.78374ZM10.9938 2.94989L11.7197 3.13821V3.13821L10.9938 2.94989ZM12.6676 2.06435L12.4382 2.77841L12.4382 2.77841L12.6676 2.06435ZM12.8126 2.11093L13.042 1.39687L13.042 1.39687L12.8126 2.11093ZM9.86195 6.46262L10.5235 6.81599V6.81599L9.86195 6.46262ZM13.9047 3.24752L13.1787 3.43584V3.43584L13.9047 3.24752ZM11.6742 2.13239L11.3486 1.45675V1.45675L11.6742 2.13239ZM3.9716 21.4707L3.22439 21.5353L3.9716 21.4707ZM3 10.2342L3.74721 10.1696C3.71261 9.76945 3.36893 9.46758 2.96767 9.4849C2.5664 9.50221 2.25 9.83256 2.25 10.2342H3ZM20.2361 12.0574L19.5306 16.1371L21.0087 16.3928L21.7142 12.313L20.2361 12.0574ZM13.245 21.25H8.59635V22.75H13.245V21.25ZM7.68498 20.4125L6.87282 11.0198L5.3784 11.149L6.19056 20.5417L7.68498 20.4125ZM19.5306 16.1371C19.0238 19.0677 16.3813 21.25 13.245 21.25V22.75C17.0712 22.75 20.3708 20.081 21.0087 16.3928L19.5306 16.1371ZM13.2548 5.10015L12.5921 9.14472L14.0724 9.38725L14.7351 5.34269L13.2548 5.10015ZM7.18773 10.2456L8.62647 9.00585L7.64729 7.86954L6.20855 9.10933L7.18773 10.2456ZM11.244 4.97206L11.7197 3.13821L10.2678 2.76157L9.79208 4.59542L11.244 4.97206ZM12.4382 2.77841L12.5832 2.82498L13.042 1.39687L12.897 1.3503L12.4382 2.77841ZM10.5235 6.81599C10.8354 6.23198 11.0777 5.61339 11.244 4.97206L9.79208 4.59542C9.65573 5.12107 9.45699 5.62893 9.20042 6.10924L10.5235 6.81599ZM12.5832 2.82498C12.8896 2.92342 13.1072 3.16009 13.1787 3.43584L14.6307 3.05921C14.4252 2.26719 13.819 1.64648 13.042 1.39687L12.5832 2.82498ZM11.7197 3.13821C11.7548 3.0032 11.8523 2.87913 11.9998 2.80804L11.3486 1.45675C10.8166 1.71309 10.417 2.18627 10.2678 2.76157L11.7197 3.13821ZM11.9998 2.80804C12.1345 2.74311 12.2931 2.73181 12.4382 2.77841L12.897 1.3503C12.3873 1.18655 11.8312 1.2242 11.3486 1.45675L11.9998 2.80804ZM14.1537 10.9842H19.3348V9.4842H14.1537V10.9842ZM4.71881 21.4061L3.74721 10.1696L2.25279 10.2988L3.22439 21.5353L4.71881 21.4061ZM3.75 21.5127V10.2342H2.25V21.5127H3.75ZM3.22439 21.5353C3.2112 21.3828 3.33146 21.25 3.48671 21.25V22.75C4.21268 22.75 4.78122 22.1279 4.71881 21.4061L3.22439 21.5353ZM14.7351 5.34269C14.8596 4.58256 14.8241 3.80477 14.6307 3.0592L13.1787 3.43584C13.3197 3.97923 13.3456 4.54613 13.2548 5.10016L14.7351 5.34269ZM8.59635 21.25C8.12244 21.25 7.72601 20.887 7.68498 20.4125L6.19056 20.5417C6.29852 21.7902 7.3427 22.75 8.59635 22.75V21.25ZM8.62647 9.00585C9.30632 8.42 10.0392 7.72267 10.5235 6.81599L9.20042 6.10924C8.85404 6.75767 8.3025 7.30493 7.64729 7.86954L8.62647 9.00585ZM21.7142 12.313C21.9695 10.8365 20.8341 9.4842 19.3348 9.4842V10.9842C19.9014 10.9842 20.3332 11.4959 20.2361 12.0574L21.7142 12.313ZM3.48671 21.25C3.63292 21.25 3.75 21.3684 3.75 21.5127H2.25C2.25 22.1953 2.80289 22.75 3.48671 22.75V21.25ZM12.5921 9.14471C12.4344 10.1076 13.1766 10.9842 14.1537 10.9842V9.4842C14.1038 9.4842 14.0639 9.43901 14.0724 9.38725L12.5921 9.14471ZM6.87282 11.0198C6.8474 10.7258 6.96475 10.4378 7.18773 10.2456L6.20855 9.10933C5.62022 9.61631 5.31149 10.3753 5.3784 11.149L6.87282 11.0198Z" fill="#1C274C"/>
+</svg>  <span>J'aime</span>
+                                        @endif
+                                    </button>
+                                </form>
+
+                                <button class="flex-1 btn-comment flex items-center justify-center gap-2 py-3 text-gray-500 hover:bg-gray-100 font-semibold rounded-md transition-colors text-sm">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-6 h-6"><path d="M7 9h10v1H7zm0 4h7v-1H7zm16-2a6.78 6.78 0 01-2.84 5.61L12 22v-4H8A7 7 0 018 4h8a7 7 0 017 7zm-2 0a5 5 0 00-5-5H8a5 5 0 000 10h6v2.28L19 15a4.79 4.79 0 002-4z"></path></svg>
+                                    <span>Commenter</span>
+                                </button>
+                                <div>
+                                              @php $hassave = $post->saves->contains('user_id', auth()->id()); @endphp
+                                <form action="{{ route('feed_save.store') }}"  method="POST">
+                                     @csrf
+                                       <input type="hidden" name="post_id" value="{{ $post->id }}">
+                                <button  type="submit" class="w-full flex items-center justify-center gap-2 py-3 rounded-md transition-colors text-sm font-semibold {{ $hassave ? 'text-grey-700 bg-gray-300 hover:bg-gray-100' : 'text-gray-500 hover:bg-gray-100' }}">
+                                   <svg width="800px" height="800px" class="w-6 h-6 " viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path fill-rule="evenodd" clip-rule="evenodd" d="M6.75 6L7.5 5.25H16.5L17.25 6V19.3162L12 16.2051L6.75 19.3162V6ZM8.25 6.75V16.6838L12 14.4615L15.75 16.6838V6.75H8.25Z" fill="#080341"/>
+</svg> <span>Save</span>
+                                </button>
+                                </form>
+                            </div>
+                            </div>
+
+                            <!-- Comment Area (Hidden initially) -->
+                            <div class="comment-area px-4 pb-4 hidden transition-all duration-300">
+                                <form action="{{ route('feed_comment.store') }}" method="POST" class="mt-1 mb-4">
+                                    @csrf
+                                    <div class="flex gap-2 items-start">
+                                        <img src="{{ auth()->user()->avatar_url ?? 'https://ui-avatars.com/api/?name=' . urlencode(auth()->user()->name) . '&background=random' }}"
+                                            alt="Avatar" class="w-10 h-10 rounded-full object-cover shrink-0 mt-0.5">
+                                        <div class="flex-1 flex flex-col items-end">
+                                            <textarea name="content" rows="1" required
+                                                class="w-full border border-gray-400 text-sm rounded-full focus:ring-1 focus:ring-gray-500 focus:border-gray-500 py-2.5 px-4 placeholder-gray-500 resize-none transition-all shadow-sm"
+                                                placeholder="Ajouter un commentaire..."
+                                                oninput="this.style.height = ''; this.style.height = Math.min(this.scrollHeight, 150) + 'px'; this.classList.remove('rounded-full'); this.classList.add('rounded-xl'); if(this.value === '') { this.classList.add('rounded-full'); this.classList.remove('rounded-xl'); }"
+                                                ></textarea>
+                                            <input type="hidden" name="post_id" value="{{ $post->id }}">
+                                            <button type="submit" class="mt-2 bg-[#0a66c2] hover:bg-[#004182] text-white font-semibold py-1.5 px-4 rounded-full text-sm transition shadow-sm">
+                                                Publier
+                                            </button>
+                                        </div>
+                                    </div>
+                                </form>
+
+                                <!-- Comments List -->
+                                <div class="space-y-4">
+                                    @foreach ($post->comments as $comment)
+                                        <div class="flex gap-2 items-start">
+                                            <img src="{{ $comment->user->avatar_url ?? 'https://ui-avatars.com/api/?name=' . urlencode($comment->user->name) . '&background=random' }}"
+                                                alt="Avatar" class="w-10 h-10 rounded-full object-cover mt-0.5 shrink-0 hover:opacity-80 cursor-pointer">
+
+                                            <div class="flex-1">
+                                                <div class="bg-[#f2f2f2] px-3.5 py-2.5 rounded-br-xl rounded-bl-xl rounded-tr-xl inline-block w-full">
+                                                    <div class="flex justify-between items-start">
+                                                        <div>
+                                                            <h4  class="font-bold text-gray-900 text-sm hover:text-blue-700 hover:underline cursor-pointer leading-tight">
+                                                                {{ $comment->user->name }}
+                                                            </h4>
+                                                            <p class="text-xs text-gray-500 mb-1 leading-tight line-clamp-1">{{ $comment->user->headline ?? 'Membre' }}</p>
+                                                        </div>
+                                                        <span class="text-xs text-gray-500 shrink-0 ml-4">{{ $comment->created_at->diffForHumans(null, true, true) }}</span>
+                                                    </div>
+                                                    <p class="text-gray-900 text-sm leading-snug whitespace-pre-wrap break-words mt-1">{{ $comment->content }}</p>
+                                                </div>
+
+                                                <!-- Comment Meta Actions -->
+                                                <div class="flex items-center gap-4 mt-1 ml-3 text-xs font-semibold text-gray-500">
+                                                    <button class="hover:bg-gray-200 px-2 py-0.5 rounded transition">J'aime</button>
+                                                    <span class="text-gray-300">|</span>
+                                                    @if ($comment->user_id == auth()->id())
+                                                        <a href="{{ route('feed_comment.edit', $comment->id) }}" class="hover:bg-gray-200 px-2 py-0.5 rounded transition">Modifier</a>
+                                                        <span class="text-gray-300">|</span>
+                                                        <form action="{{ route('feed_comment.destroy', $comment->id) }}" method="POST" class="inline m-0">
+                                                            @csrf @method('DELETE')
+                                                            <button type="submit" onclick="return confirm('Supprimer ce commentaire ?')" class="hover:bg-red-50 hover:text-red-600 px-2 py-0.5 rounded transition">Supprimer</button>
+                                                        </form>
+                                                    @endif
+                                                </div>
+                                            </div>
+                                        </div>
+                                    @endforeach
+                                </div>
+                            </div>
+                        </div>
+                    @empty
+                        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-12 text-center">
+                            <div class="w-20 h-20 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-4 border border-gray-100">
+                                <svg class="w-10 h-10 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10l4 4v10a2 2 0 01-2 2z"></path>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M14 3v5h5"></path>
+                                </svg>
+                            </div>
+                            <h3 class="text-lg font-semibold text-gray-900 mb-2">Votre fil d'actualité est vide</h3>
+                            <p class="text-gray-500 text-sm mb-6 max-w-sm mx-auto">Partagez vos pensées, idées ou articles avec votre réseau professionnel.</p>
+                            <a href="{{ route('feed.create') }}" class="inline-flex justify-center px-6 py-2.5 bg-[#0a66c2] border border-transparent shadow-sm text-sm font-medium rounded-full text-white hover:bg-[#004182] transition-colors">
+                                Rédiger un post
+                            </a>
+                        </div>
+                    @endforelse
                 </div>
-            </div>
-        </div>
-    </div>
+
 </x-app-layout>
-</file>
-
-<file path="resources/views/profile/partials/delete-user-form.blade.php">
-<section class="space-y-6">
-    <header>
-        <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100">
-            {{ __('Delete Account') }}
-        </h2>
-
-        <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">
-            {{ __('Once your account is deleted, all of its resources and data will be permanently deleted. Before deleting your account, please download any data or information that you wish to retain.') }}
-        </p>
-    </header>
-
-    <x-danger-button
-        x-data=""
-        x-on:click.prevent="$dispatch('open-modal', 'confirm-user-deletion')"
-    >{{ __('Delete Account') }}</x-danger-button>
-
-    <x-modal name="confirm-user-deletion" :show="$errors->userDeletion->isNotEmpty()" focusable>
-        <form method="post" action="{{ route('profile.destroy') }}" class="p-6">
-            @csrf
-            @method('delete')
-
-            <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100">
-                {{ __('Are you sure you want to delete your account?') }}
-            </h2>
-
-            <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">
-                {{ __('Once your account is deleted, all of its resources and data will be permanently deleted. Please enter your password to confirm you would like to permanently delete your account.') }}
-            </p>
-
-            <div class="mt-6">
-                <x-input-label for="password" value="{{ __('Password') }}" class="sr-only" />
-
-                <x-text-input
-                    id="password"
-                    name="password"
-                    type="password"
-                    class="mt-1 block w-3/4"
-                    placeholder="{{ __('Password') }}"
-                />
-
-                <x-input-error :messages="$errors->userDeletion->get('password')" class="mt-2" />
-            </div>
-
-            <div class="mt-6 flex justify-end">
-                <x-secondary-button x-on:click="$dispatch('close')">
-                    {{ __('Cancel') }}
-                </x-secondary-button>
-
-                <x-danger-button class="ms-3">
-                    {{ __('Delete Account') }}
-                </x-danger-button>
-            </div>
-        </form>
-    </x-modal>
-</section>
-</file>
-
-<file path="resources/views/profile/partials/update-password-form.blade.php">
-<section>
-    <header>
-        <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100">
-            {{ __('Update Password') }}
-        </h2>
-
-        <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">
-            {{ __('Ensure your account is using a long, random password to stay secure.') }}
-        </p>
-    </header>
-
-    <form method="post" action="{{ route('password.update') }}" class="mt-6 space-y-6">
-        @csrf
-        @method('put')
-
-        <div>
-            <x-input-label for="update_password_current_password" :value="__('Current Password')" />
-            <x-text-input id="update_password_current_password" name="current_password" type="password" class="mt-1 block w-full" autocomplete="current-password" />
-            <x-input-error :messages="$errors->updatePassword->get('current_password')" class="mt-2" />
-        </div>
-
-        <div>
-            <x-input-label for="update_password_password" :value="__('New Password')" />
-            <x-text-input id="update_password_password" name="password" type="password" class="mt-1 block w-full" autocomplete="new-password" />
-            <x-input-error :messages="$errors->updatePassword->get('password')" class="mt-2" />
-        </div>
-
-        <div>
-            <x-input-label for="update_password_password_confirmation" :value="__('Confirm Password')" />
-            <x-text-input id="update_password_password_confirmation" name="password_confirmation" type="password" class="mt-1 block w-full" autocomplete="new-password" />
-            <x-input-error :messages="$errors->updatePassword->get('password_confirmation')" class="mt-2" />
-        </div>
-
-        <div class="flex items-center gap-4">
-            <x-primary-button>{{ __('Save') }}</x-primary-button>
-
-            @if (session('status') === 'password-updated')
-                <p
-                    x-data="{ show: true }"
-                    x-show="show"
-                    x-transition
-                    x-init="setTimeout(() => show = false, 2000)"
-                    class="text-sm text-gray-600 dark:text-gray-400"
-                >{{ __('Saved.') }}</p>
-            @endif
-        </div>
-    </form>
-</section>
 </file>
 
 <file path="resources/views/welcome.blade.php">
@@ -3550,13 +3866,6 @@ Artisan::command('inspire', function () {
 })->purpose('Display an inspiring quote');
 </file>
 
-<file path="storage/app/.gitignore">
-*
-!private/
-!public/
-!.gitignore
-</file>
-
 <file path="storage/app/private/.gitignore">
 *
 !.gitignore
@@ -3567,26 +3876,21 @@ Artisan::command('inspire', function () {
 !.gitignore
 </file>
 
-<file path="storage/framework/.gitignore">
-compiled.php
-config.php
-down
-events.scanned.php
-maintenance.php
-routes.php
-routes.scanned.php
-schedule-*
-services.json
-</file>
-
-<file path="storage/framework/cache/.gitignore">
+<file path="storage/app/.gitignore">
 *
-!data/
+!private/
+!public/
 !.gitignore
 </file>
 
 <file path="storage/framework/cache/data/.gitignore">
 *
+!.gitignore
+</file>
+
+<file path="storage/framework/cache/.gitignore">
+*
+!data/
 !.gitignore
 </file>
 
@@ -3605,33 +3909,21 @@ services.json
 !.gitignore
 </file>
 
+<file path="storage/framework/.gitignore">
+compiled.php
+config.php
+down
+events.scanned.php
+maintenance.php
+routes.php
+routes.scanned.php
+schedule-*
+services.json
+</file>
+
 <file path="storage/logs/.gitignore">
 *
 !.gitignore
-</file>
-
-<file path="tailwind.config.js">
-import defaultTheme from 'tailwindcss/defaultTheme';
-import forms from '@tailwindcss/forms';
-
-/** @type {import('tailwindcss').Config} */
-export default {
-    content: [
-        './vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php',
-        './storage/framework/views/*.php',
-        './resources/views/**/*.blade.php',
-    ],
-
-    theme: {
-        extend: {
-            fontFamily: {
-                sans: ['Figtree', ...defaultTheme.fontFamily.sans],
-            },
-        },
-    },
-
-    plugins: [forms],
-};
 </file>
 
 <file path="tests/Feature/Auth/AuthenticationTest.php">
@@ -4087,16 +4379,28 @@ class ProfileTest extends TestCase
 }
 </file>
 
-<file path="tests/TestCase.php">
+<file path="tests/Feature/registerTest.php">
 <?php
 
-namespace Tests;
+namespace Tests\Feature;
 
-use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Foundation\Testing\WithFaker;
+use Tests\TestCase;
+use app\Models\User;
 
-abstract class TestCase extends BaseTestCase
+class registerTest extends TestCase
 {
-    //
+    /**
+     * A basic feature test example.
+     */
+    public function test_example(): void
+    {
+        $user=User::factory()->create();
+        $response = $this->actingAs($user)->get('/feed');
+
+        $response->assertStatus(200);
+    }
 }
 </file>
 
@@ -4117,6 +4421,478 @@ class ExampleTest extends TestCase
         $this->assertTrue(true);
     }
 }
+</file>
+
+<file path="tests/TestCase.php">
+<?php
+
+namespace Tests;
+
+use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
+
+abstract class TestCase extends BaseTestCase
+{
+    //
+}
+</file>
+
+<file path=".editorconfig">
+root = true
+
+[*]
+charset = utf-8
+end_of_line = lf
+indent_size = 4
+indent_style = space
+insert_final_newline = true
+trim_trailing_whitespace = true
+
+[*.md]
+trim_trailing_whitespace = false
+
+[*.{yml,yaml}]
+indent_size = 2
+
+[compose.yaml]
+indent_size = 4
+</file>
+
+<file path=".env.example">
+APP_NAME=Laravel
+APP_ENV=local
+APP_KEY=
+APP_DEBUG=true
+APP_URL=http://localhost
+
+APP_LOCALE=en
+APP_FALLBACK_LOCALE=en
+APP_FAKER_LOCALE=en_US
+
+APP_MAINTENANCE_DRIVER=file
+# APP_MAINTENANCE_STORE=database
+
+# PHP_CLI_SERVER_WORKERS=4
+
+BCRYPT_ROUNDS=12
+
+LOG_CHANNEL=stack
+LOG_STACK=single
+LOG_DEPRECATIONS_CHANNEL=null
+LOG_LEVEL=debug
+
+DB_CONNECTION=sqlite
+# DB_HOST=127.0.0.1
+# DB_PORT=3306
+# DB_DATABASE=laravel
+# DB_USERNAME=root
+# DB_PASSWORD=
+
+SESSION_DRIVER=database
+SESSION_LIFETIME=120
+SESSION_ENCRYPT=false
+SESSION_PATH=/
+SESSION_DOMAIN=null
+
+BROADCAST_CONNECTION=log
+FILESYSTEM_DISK=local
+QUEUE_CONNECTION=database
+
+CACHE_STORE=database
+# CACHE_PREFIX=
+
+MEMCACHED_HOST=127.0.0.1
+
+REDIS_CLIENT=phpredis
+REDIS_HOST=127.0.0.1
+REDIS_PASSWORD=null
+REDIS_PORT=6379
+
+MAIL_MAILER=log
+MAIL_SCHEME=null
+MAIL_HOST=127.0.0.1
+MAIL_PORT=2525
+MAIL_USERNAME=null
+MAIL_PASSWORD=null
+MAIL_FROM_ADDRESS="hello@example.com"
+MAIL_FROM_NAME="${APP_NAME}"
+
+AWS_ACCESS_KEY_ID=
+AWS_SECRET_ACCESS_KEY=
+AWS_DEFAULT_REGION=us-east-1
+AWS_BUCKET=
+AWS_USE_PATH_STYLE_ENDPOINT=false
+
+VITE_APP_NAME="${APP_NAME}"
+</file>
+
+<file path=".gitattributes">
+* text=auto eol=lf
+
+*.blade.php diff=html
+*.css diff=css
+*.html diff=html
+*.md diff=markdown
+*.php diff=php
+
+/.github export-ignore
+CHANGELOG.md export-ignore
+.styleci.yml export-ignore
+</file>
+
+<file path=".gitignore">
+*.log
+.DS_Store
+.env
+.env.backup
+.env.production
+.phpactor.json
+.phpunit.result.cache
+/.fleet
+/.idea
+/.nova
+/.phpunit.cache
+/.vscode
+/.zed
+/auth.json
+/node_modules
+/public/build
+/public/hot
+/public/storage
+/storage/*.key
+/storage/pail
+/vendor
+Homestead.json
+Homestead.yaml
+Thumbs.db
+</file>
+
+<file path=".styleci.yml">
+php:
+  preset: laravel
+  disabled:
+    - no_unused_imports
+  finder:
+    not-name:
+      - index.php
+js: true
+css: true
+</file>
+
+<file path="artisan">
+#!/usr/bin/env php
+<?php
+
+use Illuminate\Foundation\Application;
+use Symfony\Component\Console\Input\ArgvInput;
+
+define('LARAVEL_START', microtime(true));
+
+// Register the Composer autoloader...
+require __DIR__.'/vendor/autoload.php';
+
+// Bootstrap Laravel and handle the command...
+/** @var Application $app */
+$app = require_once __DIR__.'/bootstrap/app.php';
+
+$status = $app->handleCommand(new ArgvInput);
+
+exit($status);
+</file>
+
+<file path="CHANGELOG.md">
+# Release Notes
+
+## [Unreleased](https://github.com/laravel/laravel/compare/v12.12.1...12.x)
+
+## [v12.12.1](https://github.com/laravel/laravel/compare/v12.12.0...v12.12.1) - 2026-03-10
+
+* [12.x] Makes imports consistent by [@nunomaduro](https://github.com/nunomaduro) in https://github.com/laravel/laravel/pull/6760
+
+## [v12.12.0](https://github.com/laravel/laravel/compare/v12.11.2...v12.12.0) - 2026-03-09
+
+* Update phpunit version to ^11.5.50 to address CVE by [@PerryvanderMeer](https://github.com/PerryvanderMeer) in https://github.com/laravel/laravel/pull/6746
+* [12.x] Add `APP_NAME` fallback in mail config by [@apoorvdarshan](https://github.com/apoorvdarshan) in https://github.com/laravel/laravel/pull/6755
+* [12.x] Neutralize DB_URL in default phpunit.xml by [@Husseinadq](https://github.com/Husseinadq) in https://github.com/laravel/laravel/pull/6761
+
+## [v12.11.2](https://github.com/laravel/laravel/compare/v12.11.1...v12.11.2) - 2026-01-19
+
+* [12.x] Update composer dev script to ensure no timeout by [@jackbayliss](https://github.com/jackbayliss) in https://github.com/laravel/laravel/pull/6735
+* [12.x] Update jobs/cache migrations by [@jackbayliss](https://github.com/jackbayliss) in https://github.com/laravel/laravel/pull/6736
+* [12.x] Remove failed jobs indexes by [@jackbayliss](https://github.com/jackbayliss) in https://github.com/laravel/laravel/pull/6739
+* [12.x] Add `APP_URL` fallback in filesystems config by [@KentarouTakeda](https://github.com/KentarouTakeda) in https://github.com/laravel/laravel/pull/6742
+* chore: Update outdated GitHub Actions version by [@pgoslatara](https://github.com/pgoslatara) in https://github.com/laravel/laravel/pull/6743
+
+## [v12.11.1](https://github.com/laravel/laravel/compare/v12.11.0...v12.11.1) - 2025-12-23
+
+* Use environment variable for `DB_SSLMODE` - Postgres by [@robsontenorio](https://github.com/robsontenorio) in https://github.com/laravel/laravel/pull/6727
+* fix: ensure APP_URL does not have trailing slash in filesystem by [@msamgan](https://github.com/msamgan) in https://github.com/laravel/laravel/pull/6728
+
+## [v12.11.0](https://github.com/laravel/laravel/compare/v12.10.1...v12.11.0) - 2025-11-25
+
+* fix: cookies are not available for subdomains by default by [@joostdebruijn](https://github.com/joostdebruijn) in https://github.com/laravel/laravel/pull/6705
+* Fix PHP 8.5 PDO Driver Specific Constant Deprecation by [@RyanSchaefer](https://github.com/RyanSchaefer) in https://github.com/laravel/laravel/pull/6710
+* Ignore Laravel compiled views for Vite  by [@QistiAmal1212](https://github.com/QistiAmal1212) in https://github.com/laravel/laravel/pull/6714
+
+## [v12.10.1](https://github.com/laravel/laravel/compare/v12.10.0...v12.10.1) - 2025-11-06
+
+* Update schema URL in package.json by [@robinmiau](https://github.com/robinmiau) in https://github.com/laravel/laravel/pull/6701
+
+## [v12.10.0](https://github.com/laravel/laravel/compare/v12.9.1...v12.10.0) - 2025-11-04
+
+* Add background driver by [@barryvdh](https://github.com/barryvdh) in https://github.com/laravel/laravel/pull/6699
+
+## [v12.9.1](https://github.com/laravel/laravel/compare/v12.9.0...v12.9.1) - 2025-10-23
+
+* [12.x] Replace Bootcamp with Laravel Learn by [@AhmedAlaa4611](https://github.com/AhmedAlaa4611) in https://github.com/laravel/laravel/pull/6692
+* [12.x] Comment out CLI workers for fresh applications by [@timacdonald](https://github.com/timacdonald) in https://github.com/laravel/laravel/pull/6693
+
+## [v12.9.0](https://github.com/laravel/laravel/compare/v12.8.0...v12.9.0) - 2025-10-21
+
+**Full Changelog**: https://github.com/laravel/laravel/compare/v12.8.0...v12.9.0
+
+## [v12.8.0](https://github.com/laravel/laravel/compare/v12.7.1...v12.8.0) - 2025-10-20
+
+* [12.x] Makes test suite using broadcast's `null` driver by [@nunomaduro](https://github.com/nunomaduro) in https://github.com/laravel/laravel/pull/6691
+
+## [v12.7.1](https://github.com/laravel/laravel/compare/v12.7.0...v12.7.1) - 2025-10-15
+
+* Added `failover` driver to the `queue` config comment.  by [@sajjadhossainshohag](https://github.com/sajjadhossainshohag) in https://github.com/laravel/laravel/pull/6688
+
+## [v12.7.0](https://github.com/laravel/laravel/compare/v12.6.0...v12.7.0) - 2025-10-14
+
+**Full Changelog**: https://github.com/laravel/laravel/compare/v12.6.0...v12.7.0
+
+## [v12.6.0](https://github.com/laravel/laravel/compare/v12.5.0...v12.6.0) - 2025-10-02
+
+* Fix setup script by [@goldmont](https://github.com/goldmont) in https://github.com/laravel/laravel/pull/6682
+
+## [v12.5.0](https://github.com/laravel/laravel/compare/v12.4.0...v12.5.0) - 2025-09-30
+
+* [12.x] Fix type casting for environment variables in config files by [@AhmedAlaa4611](https://github.com/AhmedAlaa4611) in https://github.com/laravel/laravel/pull/6670
+* Fix CVEs affecting vite by [@faissaloux](https://github.com/faissaloux) in https://github.com/laravel/laravel/pull/6672
+* Update .editorconfig to target compose.yaml by [@fredikaputra](https://github.com/fredikaputra) in https://github.com/laravel/laravel/pull/6679
+* Add pre-package-uninstall script to composer.json by [@cosmastech](https://github.com/cosmastech) in https://github.com/laravel/laravel/pull/6681
+
+## [v12.4.0](https://github.com/laravel/laravel/compare/v12.3.1...v12.4.0) - 2025-08-29
+
+* [12.x] Add default Redis retry configuration by [@mateusjatenee](https://github.com/mateusjatenee) in https://github.com/laravel/laravel/pull/6666
+
+## [v12.3.1](https://github.com/laravel/laravel/compare/v12.3.0...v12.3.1) - 2025-08-21
+
+* [12.x] Bump Pint version by [@AhmedAlaa4611](https://github.com/AhmedAlaa4611) in https://github.com/laravel/laravel/pull/6653
+* [12.x] Making sure all related processed are closed when terminating the currently command by [@AhmedAlaa4611](https://github.com/AhmedAlaa4611) in https://github.com/laravel/laravel/pull/6654
+* [12.x] Use application name from configuration by [@AhmedAlaa4611](https://github.com/AhmedAlaa4611) in https://github.com/laravel/laravel/pull/6655
+* Bring back postAutoloadDump script by [@jasonvarga](https://github.com/jasonvarga) in https://github.com/laravel/laravel/pull/6662
+
+## [v12.3.0](https://github.com/laravel/laravel/compare/v12.2.0...v12.3.0) - 2025-08-03
+
+* Fix Critical Security Vulnerability in form-data Dependency by [@izzygld](https://github.com/izzygld) in https://github.com/laravel/laravel/pull/6645
+* Revert "fix" by [@RobertBoes](https://github.com/RobertBoes) in https://github.com/laravel/laravel/pull/6646
+* Change composer post-autoload-dump script to Artisan command by [@lmjhs](https://github.com/lmjhs) in https://github.com/laravel/laravel/pull/6647
+
+## [v12.2.0](https://github.com/laravel/laravel/compare/v12.1.0...v12.2.0) - 2025-07-11
+
+* Add Vite 7 support by [@timacdonald](https://github.com/timacdonald) in https://github.com/laravel/laravel/pull/6639
+
+## [v12.1.0](https://github.com/laravel/laravel/compare/v12.0.11...v12.1.0) - 2025-07-03
+
+* [12.x] Disable nightwatch in testing by [@laserhybiz](https://github.com/laserhybiz) in https://github.com/laravel/laravel/pull/6632
+* [12.x] Reorder environment variables in phpunit.xml for logical grouping by [@AhmedAlaa4611](https://github.com/AhmedAlaa4611) in https://github.com/laravel/laravel/pull/6634
+* Change to hyphenate prefixes and cookie names by [@u01jmg3](https://github.com/u01jmg3) in https://github.com/laravel/laravel/pull/6636
+* [12.x] Fix type casting for environment variables in config files by [@AhmedAlaa4611](https://github.com/AhmedAlaa4611) in https://github.com/laravel/laravel/pull/6637
+
+## [v12.0.11](https://github.com/laravel/laravel/compare/v12.0.10...v12.0.11) - 2025-06-10
+
+**Full Changelog**: https://github.com/laravel/laravel/compare/v12.0.10...v12.0.11
+
+## [v12.0.10](https://github.com/laravel/laravel/compare/v12.0.9...v12.0.10) - 2025-06-09
+
+* fix alphabetical order by [@Khuthaily](https://github.com/Khuthaily) in https://github.com/laravel/laravel/pull/6627
+* [12.x] Reduce redundancy and keeps the .gitignore file cleaner by [@AhmedAlaa4611](https://github.com/AhmedAlaa4611) in https://github.com/laravel/laravel/pull/6629
+* [12.x] Fix: Add void return type to satisfy Rector analysis by [@Aluisio-Pires](https://github.com/Aluisio-Pires) in https://github.com/laravel/laravel/pull/6628
+
+## [v12.0.9](https://github.com/laravel/laravel/compare/v12.0.8...v12.0.9) - 2025-05-26
+
+* [12.x] Remove apc by [@AhmedAlaa4611](https://github.com/AhmedAlaa4611) in https://github.com/laravel/laravel/pull/6611
+* [12.x] Add JSON Schema to package.json by [@martinbean](https://github.com/martinbean) in https://github.com/laravel/laravel/pull/6613
+* Minor language update by [@woganmay](https://github.com/woganmay) in https://github.com/laravel/laravel/pull/6615
+* Enhance .gitignore to exclude common OS and log files by [@mohammadRezaei1380](https://github.com/mohammadRezaei1380) in https://github.com/laravel/laravel/pull/6619
+
+## [v12.0.8](https://github.com/laravel/laravel/compare/v12.0.7...v12.0.8) - 2025-05-12
+
+* [12.x] Clean up URL formatting in README by [@AhmedAlaa4611](https://github.com/AhmedAlaa4611) in https://github.com/laravel/laravel/pull/6601
+
+## [v12.0.7](https://github.com/laravel/laravel/compare/v12.0.6...v12.0.7) - 2025-04-15
+
+* Add `composer run test` command by [@crynobone](https://github.com/crynobone) in https://github.com/laravel/laravel/pull/6598
+* Partner Directory Changes in ReadME by [@joshcirre](https://github.com/joshcirre) in https://github.com/laravel/laravel/pull/6599
+
+## [v12.0.6](https://github.com/laravel/laravel/compare/v12.0.5...v12.0.6) - 2025-04-08
+
+**Full Changelog**: https://github.com/laravel/laravel/compare/v12.0.5...v12.0.6
+
+## [v12.0.5](https://github.com/laravel/laravel/compare/v12.0.4...v12.0.5) - 2025-04-02
+
+* [12.x] Update `config/mail.php` to match the latest core configuration by [@AhmedAlaa4611](https://github.com/AhmedAlaa4611) in https://github.com/laravel/laravel/pull/6594
+
+## [v12.0.4](https://github.com/laravel/laravel/compare/v12.0.3...v12.0.4) - 2025-03-31
+
+* Bump vite from 6.0.11 to 6.2.3 - Vulnerability patch by [@abdel-aouby](https://github.com/abdel-aouby) in https://github.com/laravel/laravel/pull/6586
+* Bump vite from 6.2.3 to 6.2.4 by [@thinkverse](https://github.com/thinkverse) in https://github.com/laravel/laravel/pull/6590
+
+## [v12.0.3](https://github.com/laravel/laravel/compare/v12.0.2...v12.0.3) - 2025-03-17
+
+* Remove reverted change from CHANGELOG.md by [@AJenbo](https://github.com/AJenbo) in https://github.com/laravel/laravel/pull/6565
+* Improves clarity in app.css file by [@AhmedAlaa4611](https://github.com/AhmedAlaa4611) in https://github.com/laravel/laravel/pull/6569
+* [12.x] Refactor: Structural improvement for clarity by [@AhmedAlaa4611](https://github.com/AhmedAlaa4611) in https://github.com/laravel/laravel/pull/6574
+* Bump axios from 1.7.9 to 1.8.2 - Vulnerability patch by [@abdel-aouby](https://github.com/abdel-aouby) in https://github.com/laravel/laravel/pull/6572
+* [12.x] Remove Unnecessarily [@source](https://github.com/source) by [@AhmedAlaa4611](https://github.com/AhmedAlaa4611) in https://github.com/laravel/laravel/pull/6584
+
+## [v12.0.2](https://github.com/laravel/laravel/compare/v12.0.1...v12.0.2) - 2025-03-04
+
+* Make the github test action run out of the box independent of the choice of testing framework by [@ndeblauw](https://github.com/ndeblauw) in https://github.com/laravel/laravel/pull/6555
+
+## [v12.0.1](https://github.com/laravel/laravel/compare/v12.0.0...v12.0.1) - 2025-02-24
+
+* [12.x] prefer stable stability by [@pataar](https://github.com/pataar) in https://github.com/laravel/laravel/pull/6548
+
+## [v12.0.0 (2025-??-??)](https://github.com/laravel/laravel/compare/v11.0.2...v12.0.0)
+
+Laravel 12 includes a variety of changes to the application skeleton. Please consult the diff to see what's new.
+</file>
+
+<file path="phpunit.xml">
+<?xml version="1.0" encoding="UTF-8"?>
+<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:noNamespaceSchemaLocation="vendor/phpunit/phpunit/phpunit.xsd"
+         bootstrap="vendor/autoload.php"
+         colors="true"
+>
+    <testsuites>
+        <testsuite name="Unit">
+            <directory>tests/Unit</directory>
+        </testsuite>
+        <testsuite name="Feature">
+            <directory>tests/Feature</directory>
+        </testsuite>
+    </testsuites>
+    <source>
+        <include>
+            <directory>app</directory>
+        </include>
+    </source>
+    <php>
+        <env name="APP_ENV" value="testing"/>
+        <env name="APP_MAINTENANCE_DRIVER" value="file"/>
+        <env name="BCRYPT_ROUNDS" value="4"/>
+        <env name="BROADCAST_CONNECTION" value="null"/>
+        <env name="CACHE_STORE" value="array"/>
+        <env name="DB_CONNECTION" value="sqlite"/>
+        <env name="DB_DATABASE" value=":memory:"/>
+        <env name="DB_URL" value=""/>
+        <env name="MAIL_MAILER" value="array"/>
+        <env name="QUEUE_CONNECTION" value="sync"/>
+        <env name="SESSION_DRIVER" value="array"/>
+        <env name="PULSE_ENABLED" value="false"/>
+        <env name="TELESCOPE_ENABLED" value="false"/>
+        <env name="NIGHTWATCH_ENABLED" value="false"/>
+    </php>
+</phpunit>
+</file>
+
+<file path="postcss.config.js">
+export default {
+    plugins: {
+        tailwindcss: {},
+        autoprefixer: {},
+    },
+};
+</file>
+
+<file path="README.md">
+<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+
+<p align="center">
+<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
+<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
+<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
+<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
+</p>
+
+## About Laravel
+
+Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+
+- [Simple, fast routing engine](https://laravel.com/docs/routing).
+- [Powerful dependency injection container](https://laravel.com/docs/container).
+- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
+- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
+- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
+- [Robust background job processing](https://laravel.com/docs/queues).
+- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+
+Laravel is accessible, powerful, and provides tools required for large, robust applications.
+
+## Learning Laravel
+
+Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+
+If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+
+## Laravel Sponsors
+
+We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+
+### Premium Partners
+
+- **[Vehikl](https://vehikl.com)**
+- **[Tighten Co.](https://tighten.co)**
+- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
+- **[64 Robots](https://64robots.com)**
+- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
+- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
+- **[Redberry](https://redberry.international/laravel-development)**
+- **[Active Logic](https://activelogic.com)**
+
+## Contributing
+
+Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+
+## Code of Conduct
+
+In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+
+## Security Vulnerabilities
+
+If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+
+## License
+
+The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+</file>
+
+<file path="tailwind.config.js">
+import defaultTheme from 'tailwindcss/defaultTheme';
+import forms from '@tailwindcss/forms';
+
+/** @type {import('tailwindcss').Config} */
+export default {
+    content: [
+        './vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php',
+        './storage/framework/views/*.php',
+        './resources/views/**/*.blade.php',
+    ],
+
+    theme: {
+        extend: {
+            fontFamily: {
+                sans: ['Figtree', ...defaultTheme.fontFamily.sans],
+            },
+        },
+    },
+
+    plugins: [forms],
+};
 </file>
 
 <file path="app/Http/Controllers/Auth/AuthenticatedSessionController.php">
@@ -4300,6 +5076,7 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use App\Models\Connection;
+use App\Models\Post;
 use Illuminate\Http\Request;
 
 class NetworkController extends Controller
@@ -4313,11 +5090,15 @@ class NetworkController extends Controller
                 ->where('id', '!=', auth()->id())
                 ->get();
         } else {
+
             $users = User::where('id', '!=', auth()->id())
                 ->inRandomOrder()
                 ->take(12)
                 ->get();
+        //  $users = User::has('likes')->cont('user_id')->get();
+        //  $users = User::withCount('likes')->get();
         }
+    // dd($users);
 
         $pendingRequests = Connection::with('sender')
             ->where('connected_user_id', auth()->id())
@@ -4326,6 +5107,52 @@ class NetworkController extends Controller
 
         return view('network', compact('users', 'query', 'pendingRequests'));
     }
+}
+</file>
+
+<file path="app/Http/Controllers/SaveController.php">
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Http\Controllers\Controller;
+use App\Models\Post;
+use App\Models\save;
+use Illuminate\Http\Request;
+
+class SaveController extends Controller
+{
+public function store(Request $request)
+{
+$request->validate([
+    'post_id'=> 'required|exists:posts,id',
+]);
+
+$user_id=$request->user()->id;
+
+$save=save::where('user_id', $user_id)
+   ->where('post_id', $request->post_id)
+    ->first();
+// dd($save)
+if($save){
+    $save->delete();
+         return redirect()->route('feed.index')
+                ->with('success', 'save removed successfully.');
+}
+
+$save = new save();
+$save->user_id=$user_id;
+$save->post_id=$request->post_id;
+$save->save();
+      return redirect()->route('feed.index')
+            ->with('success', 'save added successfully.');
+}
+//  public function index(){
+//  $posts = Post::with('comments' , 'likes', 'saves')-> latest()->get();
+// // $posts=save::where('user_id', $user_id)->where('post_id', $request->post_id)->first();
+//     return view('save_post' , compact('posts'));
+//  }
+
 }
 </file>
 
@@ -4374,96 +5201,6 @@ class Like extends Model
 public function user(){
         return $this->belongsTo(User::class);
     }
-}
-</file>
-
-<file path="composer.json">
-{
-    "$schema": "https://getcomposer.org/schema.json",
-    "name": "laravel/laravel",
-    "type": "project",
-    "description": "The skeleton application for the Laravel framework.",
-    "keywords": ["laravel", "framework"],
-    "license": "MIT",
-    "require": {
-        "php": "^8.2",
-        "laravel/framework": "^12.0",
-        "laravel/tinker": "^2.10.1"
-    },
-    "require-dev": {
-        "fakerphp/faker": "^1.23",
-        "laravel/breeze": "^2.4",
-        "laravel/pail": "^1.2.2",
-        "laravel/pint": "^1.24",
-        "laravel/sail": "^1.41",
-        "mockery/mockery": "^1.6",
-        "nunomaduro/collision": "^8.6",
-        "phpunit/phpunit": "^11.5.50"
-    },
-    "autoload": {
-        "psr-4": {
-            "App\\": "app/",
-            "Database\\Factories\\": "database/factories/",
-            "Database\\Seeders\\": "database/seeders/"
-        }
-    },
-    "autoload-dev": {
-        "psr-4": {
-            "Tests\\": "tests/"
-        }
-    },
-    "scripts": {
-        "setup": [
-            "composer install",
-            "@php -r \"file_exists('.env') || copy('.env.example', '.env');\"",
-            "@php artisan key:generate",
-            "@php artisan migrate --force",
-            "npm install",
-            "npm run build"
-        ],
-        "dev": [
-            "Composer\\Config::disableProcessTimeout",
-            "npx concurrently -c \"#93c5fd,#c4b5fd,#fb7185,#fdba74\" \"php artisan serve\" \"php artisan queue:listen --tries=1 --timeout=0\" \"php artisan pail --timeout=0\" \"npm run dev\" --names=server,queue,logs,vite --kill-others"
-        ],
-        "test": [
-            "@php artisan config:clear --ansi",
-            "@php artisan test"
-        ],
-        "post-autoload-dump": [
-            "Illuminate\\Foundation\\ComposerScripts::postAutoloadDump",
-            "@php artisan package:discover --ansi"
-        ],
-        "post-update-cmd": [
-            "@php artisan vendor:publish --tag=laravel-assets --ansi --force"
-        ],
-        "post-root-package-install": [
-            "@php -r \"file_exists('.env') || copy('.env.example', '.env');\""
-        ],
-        "post-create-project-cmd": [
-            "@php artisan key:generate --ansi",
-            "@php -r \"file_exists('database/database.sqlite') || touch('database/database.sqlite');\"",
-            "@php artisan migrate --graceful --ansi"
-        ],
-        "pre-package-uninstall": [
-            "Illuminate\\Foundation\\ComposerScripts::prePackageUninstall"
-        ]
-    },
-    "extra": {
-        "laravel": {
-            "dont-discover": []
-        }
-    },
-    "config": {
-        "optimize-autoloader": true,
-        "preferred-install": "dist",
-        "sort-packages": true,
-        "allow-plugins": {
-            "pestphp/pest-plugin": true,
-            "php-http/discovery": true
-        }
-    },
-    "minimum-stability": "stable",
-    "prefer-stable": true
 }
 </file>
 
@@ -4654,11 +5391,6 @@ return [
 ];
 </file>
 
-<file path="database/.gitignore">
-*.sqlite*
-.env
-</file>
-
 <file path="database/factories/UserFactory.php">
 <?php
 
@@ -4765,28 +5497,9 @@ return new class extends Migration
 };
 </file>
 
-<file path="package.json">
-{
-    "$schema": "https://www.schemastore.org/package.json",
-    "private": true,
-    "type": "module",
-    "scripts": {
-        "build": "vite build",
-        "dev": "vite"
-    },
-    "devDependencies": {
-        "@tailwindcss/forms": "^0.5.2",
-        "@tailwindcss/vite": "^4.0.0",
-        "alpinejs": "^3.4.2",
-        "autoprefixer": "^10.4.2",
-        "axios": "^1.11.0",
-        "concurrently": "^9.0.1",
-        "laravel-vite-plugin": "^2.0.0",
-        "postcss": "^8.4.31",
-        "tailwindcss": "^3.1.0",
-        "vite": "^7.0.7"
-    }
-}
+<file path="database/.gitignore">
+*.sqlite*
+.env
 </file>
 
 <file path="resources/css/app.css">
@@ -4803,26 +5516,6 @@ import Alpine from 'alpinejs';
 window.Alpine = Alpine;
 
 Alpine.start();
-</file>
-
-<file path="resources/views/dashboard.blade.php">
-{{-- <x-app-layout>
-    <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
-            {{ __('Dashboard') }}
-        </h2>
-    </x-slot>
-
-    <div class="py-12">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
-                <div class="p-6 text-gray-900 dark:text-gray-100">
-                    {{ __("You're logged in!") }}
-                </div>
-            </div>
-        </div>
-    </div>
-</x-app-layout> --}}
 </file>
 
 <file path="resources/views/layouts/guest.blade.php">
@@ -4852,6 +5545,140 @@ Alpine.start();
         </div>
     </body>
 </html>
+</file>
+
+<file path="resources/views/dashboard.blade.php">
+{{-- <x-app-layout>
+    <x-slot name="header">
+        <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
+            {{ __('Dashboard') }}
+        </h2>
+    </x-slot>
+
+    <div class="py-12">
+        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+            <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
+                <div class="p-6 text-gray-900 dark:text-gray-100">
+                    {{ __("You're logged in!") }}
+                </div>
+            </div>
+        </div>
+    </div>
+</x-app-layout> --}}
+</file>
+
+<file path="composer.json">
+{
+    "$schema": "https://getcomposer.org/schema.json",
+    "name": "laravel/laravel",
+    "type": "project",
+    "description": "The skeleton application for the Laravel framework.",
+    "keywords": ["laravel", "framework"],
+    "license": "MIT",
+    "require": {
+        "php": "^8.2",
+        "laravel/framework": "^12.0",
+        "laravel/tinker": "^2.10.1"
+    },
+    "require-dev": {
+        "fakerphp/faker": "^1.23",
+        "laravel/breeze": "^2.4",
+        "laravel/pail": "^1.2.2",
+        "laravel/pint": "^1.24",
+        "laravel/sail": "^1.41",
+        "mockery/mockery": "^1.6",
+        "nunomaduro/collision": "^8.6",
+        "phpunit/phpunit": "^11.5.50"
+    },
+    "autoload": {
+        "psr-4": {
+            "App\\": "app/",
+            "Database\\Factories\\": "database/factories/",
+            "Database\\Seeders\\": "database/seeders/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Tests\\": "tests/"
+        }
+    },
+    "scripts": {
+        "setup": [
+            "composer install",
+            "@php -r \"file_exists('.env') || copy('.env.example', '.env');\"",
+            "@php artisan key:generate",
+            "@php artisan migrate --force",
+            "npm install",
+            "npm run build"
+        ],
+        "dev": [
+            "Composer\\Config::disableProcessTimeout",
+            "npx concurrently -c \"#93c5fd,#c4b5fd,#fb7185,#fdba74\" \"php artisan serve\" \"php artisan queue:listen --tries=1 --timeout=0\" \"php artisan pail --timeout=0\" \"npm run dev\" --names=server,queue,logs,vite --kill-others"
+        ],
+        "test": [
+            "@php artisan config:clear --ansi",
+            "@php artisan test"
+        ],
+        "post-autoload-dump": [
+            "Illuminate\\Foundation\\ComposerScripts::postAutoloadDump",
+            "@php artisan package:discover --ansi"
+        ],
+        "post-update-cmd": [
+            "@php artisan vendor:publish --tag=laravel-assets --ansi --force"
+        ],
+        "post-root-package-install": [
+            "@php -r \"file_exists('.env') || copy('.env.example', '.env');\""
+        ],
+        "post-create-project-cmd": [
+            "@php artisan key:generate --ansi",
+            "@php -r \"file_exists('database/database.sqlite') || touch('database/database.sqlite');\"",
+            "@php artisan migrate --graceful --ansi"
+        ],
+        "pre-package-uninstall": [
+            "Illuminate\\Foundation\\ComposerScripts::prePackageUninstall"
+        ]
+    },
+    "extra": {
+        "laravel": {
+            "dont-discover": []
+        }
+    },
+    "config": {
+        "optimize-autoloader": true,
+        "preferred-install": "dist",
+        "sort-packages": true,
+        "allow-plugins": {
+            "pestphp/pest-plugin": true,
+            "php-http/discovery": true
+        }
+    },
+    "minimum-stability": "stable",
+    "prefer-stable": true
+}
+</file>
+
+<file path="package.json">
+{
+    "$schema": "https://www.schemastore.org/package.json",
+    "private": true,
+    "type": "module",
+    "scripts": {
+        "build": "vite build",
+        "dev": "vite"
+    },
+    "devDependencies": {
+        "@tailwindcss/forms": "^0.5.2",
+        "@tailwindcss/vite": "^4.0.0",
+        "alpinejs": "^3.4.2",
+        "autoprefixer": "^10.4.2",
+        "axios": "^1.11.0",
+        "concurrently": "^9.0.1",
+        "laravel-vite-plugin": "^2.0.0",
+        "postcss": "^8.4.31",
+        "tailwindcss": "^3.1.0",
+        "vite": "^7.0.7"
+    }
+}
 </file>
 
 <file path="vite.config.js">
@@ -5709,145 +6536,6 @@ class DatabaseSeeder extends Seeder
 </x-app-layout>
 </file>
 
-<file path="app/Models/Post.php">
-<?php
-
-namespace App\Models;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
-
-class Post extends Model
-{
-    use HasFactory;
-    protected $fillable = [
-        'user_id',
-        'content',
-        'photo',
-    ];
-
-    public function user(){
-        return $this->belongsTo(User::class);
-    }
-     public function likes(){
-        return $this->hasMany(like::class);
-    }
-     public function comments(){
-        return $this->hasMany(comment::class);
-    }
-}
-</file>
-
-<file path="app/Models/User.php">
-<?php
-
-namespace App\Models;
-
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
-use Illuminate\Database\Eloquent\Casts\Attribute;
-use Database\Factories\UserFactory;
-use App\Models\Connection;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Foundation\Auth\User as Authenticatable;
-use Illuminate\Notifications\Notifiable;
-
-class User extends Authenticatable
-{
-    /** @use HasFactory<UserFactory> */
-    use HasFactory, Notifiable;
-
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var list<string>
-     */
-    protected $fillable = [
-        'name',
-        'email',
-        'password',
-        'image_url',
-        'company',
-        'headline',
-    ];
-
-    /**
-     * The attributes that should be hidden for serialization.
-     *
-     * @var list<string>
-     */
-    protected $hidden = [
-        'password',
-        'remember_token',
-    ];
-
-    /**
-     * Get the attributes that should be cast.
-     *
-     * @return array<string, string>
-     */
-    protected function casts(): array
-    {
-        return [
-            'email_verified_at' => 'datetime',
-            'password' => 'hashed',
-        ];
-    }
-public function posts(){
-    return $this->hasMany(post::class);
-}
-public function likes(){
-    return $this->hasMany(like::class);
-}
-public function connections(){
-    return $this->hasMany(Connection::class);
-}
-
-
- public function comments(){
-        return $this->hasMany(comment::class);
-    }
-protected function avatarUrl(): Attribute{
-    return Attribute::make(
-        get: function(){
-            if($this->image_url){
-                return $this->image_url;
-            }
-            return 'https://ui-avatars.com/api/?name=' . urlencode($this->name) . '&background=random&color=fff';
-        }
-    );
-}
-
-  public function connectionStatus($otherUserId)
-    {
-        $connection = Connection::where(function($query) use ($otherUserId) {
-            $query->where('user_id', $this->id)
-                  ->where('connected_user_id', $otherUserId);
-        })->orWhere(function($query) use ($otherUserId) {
-            $query->where('user_id', $otherUserId)
-                  ->where('connected_user_id', $this->id);
-        })->first();
-
-        if (!$connection) {
-            return null;
-        }
-
-        return [
-            'id' => $connection->id,
-            'status' => $connection->status,
-            'sender_id' => $connection->user_id,
-        ];
-    }
-
-    public function getConnectionsCountAttribute()
-    {
-        return Connection::where('status', 'accepted')
-            ->where(function($q) {
-                $q->where('user_id', $this->id)
-                  ->orWhere('connected_user_id', $this->id);
-            })->count();
-    }
-}
-</file>
-
 <file path="resources/views/layouts/navigation.blade.php">
 <nav x-data="{ open: false }" class="bg-white border-b border-gray-200 sticky top-0 z-50">
     <div class="max-w-[1128px] mx-auto px-4 sm:px-6 lg:px-8">
@@ -5907,6 +6595,167 @@ protected function avatarUrl(): Attribute{
 </nav>
 </file>
 
+<file path="app/Models/Post.php">
+<?php
+
+namespace App\Models;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+
+class Post extends Model
+{
+    use HasFactory;
+    protected $fillable = [
+        'user_id',
+        'content',
+        'photo',
+    ];
+
+    public function user(){
+        return $this->belongsTo(User::class);
+    }
+     public function likes(){
+        return $this->hasMany(like::class);
+    }
+     public function comments(){
+        return $this->hasMany(comment::class);
+    }
+    public function saves(){
+        return $this->hasMany(save::class);
+    }
+     public function republiers(){
+        return $this->hasMany(Republier::class);
+    }
+}
+</file>
+
+<file path="app/Models/User.php">
+<?php
+
+namespace App\Models;
+
+// use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Illuminate\Database\Eloquent\Casts\Attribute;
+use Database\Factories\UserFactory;
+use App\Models\Connection;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\DB;
+
+class User extends Authenticatable
+{
+    /** @use HasFactory<UserFactory> */
+    use HasFactory, Notifiable;
+
+    /**
+     * The attributes that are mass assignable.
+     *
+     * @var list<string>
+     */
+    protected $fillable = [
+        'name',
+        'email',
+        'password',
+        'image_url',
+        'company',
+        'headline',
+    ];
+
+    /**
+     * The attributes that should be hidden for serialization.
+     *
+     * @var list<string>
+     */
+    protected $hidden = [
+        'password',
+        'remember_token',
+    ];
+
+    /**
+     * Get the attributes that should be cast.
+     *
+     * @return array<string, string>
+     */
+    protected function casts(): array
+    {
+        return [
+            'email_verified_at' => 'datetime',
+            'password' => 'hashed',
+        ];
+    }
+public function posts(){
+    return $this->hasMany(post::class);
+}
+public function likes(){
+    return $this->hasMany(like::class);
+}
+public function connections(){
+    return $this->hasMany(Connection::class);
+}
+
+
+ public function comments(){
+        return $this->hasMany(comment::class);
+    }
+ public function saves(){
+        return $this->hasMany(save::class);
+    }
+
+ public function republiers(){
+        return $this->hasMany(Republier::class);
+    }
+
+protected function avatarUrl(): Attribute{
+    return Attribute::make(
+        get: function(){
+            if($this->image_url){
+                return $this->image_url;
+            }
+            return 'https://ui-avatars.com/api/?name=' . urlencode($this->name) . '&background=random&color=fff';
+        }
+    );
+}
+
+  public function connectionStatus($otherUserId)
+    {
+        $connection = Connection::where(function($query) use ($otherUserId) {
+            $query->where('user_id', $this->id)
+                  ->where('connected_user_id', $otherUserId);
+        })->orWhere(function($query) use ($otherUserId) {
+            $query->where('user_id', $otherUserId)
+                  ->where('connected_user_id', $this->id);
+        })->first();
+
+        if (!$connection) {
+            return null;
+        }
+
+        return [
+            'id' => $connection->id,
+            'status' => $connection->status,
+            'sender_id' => $connection->user_id,
+        ];
+    }
+
+    public function getConnectionsCountAttribute()
+    {
+        return Connection::where('status', 'accepted')
+            ->where(function($q) {
+                $q->where('user_id', $this->id)
+                  ->orWhere('connected_user_id', $this->id);
+            })->count();
+    }
+public function getSavesCountAttribute()
+{
+  return    DB::table('republiers')
+            ->where('reposted_by', $this->id)
+            ->count();
+}
+
+}
+</file>
+
 <file path="app/Http/Controllers/PostController.php">
 <?php
 
@@ -5914,18 +6763,54 @@ namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Models\Post;
+use App\Models\Republier;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class PostController extends Controller
 {
 
     public function index()
 {
-    $posts = Post::with('comments' , 'likes')-> latest()->get();
-    //  dd($posts);
+    // $posts = Post::with('comments' , 'likes')-> latest()->get();
 
-    return view('feed', compact('posts'));
+// $posts = DB::table('posts')
+// ->leftJoin('users as creator', 'posts.user_id', '=', 'creator.id')
+// ->leftJoin('republiers' , 'republiers.post_id' , '='  ,'posts.id')
+// ->leftJoin( 'users as reposted' ,  'republiers.reposted_by' , '=' , 'reposted.id')
+// ->leftJoin( 'comments' ,  'comments.post_id' , '=' , 'posts.id')
+// ->leftJoin( 'likes' ,  'likes.post_id' , '=' , 'posts.id')
+// ->get();
+
+// $posts = DB::select('SELECT * FROM users
+// right JOIN republiers on republiers.reposted_by = users.id
+// right JOIN posts on republiers.post_id = posts.id
+// right join likes on likes.post_id = posts.id
+// right join comments on comments.post_id = posts.id
+// ');
+
+
+// $posts = Post::with(['republiers.user', 'comments', 'likes'])->get();
+
+$normalPosts = Post::with(['user' , 'comments.user' , 'likes'])->get()->map(function ($post) {
+    $post->feed_type = 'post';
+    $post->feed_date = $post->created_at;
+    return $post;
+});
+
+$reposts = Republier::with(['user','post.user','post.comments.user','post.likes'])->get()->map(function ($repost) {
+    $repost->feed_type='repost';
+    $repost->feed_date=$repost->created_at;
+    return $repost;
+});
+
+$feed = $normalPosts->concat($reposts)->sortByDesc('feed_date');
+
+
+    //   dd($feed);
+
+    return view('feed', compact('feed'));
 }
 public function create(){
     return view('create');
@@ -5986,6 +6871,31 @@ public function destroy(string $id){
     return redirect()->route('feed.index')->with('success', 'Post supprime avec succès');
 
 }
+
+public function savedPosts()
+{
+     $savedPostIds = DB::table('saves')
+                      ->where('user_id', auth()->id())
+                      ->pluck('post_id');
+
+   $feed = Post::whereIn('id', $savedPostIds)
+                 ->latest()
+                 ->get();
+
+    return view('feed', compact('feed'));
+}
+public function rep_post()
+{
+     $savedPostIds = DB::table('republiers')
+                      ->pluck('post_id');
+
+   $rep_post = Post::whereIn('id', $savedPostIds)
+                 ->latest()
+                 ->get();
+
+    return view('feed', compact('rep_post'));
+}
+
 }
 </file>
 
@@ -5999,13 +6909,19 @@ use App\Http\Controllers\LikeController;
 use App\Http\Controllers\NetworkController;
 use App\Http\Controllers\PostController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\RepublierController;
+use App\Http\Controllers\SaveController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware('auth')->group(function () {
     // Feed & Posts
+    Route::get('/feed/saved-posts', [PostController::class, 'savedPosts'])->name('feed.savedPosts');
+    Route::get('/feed/rep_post', [PostController::class, 'rep_post'])->name('feed.rep_post');
+    Route::resource('republier',RepublierController::class);
     Route::resource('/feed', PostController::class);
     Route::resource('/feed_comment', CommentController::class);
     Route::resource('/feed_like', LikeController::class);
+    Route::resource('/feed_save', SaveController::class);
 
     // Profile
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
@@ -6045,6 +6961,10 @@ require __DIR__.'/auth.php';
                              <span class="text-[#0a66c2]">{{ auth()->user()->connections_count }}</span>
                          </a>
                          <p class="text-xs font-bold text-gray-900 ml-1 mt-1">Développez votre réseau</p>
+                          <a href="{{ route('feed.savedPosts') }}" class="flex justify-between items-center text-xs font-semibold text-gray-500 hover:bg-gray-50 cursor-pointer p-1 rounded transition">
+                             <span>Save</span>
+                             <span class="text-[#0a66c2]">{{ auth()->user()->saves_count }}</span>
+                         </a>
                     </div>
                 </div>
             </div>
@@ -6084,190 +7004,216 @@ require __DIR__.'/auth.php';
 
                 <!-- Feed Posts -->
                 <div class="space-y-4 pb-20 md:pb-0">
-                    @forelse ($posts as $post)
-                        <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
 
-                            <!-- Post Header -->
-                            <div class="px-4 pt-3 pb-1 flex items-start justify-between">
-                                <div class="flex items-start gap-3">
-                                    <img src="{{ $post->user->avatar_url ?? 'https://ui-avatars.com/api/?name=' . urlencode($post->user->name) . '&background=random' }}"
-                                        alt="Avatar" class="w-12 h-12 rounded-full object-cover border border-gray-100">
-                                    <div class="leading-tight">
-                                        <a href="{{route('user_profil' ,$post->user_id )}}" class="font-semibold text-gray-900 text-sm hover:text-[#0a66c2] hover:underline cursor-pointer leading-none">
-                                            {{ $post->user->name }}
-                                        </a>
-                                        <p class="text-xs text-gray-500 mt-0.5 line-clamp-1">{{ $post->user->headline ?? 'Membre' }} @if($post->user->company) chez {{ $post->user->company }} @endif</p>
-                                        <p class="text-[11px] text-gray-500 flex items-center gap-1 mt-0.5">
-                                            {{ $post->created_at->diffForHumans() }}
-                                            <span class="w-1 h-1 bg-gray-400 rounded-full inline-block mx-0.5"></span>
-                                            <svg class="w-3 h-3 fill-current text-gray-400" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM4.332 8.027a6.012 6.012 0 011.912-2.706C6.512 5.73 6.974 6 7.5 6A1.5 1.5 0 019 7.5V8a2 2 0 004 0 2 2 0 011.523-1.943A5.977 5.977 0 0116 10c0 .34-.028.675-.083 1H15a2 2 0 00-2 2v2.197A5.973 5.973 0 0110 16v-2a2 2 0 00-2-2 2 2 0 01-2-2 2 2 0 00-1.668-1.973z" clip-rule="evenodd" /></svg>
-                                        </p>
+
+
+
+
+
+                  @forelse ($feed as $item)
+    @php
+        $post = ($item->feed_type === 'repost') ? $item->post : $item;
+    @endphp
+
+    <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden mb-4">
+
+        @if($item->feed_type === 'repost')
+            <div class="px-4 pt-3 text-xs text-gray-500 font-semibold flex items-center gap-1.5 pb-1">
+                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M19 7a1 1 0 0 0-1-1h-8v2h7v5h-3l4 4 4-4h-3V7zM6 17h8v-2H7v-5h3L6 6 2 10h3v7a1 1 0 0 0 1 1z"></path>
+                </svg>
+                <a href="{{ route('user_profil', $item->user->id) }}" class="hover:text-[#0a66c2] hover:underline">
+                    {{ $item->user->name }}
+                </a>
+                <span>a reposté</span>
+            </div>
+        @endif
+
+        <div class="px-4 pt-3 pb-1 flex items-start justify-between">
+            <div class="flex items-start gap-3">
+                <img src="{{ $post->user->avatar_url ?? 'https://ui-avatars.com/api/?name=' . urlencode($post->user->name) . '&background=random' }}"
+                    alt="Avatar" class="w-12 h-12 rounded-full object-cover border border-gray-100">
+
+                <div class="leading-tight">
+                    <a href="{{ route('user_profil', $item->user->id) }}" class="font-semibold text-gray-900 text-sm hover:text-[#0a66c2] hover:underline cursor-pointer leading-none">
+                        {{ $post->user->name }}
+                    </a>
+                    <p class="text-xs text-gray-500 mt-0.5 line-clamp-1">{{ $post->user->headline ?? 'Membre' }} @if($post->user->company) chez {{ $post->user->company }} @endif</p>
+                    <p class="text-[11px] text-gray-500 flex items-center gap-1 mt-0.5">
+                        {{ $post->created_at->diffForHumans() }}
+                        <span class="w-1 h-1 bg-gray-400 rounded-full inline-block mx-0.5"></span>
+                        <svg class="w-3 h-3 fill-current text-gray-400" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM4.332 8.027a6.012 6.012 0 011.912-2.706C6.512 5.73 6.974 6 7.5 6A1.5 1.5 0 019 7.5V8a2 2 0 004 0 2 2 0 011.523-1.943A5.977 5.977 0 0116 10c0 .34-.028.675-.083 1H15a2 2 0 00-2 2v2.197A5.973 5.973 0 0110 16v-2a2 2 0 00-2-2 2 2 0 01-2-2 2 2 0 00-1.668-1.973z" clip-rule="evenodd" /></svg>
+                    </p>
+                </div>
+            </div>
+
+            @if ($post->user_id == auth()->id())
+                <div class="relative inline-block text-left dropdown">
+                    <button type="button" class="p-1.5 hover:bg-gray-100 rounded-full transition dropdown-btn text-gray-500 focus:outline-none">
+                        <svg class="h-6 w-6" fill="currentColor" viewBox="0 0 24 24"><path d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"></path></svg>
+                    </button>
+                    <div class="dropdown-menu absolute right-0 mt-1 w-48 bg-white rounded-lg shadow-xl border border-gray-200 py-1 hidden z-30">
+                        <a href="{{ route('feed.edit', $post->id) }}" class="flex items-center px-4 py-2.5 text-sm text-gray-700 font-medium hover:bg-gray-100">
+                            <svg class="mr-3 h-5 w-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg>
+                            Modifier le post
+                        </a>
+                        <form action="{{ route('feed.destroy', $post->id) }}" method="POST" class="w-full m-0">
+                            @csrf @method('DELETE')
+                            <button type="submit" onclick="return confirm('Êtes-vous sûr de vouloir supprimer ce post ?')" class="flex items-center w-full px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-100">
+                                <svg class="mr-3 h-5 w-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                                Supprimer le post
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            @endif
+        </div>
+
+        <div class="px-4 pb-2 pt-1">
+            <p class="text-gray-900 text-[15px] leading-relaxed whitespace-pre-wrap break-words">{{ $post->content }}</p>
+        </div>
+
+        @if($post->photo !== "null" && !empty($post->photo))
+        <div class="w-full bg-gray-50">
+            <img src="{{ asset('photos/' . $post->photo) }}" alt="Post image" class="w-full max-h-[500px] object-contain">
+        </div>
+        @endif
+
+        <div class="px-4 py-2 flex items-center justify-between text-xs text-gray-500 border-b border-gray-100 mt-1">
+            <div class="flex items-center gap-1">
+                @if ($post->likes->count() > 0)
+                    <div class="relative flex items-center">
+                        <img class="w-4 h-4 rounded-full border border-white z-10 relative" src="https://static.licdn.com/aero-v1/sc/h/8ekq8gho1ruaf8i7f86vd1ftt" alt="Like">
+                    </div>
+                    <span class="hover:text-blue-700 hover:underline cursor-pointer ml-1">{{ $post->likes->count() }}</span>
+                @endif
+            </div>
+            @if($post->comments->count() > 0)
+            <div class="hover:text-blue-700 hover:underline cursor-pointer">
+                {{ $post->comments->count() }} commentaire{{ $post->comments->count() > 1 ? 's' : '' }}
+            </div>
+            @endif
+        </div>
+
+        <div class="px-2 py-1 gap-2 flex justify-around items-center">
+            @php
+                $hasLiked = $post->likes->contains('user_id', auth()->id());
+                $hasrepublier = $post->republiers->contains('reposted_by', auth()->id());
+                $hassave = $post->saves ? $post->saves->contains('user_id', auth()->id()) : false;
+            @endphp
+
+            <form action="{{ route('feed_like.store') }}" method="POST" class="flex-1 m-0">
+                @csrf
+                <input type="hidden" name="post_id" value="{{ $post->id }}">
+                <button type="submit" class="w-full flex items-center justify-center gap-2 py-3 rounded-md transition-colors text-sm font-semibold {{ $hasLiked ? 'text-blue-900 bg-blue-200' : 'text-gray-500 hover:bg-blue-100' }}">
+<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M20.9752 12.1852L20.2361 12.0574L20.9752 12.1852ZM20.2696 16.265L19.5306 16.1371L20.2696 16.265ZM6.93777 20.4771L6.19056 20.5417L6.93777 20.4771ZM6.12561 11.0844L6.87282 11.0198L6.12561 11.0844ZM13.995 5.22142L14.7351 5.34269V5.34269L13.995 5.22142ZM13.3323 9.26598L14.0724 9.38725V9.38725L13.3323 9.26598ZM6.69814 9.67749L6.20855 9.10933H6.20855L6.69814 9.67749ZM8.13688 8.43769L8.62647 9.00585H8.62647L8.13688 8.43769ZM10.5181 4.78374L9.79208 4.59542L10.5181 4.78374ZM10.9938 2.94989L11.7197 3.13821V3.13821L10.9938 2.94989ZM12.6676 2.06435L12.4382 2.77841L12.4382 2.77841L12.6676 2.06435ZM12.8126 2.11093L13.042 1.39687L13.042 1.39687L12.8126 2.11093ZM9.86195 6.46262L10.5235 6.81599V6.81599L9.86195 6.46262ZM13.9047 3.24752L13.1787 3.43584V3.43584L13.9047 3.24752ZM11.6742 2.13239L11.3486 1.45675V1.45675L11.6742 2.13239ZM3.9716 21.4707L3.22439 21.5353L3.9716 21.4707ZM3 10.2342L3.74721 10.1696C3.71261 9.76945 3.36893 9.46758 2.96767 9.4849C2.5664 9.50221 2.25 9.83256 2.25 10.2342H3ZM20.2361 12.0574L19.5306 16.1371L21.0087 16.3928L21.7142 12.313L20.2361 12.0574ZM13.245 21.25H8.59635V22.75H13.245V21.25ZM7.68498 20.4125L6.87282 11.0198L5.3784 11.149L6.19056 20.5417L7.68498 20.4125ZM19.5306 16.1371C19.0238 19.0677 16.3813 21.25 13.245 21.25V22.75C17.0712 22.75 20.3708 20.081 21.0087 16.3928L19.5306 16.1371ZM13.2548 5.10015L12.5921 9.14472L14.0724 9.38725L14.7351 5.34269L13.2548 5.10015ZM7.18773 10.2456L8.62647 9.00585L7.64729 7.86954L6.20855 9.10933L7.18773 10.2456ZM11.244 4.97206L11.7197 3.13821L10.2678 2.76157L9.79208 4.59542L11.244 4.97206ZM12.4382 2.77841L12.5832 2.82498L13.042 1.39687L12.897 1.3503L12.4382 2.77841ZM10.5235 6.81599C10.8354 6.23198 11.0777 5.61339 11.244 4.97206L9.79208 4.59542C9.65573 5.12107 9.45699 5.62893 9.20042 6.10924L10.5235 6.81599ZM12.5832 2.82498C12.8896 2.92342 13.1072 3.16009 13.1787 3.43584L14.6307 3.05921C14.4252 2.26719 13.819 1.64648 13.042 1.39687L12.5832 2.82498ZM11.7197 3.13821C11.7548 3.0032 11.8523 2.87913 11.9998 2.80804L11.3486 1.45675C10.8166 1.71309 10.417 2.18627 10.2678 2.76157L11.7197 3.13821ZM11.9998 2.80804C12.1345 2.74311 12.2931 2.73181 12.4382 2.77841L12.897 1.3503C12.3873 1.18655 11.8312 1.2242 11.3486 1.45675L11.9998 2.80804ZM14.1537 10.9842H19.3348V9.4842H14.1537V10.9842ZM4.71881 21.4061L3.74721 10.1696L2.25279 10.2988L3.22439 21.5353L4.71881 21.4061ZM3.75 21.5127V10.2342H2.25V21.5127H3.75ZM3.22439 21.5353C3.2112 21.3828 3.33146 21.25 3.48671 21.25V22.75C4.21268 22.75 4.78122 22.1279 4.71881 21.4061L3.22439 21.5353ZM14.7351 5.34269C14.8596 4.58256 14.8241 3.80477 14.6307 3.0592L13.1787 3.43584C13.3197 3.97923 13.3456 4.54613 13.2548 5.10016L14.7351 5.34269ZM8.59635 21.25C8.12244 21.25 7.72601 20.887 7.68498 20.4125L6.19056 20.5417C6.29852 21.7902 7.3427 22.75 8.59635 22.75V21.25ZM8.62647 9.00585C9.30632 8.42 10.0392 7.72267 10.5235 6.81599L9.20042 6.10924C8.85404 6.75767 8.3025 7.30493 7.64729 7.86954L8.62647 9.00585ZM21.7142 12.313C21.9695 10.8365 20.8341 9.4842 19.3348 9.4842V10.9842C19.9014 10.9842 20.3332 11.4959 20.2361 12.0574L21.7142 12.313ZM3.48671 21.25C3.63292 21.25 3.75 21.3684 3.75 21.5127H2.25C2.25 22.1953 2.80289 22.75 3.48671 22.75V21.25ZM12.5921 9.14471C12.4344 10.1076 13.1766 10.9842 14.1537 10.9842V9.4842C14.1038 9.4842 14.0639 9.43901 14.0724 9.38725L12.5921 9.14471ZM6.87282 11.0198C6.8474 10.7258 6.96475 10.4378 7.18773 10.2456L6.20855 9.10933C5.62022 9.61631 5.31149 10.3753 5.3784 11.149L6.87282 11.0198Z" fill="#1C274C"/>
+</svg>
+                        <span>J'aime</span>
+                </button>
+            </form>
+
+            <button class="flex-1 btn-comment flex items-center justify-center gap-2 py-3 text-gray-500 hover:bg-gray-100 font-semibold rounded-md transition-colors text-sm">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-6 h-6"><path d="M7 9h10v1H7zm0 4h7v-1H7zm16-2a6.78 6.78 0 01-2.84 5.61L12 22v-4H8A7 7 0 018 4h8a7 7 0 017 7zm-2 0a5 5 0 00-5-5H8a5 5 0 000 10h6v2.28L19 15a4.79 4.79 0 002-4z"></path></svg>
+                <span>Commenter</span>
+            </button>
+
+            <form action="{{ route('feed_save.store') }}" method="POST" class="flex-1 m-0">
+                @csrf
+                <input type="hidden" name="post_id" value="{{ $post->id }}">
+                <button type="submit" class="w-full flex items-center justify-center gap-2 py-3 rounded-md transition-colors text-sm font-semibold {{ $hassave ? 'text-gray-900 bg-gray-200' : 'text-gray-500 hover:bg-gray-100' }}">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                        <path fill-rule="evenodd" clip-rule="evenodd" d="M6.75 6L7.5 5.25H16.5L17.25 6V19.3162L12 16.2051L6.75 19.3162V6ZM8.25 6.75V16.6838L12 14.4615L15.75 16.6838V6.75H8.25Z"/>
+                    </svg>
+                    <span>Save</span>
+                </button>
+            </form>
+
+            <form action="{{ route('republier.store') }}" method="POST" class="flex-1 m-0">
+                @csrf
+                <input type="hidden" name="post_id" value="{{ $post->id }}">
+                <button type="submit" class="w-full flex items-center justify-center gap-2 py-3 rounded-md transition-colors text-sm font-semibold text-gray-500 hover:bg-gray-100  {{ $hasrepublier ? 'text-gray-900 bg-gray-200' : 'text-gray-500 hover:bg-gray-100' }}">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                        <path fill-rule="evenodd" clip-rule="evenodd" d="M19 7a1 1 0 0 0-1-1h-8v2h7v5h-3l4 4 4-4h-3V7zM6 17h8v-2H7v-5h3L6 6 2 10h3v7a1 1 0 0 0 1 1z"/>
+                    </svg>
+                    <span>Republier</span>
+                </button>
+            </form>
+        </div>
+
+        <div class="comment-area px-4 pb-4 hidden transition-all duration-300">
+            <form action="{{ route('feed_comment.store') }}" method="POST" class="mt-1 mb-4">
+                @csrf
+                <div class="flex gap-2 items-start">
+                    <img src="{{ auth()->user()->avatar_url ?? 'https://ui-avatars.com/api/?name=' . urlencode(auth()->user()->name) . '&background=random' }}"
+                        alt="Avatar" class="w-10 h-10 rounded-full object-cover shrink-0 mt-0.5">
+                    <div class="flex-1 flex flex-col items-end">
+                        <textarea name="content" rows="1" required
+                            class="w-full border border-gray-400 text-sm rounded-full focus:ring-1 focus:ring-gray-500 focus:border-gray-500 py-2.5 px-4 placeholder-gray-500 resize-none transition-all shadow-sm"
+                            placeholder="Ajouter un commentaire..."
+                            oninput="this.style.height = ''; this.style.height = Math.min(this.scrollHeight, 150) + 'px'; this.classList.remove('rounded-full'); this.classList.add('rounded-xl'); if(this.value === '') { this.classList.add('rounded-full'); this.classList.remove('rounded-xl'); }"
+                            ></textarea>
+                        <input type="hidden" name="post_id" value="{{ $post->id }}">
+                        <button type="submit" class="mt-2 bg-[#0a66c2] hover:bg-[#004182] text-white font-semibold py-1.5 px-4 rounded-full text-sm transition shadow-sm">
+                            Publier
+                        </button>
+                    </div>
+                </div>
+            </form>
+
+            <div class="space-y-4">
+                @foreach ($post->comments as $comment)
+                    <div class="flex gap-2 items-start">
+                        <img src="{{ $comment->user->avatar_url ?? 'https://ui-avatars.com/api/?name=' . urlencode($comment->user->name) . '&background=random' }}"
+                            alt="Avatar" class="w-10 h-10 rounded-full object-cover mt-0.5 shrink-0 hover:opacity-80 cursor-pointer">
+
+                        <div class="flex-1">
+                            <div class="bg-[#f2f2f2] px-3.5 py-2.5 rounded-br-xl rounded-bl-xl rounded-tr-xl inline-block w-full">
+                                <div class="flex justify-between items-start">
+                                    <div>
+                                        <h4 class="font-bold text-gray-900 text-sm hover:text-blue-700 hover:underline cursor-pointer leading-tight">
+                                            {{ $comment->user->name }}
+                                        </h4>
+                                        <p class="text-xs text-gray-500 mb-1 leading-tight line-clamp-1">{{ $comment->user->headline ?? 'Membre' }}</p>
                                     </div>
+                                    <span class="text-xs text-gray-500 shrink-0 ml-4">{{ $comment->created_at->diffForHumans(null, true, true) }}</span>
                                 </div>
+                                <p class="text-gray-900 text-sm leading-snug whitespace-pre-wrap break-words mt-1">{{ $comment->content }}</p>
+                            </div>
 
-                                <!-- Post Options Dropdown -->
-                                @if ($post->user_id == auth()->id())
-                                    <div class="relative inline-block text-left dropdown">
-                                        <button type="button" class="p-1.5 hover:bg-gray-100 rounded-full transition dropdown-btn text-gray-500 focus:outline-none">
-                                            <svg class="h-6 w-6" fill="currentColor" viewBox="0 0 24 24"><path d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"></path></svg>
-                                        </button>
-                                        <div class="dropdown-menu absolute right-0 mt-1 w-48 bg-white rounded-lg shadow-xl border border-gray-200 py-1 hidden z-30">
-                                            <a href="{{ route('feed.edit', $post->id) }}" class="flex items-center px-4 py-2.5 text-sm text-gray-700 font-medium hover:bg-gray-100">
-                                                <svg class="mr-3 h-5 w-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg>
-                                                Modifier le post
-                                            </a>
-                                            <form action="{{ route('feed.destroy', $post->id) }}" method="POST" class="w-full m-0">
-                                                @csrf @method('DELETE')
-                                                <button type="submit" onclick="return confirm('Êtes-vous sûr de vouloir supprimer ce post ?')" class="flex items-center w-full px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-100">
-                                                    <svg class="mr-3 h-5 w-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
-                                                    Supprimer le post
-                                                </button>
-                                            </form>
-                                        </div>
-                                    </div>
+                            <div class="flex items-center gap-4 mt-1 ml-3 text-xs font-semibold text-gray-500">
+                                <button class="hover:bg-gray-200 px-2 py-0.5 rounded transition">J'aime</button>
+                                <span class="text-gray-300">|</span>
+                                @if ($comment->user_id == auth()->id())
+                                    <a href="{{ route('feed_comment.edit', $comment->id) }}" class="hover:bg-gray-200 px-2 py-0.5 rounded transition">Modifier</a>
+                                    <span class="text-gray-300">|</span>
+                                    <form action="{{ route('feed_comment.destroy', $comment->id) }}" method="POST" class="inline m-0">
+                                        @csrf @method('DELETE')
+                                        <button type="submit" onclick="return confirm('Supprimer ce commentaire ?')" class="hover:bg-red-50 hover:text-red-600 px-2 py-0.5 rounded transition">Supprimer</button>
+                                    </form>
                                 @endif
                             </div>
-
-                            <!-- Content Text -->
-                            <div class="px-4 pb-2 pt-1">
-                                <p class="text-gray-900 text-[15px] leading-relaxed whitespace-pre-wrap break-words">{{ $post->content }}</p>
-                            </div>
-
-                            <!-- Content Image -->
-                            @if($post->photo !== "null")
-                            <div class="w-full bg-gray-50">
-                                <img src="{{ asset('photos/' . $post->photo) }}" alt="Post image" class="w-full max-h-[500px] object-contain">
-                            </div>
-                            @else
-                            <div></div>
-                            @endif
-
-                            <!-- Interactions Meta (Like/Comment Counts) -->
-                            <div class="px-4 py-2 flex items-center justify-between text-xs text-gray-500 border-b border-gray-100 mt-1">
-                                <div class="flex items-center gap-1">
-                                    @if ($post->likes->count() > 0)
-                                        <div class="relative flex items-center">
-                                            <img class="w-4 h-4 rounded-full border border-white z-10 relative" src="https://static.licdn.com/aero-v1/sc/h/8ekq8gho1ruaf8i7f86vd1ftt" alt="Like">
-                                        </div>
-                                        <span class="hover:text-blue-700 hover:underline cursor-pointer ml-1">{{ $post->likes->count() }}</span>
-                                    @endif
-                                </div>
-                                @if($post->comments->count() > 0)
-                                <div class="hover:text-blue-700 hover:underline cursor-pointer">
-                                    {{ $post->comments->count() }} commentaire{{ $post->comments->count() > 1 ? 's' : '' }}
-                                </div>
-                                @endif
-                            </div>
-
-                            <!-- Actions Bar (Like, Comment, Share) -->
-                            <div class="px-2 py-1 flex justify-around items-center">
-                                @php $hasLiked = $post->likes->contains('user_id', auth()->id()); @endphp
-
-                                <!-- Like Form -->
-                                <form action="{{ route('feed_like.store') }}" method="POST" class="flex-1 m-0">
-                                    @csrf
-                                    <input type="hidden" name="post_id" value="{{ $post->id }}">
-                                    <button type="submit" class="w-full flex items-center justify-center gap-2 py-3 rounded-md transition-colors text-sm font-semibold {{ $hasLiked ? 'text-[#0a66c2] bg-blue-300 hover:bg-blue-50' : 'text-gray-500 hover:bg-gray-100' }}">
-                                        @if($hasLiked)
-                                            <!-- Liked Icon (Filled) -->
-                                           <svg width="800px" height="800px" class="w-6 h-6" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-<path d="M20.9752 12.1852L20.2361 12.0574L20.9752 12.1852ZM20.2696 16.265L19.5306 16.1371L20.2696 16.265ZM6.93777 20.4771L6.19056 20.5417L6.93777 20.4771ZM6.12561 11.0844L6.87282 11.0198L6.12561 11.0844ZM13.995 5.22142L14.7351 5.34269V5.34269L13.995 5.22142ZM13.3323 9.26598L14.0724 9.38725V9.38725L13.3323 9.26598ZM6.69814 9.67749L6.20855 9.10933H6.20855L6.69814 9.67749ZM8.13688 8.43769L8.62647 9.00585H8.62647L8.13688 8.43769ZM10.5181 4.78374L9.79208 4.59542L10.5181 4.78374ZM10.9938 2.94989L11.7197 3.13821V3.13821L10.9938 2.94989ZM12.6676 2.06435L12.4382 2.77841L12.4382 2.77841L12.6676 2.06435ZM12.8126 2.11093L13.042 1.39687L13.042 1.39687L12.8126 2.11093ZM9.86195 6.46262L10.5235 6.81599V6.81599L9.86195 6.46262ZM13.9047 3.24752L13.1787 3.43584V3.43584L13.9047 3.24752ZM11.6742 2.13239L11.3486 1.45675V1.45675L11.6742 2.13239ZM3.9716 21.4707L3.22439 21.5353L3.9716 21.4707ZM3 10.2342L3.74721 10.1696C3.71261 9.76945 3.36893 9.46758 2.96767 9.4849C2.5664 9.50221 2.25 9.83256 2.25 10.2342H3ZM20.2361 12.0574L19.5306 16.1371L21.0087 16.3928L21.7142 12.313L20.2361 12.0574ZM13.245 21.25H8.59635V22.75H13.245V21.25ZM7.68498 20.4125L6.87282 11.0198L5.3784 11.149L6.19056 20.5417L7.68498 20.4125ZM19.5306 16.1371C19.0238 19.0677 16.3813 21.25 13.245 21.25V22.75C17.0712 22.75 20.3708 20.081 21.0087 16.3928L19.5306 16.1371ZM13.2548 5.10015L12.5921 9.14472L14.0724 9.38725L14.7351 5.34269L13.2548 5.10015ZM7.18773 10.2456L8.62647 9.00585L7.64729 7.86954L6.20855 9.10933L7.18773 10.2456ZM11.244 4.97206L11.7197 3.13821L10.2678 2.76157L9.79208 4.59542L11.244 4.97206ZM12.4382 2.77841L12.5832 2.82498L13.042 1.39687L12.897 1.3503L12.4382 2.77841ZM10.5235 6.81599C10.8354 6.23198 11.0777 5.61339 11.244 4.97206L9.79208 4.59542C9.65573 5.12107 9.45699 5.62893 9.20042 6.10924L10.5235 6.81599ZM12.5832 2.82498C12.8896 2.92342 13.1072 3.16009 13.1787 3.43584L14.6307 3.05921C14.4252 2.26719 13.819 1.64648 13.042 1.39687L12.5832 2.82498ZM11.7197 3.13821C11.7548 3.0032 11.8523 2.87913 11.9998 2.80804L11.3486 1.45675C10.8166 1.71309 10.417 2.18627 10.2678 2.76157L11.7197 3.13821ZM11.9998 2.80804C12.1345 2.74311 12.2931 2.73181 12.4382 2.77841L12.897 1.3503C12.3873 1.18655 11.8312 1.2242 11.3486 1.45675L11.9998 2.80804ZM14.1537 10.9842H19.3348V9.4842H14.1537V10.9842ZM4.71881 21.4061L3.74721 10.1696L2.25279 10.2988L3.22439 21.5353L4.71881 21.4061ZM3.75 21.5127V10.2342H2.25V21.5127H3.75ZM3.22439 21.5353C3.2112 21.3828 3.33146 21.25 3.48671 21.25V22.75C4.21268 22.75 4.78122 22.1279 4.71881 21.4061L3.22439 21.5353ZM14.7351 5.34269C14.8596 4.58256 14.8241 3.80477 14.6307 3.0592L13.1787 3.43584C13.3197 3.97923 13.3456 4.54613 13.2548 5.10016L14.7351 5.34269ZM8.59635 21.25C8.12244 21.25 7.72601 20.887 7.68498 20.4125L6.19056 20.5417C6.29852 21.7902 7.3427 22.75 8.59635 22.75V21.25ZM8.62647 9.00585C9.30632 8.42 10.0392 7.72267 10.5235 6.81599L9.20042 6.10924C8.85404 6.75767 8.3025 7.30493 7.64729 7.86954L8.62647 9.00585ZM21.7142 12.313C21.9695 10.8365 20.8341 9.4842 19.3348 9.4842V10.9842C19.9014 10.9842 20.3332 11.4959 20.2361 12.0574L21.7142 12.313ZM3.48671 21.25C3.63292 21.25 3.75 21.3684 3.75 21.5127H2.25C2.25 22.1953 2.80289 22.75 3.48671 22.75V21.25ZM12.5921 9.14471C12.4344 10.1076 13.1766 10.9842 14.1537 10.9842V9.4842C14.1038 9.4842 14.0639 9.43901 14.0724 9.38725L12.5921 9.14471ZM6.87282 11.0198C6.8474 10.7258 6.96475 10.4378 7.18773 10.2456L6.20855 9.10933C5.62022 9.61631 5.31149 10.3753 5.3784 11.149L6.87282 11.0198Z" fill="#1C274C"/>
-</svg> <span>J'aime</span>
-                                        @else
-                                            <!-- Unliked Icon (Outline) -->
-                                                 <svg width="800px" height="800px" class="w-6 h-6 " viewBox="0 0 24 24" fill="" xmlns="http://www.w3.org/2000/svg">
-<path d="M20.9752 12.1852L20.2361 12.0574L20.9752 12.1852ZM20.2696 16.265L19.5306 16.1371L20.2696 16.265ZM6.93777 20.4771L6.19056 20.5417L6.93777 20.4771ZM6.12561 11.0844L6.87282 11.0198L6.12561 11.0844ZM13.995 5.22142L14.7351 5.34269V5.34269L13.995 5.22142ZM13.3323 9.26598L14.0724 9.38725V9.38725L13.3323 9.26598ZM6.69814 9.67749L6.20855 9.10933H6.20855L6.69814 9.67749ZM8.13688 8.43769L8.62647 9.00585H8.62647L8.13688 8.43769ZM10.5181 4.78374L9.79208 4.59542L10.5181 4.78374ZM10.9938 2.94989L11.7197 3.13821V3.13821L10.9938 2.94989ZM12.6676 2.06435L12.4382 2.77841L12.4382 2.77841L12.6676 2.06435ZM12.8126 2.11093L13.042 1.39687L13.042 1.39687L12.8126 2.11093ZM9.86195 6.46262L10.5235 6.81599V6.81599L9.86195 6.46262ZM13.9047 3.24752L13.1787 3.43584V3.43584L13.9047 3.24752ZM11.6742 2.13239L11.3486 1.45675V1.45675L11.6742 2.13239ZM3.9716 21.4707L3.22439 21.5353L3.9716 21.4707ZM3 10.2342L3.74721 10.1696C3.71261 9.76945 3.36893 9.46758 2.96767 9.4849C2.5664 9.50221 2.25 9.83256 2.25 10.2342H3ZM20.2361 12.0574L19.5306 16.1371L21.0087 16.3928L21.7142 12.313L20.2361 12.0574ZM13.245 21.25H8.59635V22.75H13.245V21.25ZM7.68498 20.4125L6.87282 11.0198L5.3784 11.149L6.19056 20.5417L7.68498 20.4125ZM19.5306 16.1371C19.0238 19.0677 16.3813 21.25 13.245 21.25V22.75C17.0712 22.75 20.3708 20.081 21.0087 16.3928L19.5306 16.1371ZM13.2548 5.10015L12.5921 9.14472L14.0724 9.38725L14.7351 5.34269L13.2548 5.10015ZM7.18773 10.2456L8.62647 9.00585L7.64729 7.86954L6.20855 9.10933L7.18773 10.2456ZM11.244 4.97206L11.7197 3.13821L10.2678 2.76157L9.79208 4.59542L11.244 4.97206ZM12.4382 2.77841L12.5832 2.82498L13.042 1.39687L12.897 1.3503L12.4382 2.77841ZM10.5235 6.81599C10.8354 6.23198 11.0777 5.61339 11.244 4.97206L9.79208 4.59542C9.65573 5.12107 9.45699 5.62893 9.20042 6.10924L10.5235 6.81599ZM12.5832 2.82498C12.8896 2.92342 13.1072 3.16009 13.1787 3.43584L14.6307 3.05921C14.4252 2.26719 13.819 1.64648 13.042 1.39687L12.5832 2.82498ZM11.7197 3.13821C11.7548 3.0032 11.8523 2.87913 11.9998 2.80804L11.3486 1.45675C10.8166 1.71309 10.417 2.18627 10.2678 2.76157L11.7197 3.13821ZM11.9998 2.80804C12.1345 2.74311 12.2931 2.73181 12.4382 2.77841L12.897 1.3503C12.3873 1.18655 11.8312 1.2242 11.3486 1.45675L11.9998 2.80804ZM14.1537 10.9842H19.3348V9.4842H14.1537V10.9842ZM4.71881 21.4061L3.74721 10.1696L2.25279 10.2988L3.22439 21.5353L4.71881 21.4061ZM3.75 21.5127V10.2342H2.25V21.5127H3.75ZM3.22439 21.5353C3.2112 21.3828 3.33146 21.25 3.48671 21.25V22.75C4.21268 22.75 4.78122 22.1279 4.71881 21.4061L3.22439 21.5353ZM14.7351 5.34269C14.8596 4.58256 14.8241 3.80477 14.6307 3.0592L13.1787 3.43584C13.3197 3.97923 13.3456 4.54613 13.2548 5.10016L14.7351 5.34269ZM8.59635 21.25C8.12244 21.25 7.72601 20.887 7.68498 20.4125L6.19056 20.5417C6.29852 21.7902 7.3427 22.75 8.59635 22.75V21.25ZM8.62647 9.00585C9.30632 8.42 10.0392 7.72267 10.5235 6.81599L9.20042 6.10924C8.85404 6.75767 8.3025 7.30493 7.64729 7.86954L8.62647 9.00585ZM21.7142 12.313C21.9695 10.8365 20.8341 9.4842 19.3348 9.4842V10.9842C19.9014 10.9842 20.3332 11.4959 20.2361 12.0574L21.7142 12.313ZM3.48671 21.25C3.63292 21.25 3.75 21.3684 3.75 21.5127H2.25C2.25 22.1953 2.80289 22.75 3.48671 22.75V21.25ZM12.5921 9.14471C12.4344 10.1076 13.1766 10.9842 14.1537 10.9842V9.4842C14.1038 9.4842 14.0639 9.43901 14.0724 9.38725L12.5921 9.14471ZM6.87282 11.0198C6.8474 10.7258 6.96475 10.4378 7.18773 10.2456L6.20855 9.10933C5.62022 9.61631 5.31149 10.3753 5.3784 11.149L6.87282 11.0198Z" fill="#1C274C"/>
-</svg>  <span>J'aime</span>
-                                        @endif
-                                    </button>
-                                </form>
-
-                                <button class="flex-1 btn-comment flex items-center justify-center gap-2 py-3 text-gray-500 hover:bg-gray-100 font-semibold rounded-md transition-colors text-sm">
-                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-6 h-6"><path d="M7 9h10v1H7zm0 4h7v-1H7zm16-2a6.78 6.78 0 01-2.84 5.61L12 22v-4H8A7 7 0 018 4h8a7 7 0 017 7zm-2 0a5 5 0 00-5-5H8a5 5 0 000 10h6v2.28L19 15a4.79 4.79 0 002-4z"></path></svg>
-                                    <span>Commenter</span>
-                                </button>
-                                <button class="flex-1 flex items-center justify-center gap-2 py-3 text-gray-500 hover:bg-gray-100 font-semibold rounded-md transition-colors text-sm">
-                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-6 h-6"><path d="M21 3L0 10l7.66 4.26L16 8l-6.26 8.34L14 24l7-21z"></path></svg>
-                                    <span>Partager</span>
-                                </button>
-                            </div>
-
-                            <!-- Comment Area (Hidden initially) -->
-                            <div class="comment-area px-4 pb-4 hidden transition-all duration-300">
-                                <form action="{{ route('feed_comment.store') }}" method="POST" class="mt-1 mb-4">
-                                    @csrf
-                                    <div class="flex gap-2 items-start">
-                                        <img src="{{ auth()->user()->avatar_url ?? 'https://ui-avatars.com/api/?name=' . urlencode(auth()->user()->name) . '&background=random' }}"
-                                            alt="Avatar" class="w-10 h-10 rounded-full object-cover shrink-0 mt-0.5">
-                                        <div class="flex-1 flex flex-col items-end">
-                                            <textarea name="content" rows="1" required
-                                                class="w-full border border-gray-400 text-sm rounded-full focus:ring-1 focus:ring-gray-500 focus:border-gray-500 py-2.5 px-4 placeholder-gray-500 resize-none transition-all shadow-sm"
-                                                placeholder="Ajouter un commentaire..."
-                                                oninput="this.style.height = ''; this.style.height = Math.min(this.scrollHeight, 150) + 'px'; this.classList.remove('rounded-full'); this.classList.add('rounded-xl'); if(this.value === '') { this.classList.add('rounded-full'); this.classList.remove('rounded-xl'); }"
-                                                ></textarea>
-                                            <input type="hidden" name="post_id" value="{{ $post->id }}">
-                                            <button type="submit" class="mt-2 bg-[#0a66c2] hover:bg-[#004182] text-white font-semibold py-1.5 px-4 rounded-full text-sm transition shadow-sm">
-                                                Publier
-                                            </button>
-                                        </div>
-                                    </div>
-                                </form>
-
-                                <!-- Comments List -->
-                                <div class="space-y-4">
-                                    @foreach ($post->comments as $comment)
-                                        <div class="flex gap-2 items-start">
-                                            <img src="{{ $comment->user->avatar_url ?? 'https://ui-avatars.com/api/?name=' . urlencode($comment->user->name) . '&background=random' }}"
-                                                alt="Avatar" class="w-10 h-10 rounded-full object-cover mt-0.5 shrink-0 hover:opacity-80 cursor-pointer">
-
-                                            <div class="flex-1">
-                                                <div class="bg-[#f2f2f2] px-3.5 py-2.5 rounded-br-xl rounded-bl-xl rounded-tr-xl inline-block w-full">
-                                                    <div class="flex justify-between items-start">
-                                                        <div>
-                                                            <h4  class="font-bold text-gray-900 text-sm hover:text-blue-700 hover:underline cursor-pointer leading-tight">
-                                                                {{ $comment->user->name }}
-                                                            </h4>
-                                                            <p class="text-xs text-gray-500 mb-1 leading-tight line-clamp-1">{{ $comment->user->headline ?? 'Membre' }}</p>
-                                                        </div>
-                                                        <span class="text-xs text-gray-500 shrink-0 ml-4">{{ $comment->created_at->diffForHumans(null, true, true) }}</span>
-                                                    </div>
-                                                    <p class="text-gray-900 text-sm leading-snug whitespace-pre-wrap break-words mt-1">{{ $comment->content }}</p>
-                                                </div>
-
-                                                <!-- Comment Meta Actions -->
-                                                <div class="flex items-center gap-4 mt-1 ml-3 text-xs font-semibold text-gray-500">
-                                                    <button class="hover:bg-gray-200 px-2 py-0.5 rounded transition">J'aime</button>
-                                                    <span class="text-gray-300">|</span>
-                                                    @if ($comment->user_id == auth()->id())
-                                                        <a href="{{ route('feed_comment.edit', $comment->id) }}" class="hover:bg-gray-200 px-2 py-0.5 rounded transition">Modifier</a>
-                                                        <span class="text-gray-300">|</span>
-                                                        <form action="{{ route('feed_comment.destroy', $comment->id) }}" method="POST" class="inline m-0">
-                                                            @csrf @method('DELETE')
-                                                            <button type="submit" onclick="return confirm('Supprimer ce commentaire ?')" class="hover:bg-red-50 hover:text-red-600 px-2 py-0.5 rounded transition">Supprimer</button>
-                                                        </form>
-                                                    @endif
-                                                </div>
-                                            </div>
-                                        </div>
-                                    @endforeach
-                                </div>
-                            </div>
                         </div>
-                    @empty
-                        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-12 text-center">
-                            <div class="w-20 h-20 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-4 border border-gray-100">
-                                <svg class="w-10 h-10 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10l4 4v10a2 2 0 01-2 2z"></path>
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M14 3v5h5"></path>
-                                </svg>
-                            </div>
-                            <h3 class="text-lg font-semibold text-gray-900 mb-2">Votre fil d'actualité est vide</h3>
-                            <p class="text-gray-500 text-sm mb-6 max-w-sm mx-auto">Partagez vos pensées, idées ou articles avec votre réseau professionnel.</p>
-                            <a href="{{ route('feed.create') }}" class="inline-flex justify-center px-6 py-2.5 bg-[#0a66c2] border border-transparent shadow-sm text-sm font-medium rounded-full text-white hover:bg-[#004182] transition-colors">
-                                Rédiger un post
-                            </a>
-                        </div>
-                    @endforelse
+                    </div>
+                @endforeach
+            </div>
+        </div>
+    </div>
+@empty
+    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-12 text-center">
+        <div class="w-20 h-20 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-4 border border-gray-100">
+            <svg class="w-10 h-10 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10l4 4v10a2 2 0 01-2 2z"></path>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M14 3v5h5"></path>
+            </svg>
+        </div>
+        <h3 class="text-lg font-semibold text-gray-900 mb-2">Votre fil d'actualité est vide</h3>
+        <p class="text-gray-500 text-sm mb-6 max-w-sm mx-auto">Partagez vos pensées, idées ou articles avec votre réseau professionnel.</p>
+        <a href="{{ route('feed.create') }}" class="inline-flex justify-center px-6 py-2.5 bg-[#0a66c2] border border-transparent shadow-sm text-sm font-medium rounded-full text-white hover:bg-[#004182] transition-colors">
+            Rédiger un post
+        </a>
+    </div>
+@endforelse
                 </div>
             </div>
 

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use App\Models\Connection;
+use App\Models\Post;
 use Illuminate\Http\Request;
 
 class NetworkController extends Controller
@@ -17,11 +18,15 @@ class NetworkController extends Controller
                 ->where('id', '!=', auth()->id())
                 ->get();
         } else {
+
             $users = User::where('id', '!=', auth()->id())
                 ->inRandomOrder()
                 ->take(12)
                 ->get();
+        //  $users = User::has('likes')->cont('user_id')->get();
+        //  $users = User::withCount('likes')->get();
         }
+    // dd($users);
 
         $pendingRequests = Connection::with('sender')
             ->where('connected_user_id', auth()->id())
