@@ -37,7 +37,7 @@ La solution proposée permet de regrouper sur une même plateforme la création 
 
 | Technologie | Utilisation dans le projet |
 |-------------|----------------------------|
-| Laravel 12 (PHP) | Développement de l'architecture backend (MVC) et des contrôleurs |
+| Laravel 11 (PHP) | Développement de l'architecture backend (MVC) et des contrôleurs |
 | Blade & Tailwind CSS | Développement et stylisation de l'interface utilisateur |
 | MySQL | Stockage et structuration des données relationnelles |
 | Eloquent ORM | Interaction sécurisée et simplifiée avec la base de données |
@@ -131,15 +131,11 @@ http://localhost:8000
 
 ### Titre
 
-```
 Fil d'actualité (Feed)
-```
 
 ### Image
 
-```md
 ![Fil d'actualité](./public/feed.png)
-```
 
 ### Explication
 
@@ -151,15 +147,11 @@ Cette capture montre le flux principal où les utilisateurs peuvent consulter le
 
 ### Titre
 
-```
 Gestion du réseau
-```
 
 ### Image
 
-```md
 ![Gestion du réseau](./public/Mon_reseau.png)
-```
 
 ### Explication
 
@@ -171,15 +163,11 @@ Cette capture montre l'interface permettant d'accepter ou d'ignorer les invitati
 
 ### Titre
 
-```
 Profil Utilisateur
-```
 
 ### Image
 
-```md
 ![Profil Utilisateur](./public/My_Profil.png)
-```
 
 ### Explication
 
