@@ -9,6 +9,7 @@ use App\Models\Connection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\DB;
 
 class User extends Authenticatable
 {
@@ -65,6 +66,14 @@ public function connections(){
  public function comments(){
         return $this->hasMany(comment::class);
     }
+ public function saves(){
+        return $this->hasMany(save::class);
+    }
+
+ public function republiers(){
+        return $this->hasMany(Republier::class);
+    }
+
 protected function avatarUrl(): Attribute{
     return Attribute::make(
         get: function(){
@@ -105,4 +114,11 @@ protected function avatarUrl(): Attribute{
                   ->orWhere('connected_user_id', $this->id);
             })->count();
     }
+public function getSavesCountAttribute()
+{
+  return    DB::table('republiers')
+            ->where('reposted_by', $this->id)
+            ->count();
+}
+
 }
